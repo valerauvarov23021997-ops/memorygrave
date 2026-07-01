@@ -9,6 +9,7 @@ import {
   cemeteriesMock,
   citiesMock,
   executorOrdersMock,
+  executorProfileMock,
   gravesMock,
   ordersMock,
   paymentMethodsMock,
@@ -23,6 +24,7 @@ import type {
   Cemetery,
   City,
   ExecutorOrder,
+  ExecutorProfile,
   Grave,
   Order,
   OrderStatus,
@@ -361,6 +363,18 @@ export const executorApi = {
       return mockDelay(status ? executorOrdersMock.filter(o => o.status === status) : executorOrdersMock)
     }
     return unwrap<ExecutorOrder[]>(client.get('/executor/orders', { params: { status } }))
+  },
+  getById(id: string): Promise<ExecutorOrder> {
+    if (USE_MOCKS) {
+      const order = executorOrdersMock.find(o => o.id === id)
+      if (!order) return Promise.reject(new Error('Заказ не найден'))
+      return mockDelay(order)
+    }
+    return unwrap<ExecutorOrder>(client.get(`/executor/orders/${id}`))
+  },
+  profile(): Promise<ExecutorProfile> {
+    if (USE_MOCKS) return mockDelay(executorProfileMock)
+    return unwrap<ExecutorProfile>(client.get('/executor/profile'))
   },
   accept(id: string): Promise<{ success: boolean }> {
     if (USE_MOCKS) return mockDelay({ success: true })

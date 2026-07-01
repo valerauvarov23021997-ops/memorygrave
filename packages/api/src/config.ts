@@ -5,7 +5,9 @@
 
 export const config = {
   apiBaseUrl: process.env.EXPO_PUBLIC_API_BASE_URL ?? 'https://api.pamyat.app/v1',
-  useMocks: process.env.EXPO_PUBLIC_USE_MOCKS === 'true',
+  // Пока бэкенда нет — моки включены по умолчанию.
+  // Отключить: EXPO_PUBLIC_USE_MOCKS=false в .env
+  useMocks: process.env.EXPO_PUBLIC_USE_MOCKS !== 'false',
   timeout: 10_000,
 } as const
 

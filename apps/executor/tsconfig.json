@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "jsx": "react-native",
+    "types": ["react", "react-native", "jest", "expo/types"],
+    "paths": {
+      "@pamyat/ui": ["../../packages/ui/src"],
+      "@pamyat/api": ["../../packages/api/src"],
+      "@pamyat/store": ["../../packages/store/src"],
+      "@pamyat/utils": ["../../packages/utils/src"],
+      "@/*": ["./*"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx", ".expo/types/**/*.ts", "expo-env.d.ts"],
+  "exclude": ["node_modules"]
+}

@@ -173,9 +173,26 @@ export interface ExecutorOrder {
   cemeteryName: string
   plot: string | null
   address: string
+  coordinates: Coordinates | null
   distanceKm: number
   amount: number
+  /** Вознаграждение исполнителя в рублях. */
+  reward: number
+  /** Чек-лист выполнения для данной услуги. */
+  executionSteps: string[]
   status: OrderStatus
   date: string
   notes: string | null
+}
+
+/** Профиль исполнителя со статистикой. */
+export interface ExecutorProfile {
+  id: string
+  name: string
+  rating: number
+  isOnline: boolean
+  totalOrders: number
+  monthEarnings: number
+  cities: string[]
+  services: string[]
 }

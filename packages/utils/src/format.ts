@@ -20,7 +20,11 @@ const MONTHS_RU = [
 
 /** Форматирует сумму в рублях: 15000 → «15 000 ₽». */
 export function formatPrice(amount: number): string {
-  return `${amount.toLocaleString('ru-RU')} ₽`
+  // Ручная группировка обычным пробелом — не зависит от ICU/локали устройства.
+  const sign = amount < 0 ? '-' : ''
+  const digits = Math.abs(Math.round(amount)).toString()
+  const grouped = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+  return `${sign}${grouped} ₽`
 }
 
 /** ISO-дату (2003-11-14) → «14.11.2003». Пустой ввод → пустая строка. */
