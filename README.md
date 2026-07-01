@@ -12,7 +12,7 @@ React Native + TypeScript + Expo.
 
 ```bash
 # Установка зависимостей (npm или yarn — оба через workspaces).
-npm install                 # либо: yarn install
+npm install --legacy-peer-deps
 
 # Настройка окружения (мок-режим включён по умолчанию).
 cp .env.example apps/client/.env

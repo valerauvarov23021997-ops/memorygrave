@@ -30,6 +30,17 @@
 
 ---
 
+## 🔼 Апгрейд до Expo SDK 54
+
+Проект переведён с SDK 51 на **SDK 54** — актуальный Expo Go из сторов
+работает только с последним SDK. Обновлено через `expo install --fix`:
+- expo 54, react 19.1, react-native 0.81.5, expo-router 6
+- react-native-reanimated 4 (+ `react-native-worklets`), react-native-svg 15.12
+- babel: убран ручной reanimated-плагин (в SDK 54 его подключает `babel-preset-expo`)
+- expo-notifications: обработчик обновлён (`shouldShowBanner`/`shouldShowList`)
+
+После апгрейда: типизация всех 6 модулей чистая, оба бандла собираются.
+
 ## ✅ Проверки пройдены
 
 Зависимости ставились через **npm** (`registry.yarnpkg.com` за прокси
