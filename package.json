@@ -8,11 +8,11 @@
     "packages/*"
   ],
   "scripts": {
-    "client": "yarn workspace @pamyat/client start",
-    "executor": "yarn workspace @pamyat/executor start",
+    "client": "npm start -w @pamyat/client",
+    "executor": "npm start -w @pamyat/executor",
     "lint": "eslint . --ext .ts,.tsx",
-    "typecheck": "yarn workspaces run typecheck",
-    "test": "yarn workspaces run test",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
     "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
   },
   "devDependencies": {
