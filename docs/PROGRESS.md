@@ -30,27 +30,37 @@
 
 ---
 
-## ⚠️ Важно про проверки в этом окружении
+## ✅ Проверки пройдены
 
-Полная установка native-зависимостей (Expo SDK 51 + React Native + карты и т.д.)
-**не завершилась** в окружении сборки: реестр нестабильно отдавал крупные
-tarball и scoped-пакеты (обрывы соединения, «malformed response»). Это
-ограничение сети окружения, а не кода.
+Зависимости ставились через **npm** (`registry.yarnpkg.com` за прокси
+отдавал «malformed response» для scoped-пакетов; npmjs.org — прямой доступ,
+стабильно). В репозитории есть `package-lock.json`.
 
-Что **проверено** прямо здесь:
-- `packages/utils` — типизация `tsc --noEmit` без ошибок ✅
-- `packages/utils` — 16 unit-тестов проходят (`jest`) ✅
+Прогнано и **успешно**:
+- Типизация `tsc --noEmit` по всем 6 модулям (utils, api, store, ui,
+  client, executor) — **0 ошибок** ✅
+- `packages/utils` — **16 unit-тестов** проходят (`jest`) ✅
+- Сборка JS-бандла клиента: `expo export` → **App exported**, Hermes-бандл
+  ~9.95 MB, все ассеты выгружены ✅
+- Сборка JS-бандла исполнителя: `expo export` → **App exported** ✅
 
-Что нужно прогнать в обычном окружении с сетью (одной командой):
-```bash
-yarn install
-yarn workspaces run typecheck
-yarn workspaces run test
-yarn workspace @pamyat/client start     # клиентское приложение
-yarn workspace @pamyat/executor start    # приложение исполнителя
-```
+Что это значит: оба приложения полностью собираются Metro — все импорты
+резолвятся, babel/reanimated работает, JSX компилируется. Запуск на телефоне
+(Expo Go) или в эмуляторе делается командой `npm run client` / `npm run executor`
+в окружении с UI-устройством.
+
+### Правки, найденные при проверках (см. коммиты)
+- Веса шрифтов: пакеты `@expo-google-fonts/*` не содержат `300 Light` —
+  заменено на `400 Regular` в токенах и загрузчике шрифтов.
+- `react-native-maps` не поставляет config-plugin в 1.14 — ключ Google Maps
+  перенесён в `ios.config` / `android.config.googleMaps`.
+- Metro monorepo: убран `disableHierarchicalLookup` (при npm-раскладке
+  `@react-native/virtualized-lists` вложен в `react-native/node_modules`).
+- i18n: параметр-строка переименован из `count` (зарезервирован под число) в `value`.
+- Компонент `Icon`: тип `name` расширен до строки (иконки услуг приходят из API).
+
 Мок-режим включён по умолчанию (`EXPO_PUBLIC_USE_MOCKS` != 'false'),
-поэтому оба приложения запускаются и работают без бэкенда.
+поэтому оба приложения работают без бэкенда.
 
 ---
 

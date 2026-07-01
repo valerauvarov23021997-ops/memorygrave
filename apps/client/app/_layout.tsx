@@ -1,10 +1,5 @@
+import { DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
 import {
-  DMSans_300Light,
-  DMSans_400Regular,
-  DMSans_500Medium,
-} from '@expo-google-fonts/dm-sans'
-import {
-  PlayfairDisplay_300Light,
   PlayfairDisplay_400Regular,
   PlayfairDisplay_500Medium,
   useFonts,
@@ -24,10 +19,8 @@ void SplashScreen.preventAutoHideAsync()
 
 export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
-    PlayfairDisplay_300Light,
     PlayfairDisplay_400Regular,
     PlayfairDisplay_500Medium,
-    DMSans_300Light,
     DMSans_400Regular,
     DMSans_500Medium,
   })

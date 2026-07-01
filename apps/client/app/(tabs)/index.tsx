@@ -95,7 +95,7 @@ export default function SearchScreen() {
           keyboardShouldPersistTaps="handled"
           ListHeaderComponent={
             <Text variant="caption" color="muted" style={styles.count}>
-              {t('search.found', { count: pluralResults(data?.length ?? 0) })}
+              {t('search.found', { value: pluralResults(data?.length ?? 0) })}
             </Text>
           }
           renderItem={({ item }) => (

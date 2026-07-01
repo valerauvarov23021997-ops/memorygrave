@@ -2,7 +2,7 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react-native",
-    "types": ["react", "react-native", "jest", "expo/types"],
+    "types": ["react", "node"],
     "paths": {
       "@pamyat/ui": ["../../packages/ui/src"],
       "@pamyat/api": ["../../packages/api/src"],

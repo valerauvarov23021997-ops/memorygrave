@@ -11,10 +11,31 @@ React Native + TypeScript + Expo.
 ## Быстрый старт
 
 ```bash
-yarn install
-cp .env.example .env        # заполни ключи (или оставь USE_MOCKS=true)
-yarn workspace @pamyat/client start
+# Установка зависимостей (npm или yarn — оба через workspaces).
+npm install                 # либо: yarn install
+
+# Настройка окружения (мок-режим включён по умолчанию).
+cp .env.example apps/client/.env
+cp .env.example apps/executor/.env
+
+# Запуск на телефоне через Expo Go (отсканируй QR):
+npm run client              # клиентское приложение
+npm run executor            # приложение исполнителя
 ```
+
+Проверки:
+
+```bash
+# Типы по всем пакетам
+npm run -w @pamyat/client typecheck   # и т.д. по пакетам
+# Тесты утилит
+cd packages/utils && npx jest
+# Сборка JS-бандла (проверка, что всё собирается)
+cd apps/client && npx expo export --platform android --output-dir dist
+```
+
+> В мок-режиме (`EXPO_PUBLIC_USE_MOCKS=true`) оба приложения работают
+> полностью без бэкенда — данные берутся из фикстур `packages/api/src/mocks`.
 
 ## Структура
 

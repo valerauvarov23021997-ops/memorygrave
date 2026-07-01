@@ -12,6 +12,7 @@ config.resolver.nodeModulesPaths = [
   path.resolve(projectRoot, 'node_modules'),
   path.resolve(workspaceRoot, 'node_modules'),
 ]
-config.resolver.disableHierarchicalLookup = true
+// Иерархический поиск оставляем включённым: некоторые зависимости
+// (напр. @react-native/virtualized-lists) вложены в node_modules пакетов.
 
 module.exports = config

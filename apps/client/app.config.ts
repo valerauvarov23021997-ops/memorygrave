@@ -22,6 +22,8 @@ const config: ExpoConfig = {
       NSCameraUsageDescription: 'Для загрузки фотографий',
       NSPhotoLibraryUsageDescription: 'Для выбора фото из галереи',
     },
+    // Ключ Google Maps для iOS (react-native-maps не поставляет config-plugin).
+    config: { googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY },
   },
   android: {
     package: 'app.pamyat.client',
@@ -29,13 +31,13 @@ const config: ExpoConfig = {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#1C3318',
     },
+    config: { googleMaps: { apiKey: process.env.GOOGLE_MAPS_API_KEY } },
   },
   plugins: [
     'expo-router',
     'expo-secure-store',
     'expo-font',
     ['expo-notifications', { icon: './assets/notification-icon.png' }],
-    ['react-native-maps', { googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY }],
   ],
   experiments: {
     typedRoutes: true,

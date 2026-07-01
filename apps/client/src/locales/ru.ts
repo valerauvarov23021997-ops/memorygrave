@@ -58,7 +58,7 @@ export const ru = {
     emptyTitle: 'Найдите захоронение',
     emptyHint: 'Введите имя близкого человека, чтобы начать поиск',
     addGrave: '+ Добавить захоронение',
-    found: 'Найдено: {{count}}',
+    found: 'Найдено: {{value}}',
     noResults: 'Ничего не найдено',
     statusDigitized: 'Оцифровано',
     statusModeration: 'На модерации',

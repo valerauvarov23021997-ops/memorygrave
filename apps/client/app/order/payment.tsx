@@ -125,7 +125,7 @@ const styles = StyleSheet.create({
   methodInfo: { flex: 1 },
   otherMethod: { marginTop: spacing.md },
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs },
-  total: { fontFamily: 'PlayfairDisplay_300Light', fontSize: 28, lineHeight: 34, color: colors.forest },
+  total: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34, color: colors.forest },
   footer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,

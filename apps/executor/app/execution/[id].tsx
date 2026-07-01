@@ -147,7 +147,6 @@ export default function ExecutionScreen() {
             onSubmit={submitBefore}
             busy={busy}
             hint={t('execution.photoHint')}
-            addLabel={t('execution.addPhoto')}
             countLabel={t('execution.photosCount', { count: before.length })}
             submitLabel={t('common.continue')}
           />
@@ -175,7 +174,6 @@ export default function ExecutionScreen() {
             onSubmit={submitAfter}
             busy={busy}
             hint={t('execution.photoHint')}
-            addLabel={t('execution.addPhoto')}
             countLabel={t('execution.photosCount', { count: after.length })}
             submitLabel={t('common.continue')}
           />
@@ -207,7 +205,6 @@ function PhotoStep({
   onSubmit,
   busy,
   hint,
-  addLabel,
   countLabel,
   submitLabel,
 }: {
@@ -216,7 +213,6 @@ function PhotoStep({
   onSubmit: () => void
   busy: boolean
   hint: string
-  addLabel: string
   countLabel: string
   submitLabel: string
 }) {
