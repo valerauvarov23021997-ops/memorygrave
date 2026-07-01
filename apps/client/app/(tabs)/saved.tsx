@@ -1,4 +1,4 @@
-import { Button, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
+import { AnimatedListItem, Button, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
@@ -40,8 +40,10 @@ export default function SavedScreen() {
           data={data ?? []}
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
-          renderItem={({ item }) => (
-            <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
+          renderItem={({ item, index }) => (
+            <AnimatedListItem index={index}>
+              <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
+            </AnimatedListItem>
           )}
         />
       )}

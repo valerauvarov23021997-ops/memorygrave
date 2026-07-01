@@ -1,5 +1,5 @@
 import type { Order } from '@pamyat/api'
-import { Badge, Button, Card, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
+import { AnimatedListItem, Badge, Button, Card, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -71,7 +71,11 @@ export default function OrdersScreen() {
           contentContainerStyle={styles.list}
           onRefresh={refetch}
           refreshing={isRefetching}
-          renderItem={({ item }) => <OrderCard order={item} onPress={() => router.push(`/order/${item.id}`)} />}
+          renderItem={({ item, index }) => (
+            <AnimatedListItem index={index}>
+              <OrderCard order={item} onPress={() => router.push(`/order/${item.id}`)} />
+            </AnimatedListItem>
+          )}
         />
       )}
     </View>

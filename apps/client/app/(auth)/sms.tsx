@@ -1,4 +1,4 @@
-import { Button, Card, colors, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { Button, Card, colors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
 import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -42,8 +42,10 @@ export default function SmsScreen() {
     setError(false)
     try {
       await verifyCode(phone, value)
+      haptics.success()
       router.replace('/(tabs)')
     } catch {
+      haptics.error()
       setError(true)
       setCode('')
       showToast(t('auth.wrongCode'), 'error')

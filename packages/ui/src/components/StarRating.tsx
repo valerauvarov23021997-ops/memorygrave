@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } 
 
 import { colors } from '../tokens/colors'
 import { MIN_TOUCH_TARGET } from '../tokens/spacing'
+import { haptics } from '../utils/haptics'
 
 interface StarRatingProps {
   value: number
@@ -49,6 +50,7 @@ function Star({
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   const handlePress = () => {
+    haptics.selection()
     scale.value = withSequence(withSpring(1.3, { duration: 75 }), withSpring(1, { duration: 75 }))
     onPress()
   }

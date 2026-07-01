@@ -1,4 +1,4 @@
-import { Chip, colors, Icon, Skeleton, spacing, Text, typography } from '@pamyat/ui'
+import { AnimatedListItem, Chip, colors, Icon, Skeleton, spacing, Text, typography } from '@pamyat/ui'
 import { useSearchStore } from '@pamyat/store'
 import { pluralResults } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
@@ -98,8 +98,10 @@ export default function SearchScreen() {
               {t('search.found', { value: pluralResults(data?.length ?? 0) })}
             </Text>
           }
-          renderItem={({ item }) => (
-            <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
+          renderItem={({ item, index }) => (
+            <AnimatedListItem index={index}>
+              <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
+            </AnimatedListItem>
           )}
           ListEmptyComponent={
             <View style={styles.noResults}>

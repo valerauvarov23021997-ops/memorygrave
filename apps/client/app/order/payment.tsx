@@ -1,5 +1,5 @@
 import { ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
-import { Button, Card, colors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, colors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -38,12 +38,16 @@ export default function PaymentScreen() {
       return order
     },
     onSuccess: order => {
+      haptics.success()
       void qc.invalidateQueries({ queryKey: ['orders'] })
       showToast(t('payment.success'), 'success')
       draft.reset()
       router.replace(`/order/${order.id}`)
     },
-    onError: () => showToast(t('payment.error'), 'error'),
+    onError: () => {
+      haptics.error()
+      showToast(t('payment.error'), 'error')
+    },
   })
 
   return (

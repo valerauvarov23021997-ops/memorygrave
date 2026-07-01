@@ -5,6 +5,7 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { colors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
+import { haptics } from '../utils/haptics'
 import { Text } from './Text'
 
 type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost'
@@ -48,7 +49,10 @@ export function Button({
       accessibilityRole="button"
       accessibilityState={{ disabled: isDisabled, busy: loading }}
       disabled={isDisabled}
-      onPress={onPress}
+      onPress={() => {
+        haptics.light()
+        onPress()
+      }}
       onPressIn={() => {
         scale.value = withSpring(0.96, { duration: 80 })
       }}
