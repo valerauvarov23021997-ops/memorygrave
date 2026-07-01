@@ -92,6 +92,7 @@ export const ru = {
     orderCare: 'Заказать уход',
     savedToast: 'Добавлено в сохранённые',
     unsavedToast: 'Удалено из сохранённых',
+    share: 'Поделиться страницей памяти',
   },
   saved: {
     title: 'Сохранённые',

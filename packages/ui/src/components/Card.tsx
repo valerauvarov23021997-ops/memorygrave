@@ -5,7 +5,6 @@ import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-na
 import { colors } from '../tokens/colors'
 import { shadows, type ShadowToken } from '../tokens/shadows'
 import { radii, spacing } from '../tokens/spacing'
-import { haptics } from '../utils/haptics'
 
 type CardVariant = 'default' | 'surface' | 'featured' | 'success' | 'warning'
 type Padding = 'sm' | 'md' | 'lg'
@@ -53,10 +52,7 @@ export function Card({ children, variant = 'default', padding = 'md', onPress, s
   if (onPress) {
     return (
       <AnimatedPressable
-        onPress={() => {
-          haptics.light()
-          onPress()
-        }}
+        onPress={onPress}
         onPressIn={() => {
           scale.value = withSpring(0.98, { duration: 90 })
         }}
