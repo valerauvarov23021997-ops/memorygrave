@@ -1,0 +1,32 @@
+{
+  "name": "pamyat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Память — сервис ухода за захоронениями",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "client": "yarn workspace @pamyat/client start",
+    "executor": "yarn workspace @pamyat/executor start",
+    "lint": "eslint . --ext .ts,.tsx",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^7.0.0",
+    "@typescript-eslint/parser": "^7.0.0",
+    "eslint": "^8.57.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-config-universe": "^13.0.0",
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.4.0"
+  },
+  "packageManager": "yarn@1.22.22",
+  "engines": {
+    "node": ">=18"
+  }
+}

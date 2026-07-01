@@ -1,0 +1,7 @@
+export * from './cemeteries.mock'
+export * from './services.mock'
+export * from './graves.mock'
+export * from './orders.mock'
+export * from './reminders.mock'
+export * from './user.mock'
+export * from './executor.mock'
