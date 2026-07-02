@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { colors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
+import { useColors } from '../theme/ThemeProvider'
 
 type ToastType = 'success' | 'error' | 'info'
 
@@ -29,6 +29,8 @@ export function useToast(): ShowToast {
  */
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const accent: Record<ToastType, string> = { success: c.sageL, error: c.error, info: c.info }
   const [toast, setToast] = useState<ToastItem | null>(null)
   const opacity = useSharedValue(0)
   const translateY = useSharedValue(20)
@@ -71,12 +73,6 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   )
 }
 
-const accent: Record<ToastType, string> = {
-  success: colors.sageL,
-  error: colors.error,
-  info: colors.info,
-}
-
 const styles = StyleSheet.create({
   toast: {
     position: 'absolute',
@@ -91,5 +87,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
   },
   dot: { width: 8, height: 8, borderRadius: radii.full },
-  text: { ...typography.bodySm, color: colors.white, flex: 1 },
+  text: { ...typography.bodySm, color: '#FFFFFF', flex: 1 },
 })

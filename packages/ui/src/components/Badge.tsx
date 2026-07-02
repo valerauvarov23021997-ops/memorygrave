@@ -1,9 +1,10 @@
 import React from 'react'
 import { StyleSheet, View, type ViewStyle } from 'react-native'
 
-import { colors } from '../tokens/colors'
+import { type ThemeColors } from '../tokens/colors'
 import { radii } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
+import { useColors } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
 type BadgeVariant = 'success' | 'warning' | 'info' | 'neutral' | 'error'
@@ -13,21 +14,30 @@ interface BadgeProps {
   variant?: BadgeVariant
 }
 
-export function Badge({ label, variant = 'neutral' }: BadgeProps) {
-  const scheme = schemes[variant]
-  return (
-    <View style={[styles.badge, { backgroundColor: scheme.bg }]}>
-      <Text style={[styles.text, { color: scheme.text }]}>{label}</Text>
-    </View>
-  )
+function scheme(variant: BadgeVariant, c: ThemeColors): { bg: string; text: string } {
+  switch (variant) {
+    case 'success':
+      return { bg: c.successBg, text: c.success }
+    case 'warning':
+      return { bg: c.warningBg, text: c.warning }
+    case 'info':
+      return { bg: c.infoBg, text: c.info }
+    case 'error':
+      return { bg: c.errorBg, text: c.error }
+    case 'neutral':
+    default:
+      return { bg: c.parchment, text: c.light }
+  }
 }
 
-const schemes: Record<BadgeVariant, { bg: string; text: string }> = {
-  success: { bg: colors.successBg, text: colors.success },
-  warning: { bg: colors.warningBg, text: colors.warning },
-  info: { bg: colors.infoBg, text: colors.info },
-  neutral: { bg: colors.parchment, text: colors.light },
-  error: { bg: colors.errorBg, text: colors.error },
+export function Badge({ label, variant = 'neutral' }: BadgeProps) {
+  const c = useColors()
+  const s = scheme(variant, c)
+  return (
+    <View style={[styles.badge, { backgroundColor: s.bg }]}>
+      <Text style={[styles.text, { color: s.text }]}>{label}</Text>
+    </View>
+  )
 }
 
 const styles = StyleSheet.create({

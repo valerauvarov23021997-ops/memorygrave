@@ -1,10 +1,11 @@
 import React from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, type ViewStyle } from 'react-native'
+import { ActivityIndicator, Pressable, StyleSheet, type TextStyle, type ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
-import { colors } from '../tokens/colors'
+import { type ThemeColors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
+import { useColors } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
 type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost'
@@ -20,6 +21,34 @@ interface ButtonProps {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
+function containerFor(variant: Variant, c: ThemeColors): ViewStyle {
+  switch (variant) {
+    case 'secondary':
+      return { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.forest }
+    case 'destructive':
+      return { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.error }
+    case 'ghost':
+      return { backgroundColor: 'transparent' }
+    case 'primary':
+    default:
+      return { backgroundColor: c.forest }
+  }
+}
+
+function labelColor(variant: Variant, c: ThemeColors): string {
+  switch (variant) {
+    case 'secondary':
+      return c.forest
+    case 'destructive':
+      return c.error
+    case 'ghost':
+      return c.muted
+    case 'primary':
+    default:
+      return c.cream
+  }
+}
+
 export function Button({
   label,
   onPress,
@@ -28,6 +57,7 @@ export function Button({
   disabled = false,
   fullWidth = false,
 }: ButtonProps) {
+  const c = useColors()
   const scale = useSharedValue(1)
   const isDisabled = disabled || loading
 
@@ -35,13 +65,17 @@ export function Button({
 
   const containerStyle: ViewStyle[] = [
     styles.base,
-    variantStyles[variant],
+    containerFor(variant, c),
     variant === 'ghost' && styles.ghost,
     fullWidth && styles.fullWidth,
     isDisabled && styles.disabled,
   ].filter(Boolean) as ViewStyle[]
 
-  const spinnerColor = variant === 'primary' ? colors.cream : colors.forest
+  const labelStyle: TextStyle = {
+    ...typography.buttonLabel,
+    color: labelColor(variant, c),
+    ...(variant === 'ghost' ? { textDecorationLine: 'underline', textTransform: 'none', letterSpacing: 0 } : {}),
+  }
 
   return (
     <AnimatedPressable
@@ -58,11 +92,9 @@ export function Button({
       style={[containerStyle, animatedStyle]}
     >
       {loading ? (
-        <ActivityIndicator color={spinnerColor} />
+        <ActivityIndicator color={variant === 'primary' ? c.cream : c.forest} />
       ) : (
-        <Text style={[typography.buttonLabel, labelStyles[variant], variant === 'ghost' && styles.ghostLabel]}>
-          {label}
-        </Text>
+        <Text style={labelStyle}>{label}</Text>
       )}
     </AnimatedPressable>
   )
@@ -80,19 +112,4 @@ const styles = StyleSheet.create({
   fullWidth: { alignSelf: 'stretch' },
   disabled: { opacity: 0.4 },
   ghost: { height: undefined, paddingVertical: spacing.sm },
-  ghostLabel: { textDecorationLine: 'underline', textTransform: 'none', letterSpacing: 0 },
-})
-
-const variantStyles: Record<Variant, ViewStyle> = {
-  primary: { backgroundColor: colors.forest },
-  secondary: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.forest },
-  destructive: { backgroundColor: 'transparent', borderWidth: 1, borderColor: colors.error },
-  ghost: { backgroundColor: 'transparent' },
-}
-
-const labelStyles = StyleSheet.create({
-  primary: { color: colors.cream },
-  secondary: { color: colors.forest },
-  destructive: { color: colors.error },
-  ghost: { color: colors.muted },
 })

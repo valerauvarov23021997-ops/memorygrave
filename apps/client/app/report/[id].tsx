@@ -1,5 +1,5 @@
 import { ordersApi } from '@pamyat/api'
-import { Button, Card, colors, Icon, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
 import { useMutation } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -13,6 +13,8 @@ export default function ReportScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: order } = useOrder(id ?? '')
@@ -48,7 +50,7 @@ export default function ReportScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="success" padding="md" style={styles.done}>
           <View style={styles.doneRow}>
-            <Icon name="checkCircle" size={20} color={colors.success} weight="fill" />
+            <Icon name="checkCircle" size={20} color={c.success} weight="fill" />
             <View>
               <Text variant="headingMd" color="success">
                 {t('report.done', { service: order?.serviceName ?? '' })}
@@ -90,6 +92,8 @@ export default function ReportScreen() {
 }
 
 function PhotoGrid({ count, variant }: { count: number; variant: 'before' | 'after' }) {
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   return (
     <View style={styles.grid}>
       {Array.from({ length: count }).map((_, i) => (
@@ -97,7 +101,7 @@ function PhotoGrid({ count, variant }: { count: number; variant: 'before' | 'aft
           <Icon
             name={variant === 'after' ? 'checkCircle' : 'camera'}
             size={22}
-            color={variant === 'after' ? colors.success : colors.stone}
+            color={variant === 'after' ? c.success : c.stone}
           />
         </View>
       ))}
@@ -105,15 +109,16 @@ function PhotoGrid({ count, variant }: { count: number; variant: 'before' | 'aft
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   done: { marginBottom: spacing.lg },
   doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
   photoBox: { width: '48%', height: 100, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  photoBefore: { backgroundColor: colors.parchment, borderWidth: 0.5, borderColor: colors.stone },
-  photoAfter: { backgroundColor: colors.successBg, borderWidth: 0.5, borderColor: colors.sageL },
+  photoBefore: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.stone },
+  photoAfter: { backgroundColor: c.successBg, borderWidth: 0.5, borderColor: c.sageL },
   rating: { marginBottom: spacing.lg },
   buttons: { gap: spacing.sm },
 })

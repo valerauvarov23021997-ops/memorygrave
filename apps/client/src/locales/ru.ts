@@ -230,6 +230,10 @@ export const ru = {
     support: 'Поддержка в Telegram',
     terms: 'Политика и условия',
     logout: 'Выйти из аккаунта',
+    appearance: 'Оформление',
+    themeLight: 'Светлая',
+    themeDark: 'Тёмная',
+    themeSystem: 'Системная',
   },
   subscription: {
     title: 'Подписка',

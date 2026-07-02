@@ -1,6 +1,6 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
-import { Card, colors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
+import { Card, useColors, useThemedStyles, type ThemeColors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
 import { daysUntilAnnual, formatDayMonth, pluralDays } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -15,6 +15,8 @@ export default function RemindersScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const qc = useQueryClient()
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: reminders, isLoading } = useReminders(graveId)
@@ -59,7 +61,7 @@ export default function RemindersScreen() {
         )}
 
         <Pressable style={styles.addRow}>
-          <Icon name="plus" size={20} color={colors.sage} />
+          <Icon name="plus" size={20} color={c.sage} />
           <Text variant="bodyMd" color="sage">
             {t('reminders.addDate')}
           </Text>
@@ -74,7 +76,7 @@ export default function RemindersScreen() {
           </Text>
           {autoServices.map(s => (
             <View key={s.id} style={styles.autoService}>
-              <Icon name="checkCircle" size={18} color={colors.sage} weight="fill" />
+              <Icon name="checkCircle" size={18} color={c.sage} weight="fill" />
               <Text variant="bodyMd" color="ink">
                 {s.name}
               </Text>
@@ -94,12 +96,14 @@ export default function RemindersScreen() {
 
 function ReminderRow({ reminder, onToggle }: { reminder: Reminder; onToggle: (next: boolean) => void }) {
   const { t } = useTranslation()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const days = daysUntilAnnual(reminder.date)
   const isBirthday = reminder.type === 'birthday'
   return (
     <View style={styles.reminderRow}>
-      <View style={[styles.iconWrap, { backgroundColor: isBirthday ? colors.warningBg : colors.parchment }]}>
-        <Icon name={isBirthday ? 'cake' : 'candle'} size={18} color={isBirthday ? colors.warning : colors.muted} />
+      <View style={[styles.iconWrap, { backgroundColor: isBirthday ? c.warningBg : c.parchment }]}>
+        <Icon name={isBirthday ? 'cake' : 'candle'} size={18} color={isBirthday ? c.warning : c.muted} />
       </View>
       <View style={styles.reminderBody}>
         <Text variant="headingMd" color="ink">
@@ -114,8 +118,9 @@ function ReminderRow({ reminder, onToggle }: { reminder: Reminder; onToggle: (ne
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   context: { marginBottom: spacing.lg },
   empty: { paddingVertical: spacing.md },
@@ -125,7 +130,7 @@ const styles = StyleSheet.create({
     gap: spacing.md,
     paddingVertical: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.linen,
+    borderBottomColor: c.linen,
   },
   iconWrap: { width: 26, height: 26, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   reminderBody: { flex: 1 },

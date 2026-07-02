@@ -1,9 +1,9 @@
 import * as Phosphor from 'phosphor-react-native'
 import React from 'react'
 
-import { colors } from '../tokens/colors'
 import { icons, type IconName, type PhosphorIconName } from '../tokens/icons'
 import { iconSizes } from '../tokens/spacing'
+import { useColors } from '../theme/ThemeProvider'
 
 interface IconProps {
   /**
@@ -20,10 +20,12 @@ interface IconProps {
  * Единая точка для иконок. Разрешает семантическое имя (icons-маппинг)
  * либо прямое имя Phosphor. Stroke-width по умолчанию — regular (1.5px визуально).
  */
-export function Icon({ name, size = iconSizes.inline, color = colors.sage, weight = 'regular' }: IconProps) {
+export function Icon({ name, size = iconSizes.inline, color, weight = 'regular' }: IconProps) {
+  const c = useColors()
+  const resolved = color ?? c.sage
   const phosphorName: string = name in icons ? icons[name as IconName] : name
   const registry = Phosphor as unknown as Record<string, React.ComponentType<Phosphor.IconProps>>
   const Component = registry[phosphorName]
   if (!Component) return null
-  return <Component size={size} color={color} weight={weight} />
+  return <Component size={size} color={resolved} weight={weight} />
 }

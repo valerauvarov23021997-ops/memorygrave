@@ -4,7 +4,7 @@ import {
   BottomSheet,
   Button,
   Card,
-  colors,
+  useColors, useThemedStyles, type ThemeColors,
   FullscreenGallery,
   Icon,
   Input,
@@ -26,6 +26,8 @@ import { useProfile } from '../hooks/queries'
 /** Книга воспоминаний: истории близких о человеке + форма добавления с фото. */
 export function MemoryBook({ graveId }: { graveId: string }) {
   const { t } = useTranslation()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const qc = useQueryClient()
   const showToast = useToast()
   const { data: profile } = useProfile()
@@ -89,7 +91,7 @@ export function MemoryBook({ graveId }: { graveId: string }) {
       )}
 
       <Pressable style={styles.addRow} onPress={openForm}>
-        <Icon name="plus" size={20} color={colors.sage} />
+        <Icon name="plus" size={20} color={c.sage} />
         <Text variant="bodyMd" color="sage">
           {t('memoryBook.add')}
         </Text>
@@ -123,7 +125,7 @@ export function MemoryBook({ graveId }: { graveId: string }) {
             <Image key={i} source={{ uri }} style={styles.thumb} contentFit="cover" />
           ))}
           <Pressable style={styles.addPhoto} onPress={pickPhoto}>
-            <Icon name="camera" size={22} color={colors.sage} />
+            <Icon name="camera" size={22} color={c.sage} />
           </Pressable>
         </ScrollView>
 
@@ -147,6 +149,7 @@ export function MemoryBook({ graveId }: { graveId: string }) {
 }
 
 function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (index: number) => void }) {
+  const styles = useThemedStyles(makeStyles)
   return (
     <Card padding="md" style={styles.card}>
       <View style={styles.cardHead}>
@@ -176,7 +179,8 @@ function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (ind
   )
 }
 
-const styles = StyleSheet.create({
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
   wrap: { marginBottom: spacing.lg },
   empty: { marginBottom: spacing.sm },
   card: { marginBottom: spacing.sm },
@@ -196,9 +200,9 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.stone,
+    borderColor: c.stone,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.parchment,
+    backgroundColor: c.parchment,
   },
 })

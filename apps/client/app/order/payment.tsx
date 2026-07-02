@@ -1,5 +1,5 @@
 import { ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
-import { Button, Card, colors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -14,6 +14,8 @@ export default function PaymentScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const qc = useQueryClient()
   const draft = useOrderDraftStore()
@@ -56,7 +58,7 @@ export default function PaymentScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="success" padding="md" style={styles.secure}>
           <View style={styles.secureRow}>
-            <Icon name="lock" size={20} color={colors.sage} />
+            <Icon name="lock" size={20} color={c.sage} />
             <Text variant="bodySm" color="success">
               {t('payment.secure')}
             </Text>
@@ -69,14 +71,14 @@ export default function PaymentScreen() {
         ) : defaultMethod ? (
           <Card padding="md">
             <View style={styles.methodRow}>
-              <Icon name="orders" size={20} color={colors.sage} />
+              <Icon name="orders" size={20} color={c.sage} />
               <View style={styles.methodInfo}>
                 <Text variant="headingMd" color="ink">{`${defaultMethod.brand} •••• ${defaultMethod.last4}`}</Text>
                 <Text variant="bodySm" color="muted">
                   {defaultMethod.expiry}
                 </Text>
               </View>
-              <Icon name="checkCircle" size={20} color={colors.sage} weight="fill" />
+              <Icon name="checkCircle" size={20} color={c.sage} weight="fill" />
             </View>
           </Card>
         ) : null}
@@ -120,8 +122,9 @@ export default function PaymentScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
   secure: { marginBottom: spacing.lg },
   secureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
@@ -129,11 +132,11 @@ const styles = StyleSheet.create({
   methodInfo: { flex: 1 },
   otherMethod: { marginTop: spacing.md },
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs },
-  total: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34, color: colors.forest },
+  total: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34, color: c.forest },
   footer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.linen,
+    borderTopColor: c.linen,
   },
 })

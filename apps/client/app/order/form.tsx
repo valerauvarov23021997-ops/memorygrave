@@ -1,5 +1,5 @@
 import type { RecurringPeriod } from '@pamyat/api'
-import { Button, Card, colors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
@@ -14,6 +14,8 @@ export default function OrderFormScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const draft = useOrderDraftStore()
 
   const days = useMemo(() => {
@@ -49,7 +51,7 @@ export default function OrderFormScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="surface" padding="md" style={styles.serviceCard}>
           <View style={styles.serviceRow}>
-            {draft.serviceIcon ? <Icon name={draft.serviceIcon} size={22} color={colors.sage} /> : null}
+            {draft.serviceIcon ? <Icon name={draft.serviceIcon} size={22} color={c.sage} /> : null}
             <View style={styles.serviceInfo}>
               <Text variant="headingMd" color="ink">
                 {draft.serviceName}
@@ -72,10 +74,10 @@ export default function OrderFormScreen() {
                 style={[styles.dateCell, active ? styles.dateActive : styles.dateInactive]}
                 onPress={() => draft.setDate(iso)}
               >
-                <Text variant="caption" style={{ color: active ? colors.cream : colors.muted }}>
+                <Text variant="caption" style={{ color: active ? c.cream : c.muted }}>
                   {WEEKDAYS[d.getDay()]}
                 </Text>
-                <Text variant="headingMd" style={{ color: active ? colors.cream : colors.ink }}>
+                <Text variant="headingMd" style={{ color: active ? c.cream : c.ink }}>
                   {d.getDate()}
                 </Text>
               </Pressable>
@@ -93,7 +95,7 @@ export default function OrderFormScreen() {
                 style={[styles.period, active ? styles.periodActive : styles.periodInactive]}
                 onPress={() => draft.setRecurring(p.key)}
               >
-                <Text variant="bodySm" style={{ color: active ? colors.cream : colors.muted, fontFamily: 'DMSans_500Medium' }}>
+                <Text variant="bodySm" style={{ color: active ? c.cream : c.muted, fontFamily: 'DMSans_500Medium' }}>
                   {p.label}
                 </Text>
               </Pressable>
@@ -133,26 +135,27 @@ export default function OrderFormScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
   serviceCard: { marginBottom: spacing.lg },
   serviceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   serviceInfo: { flex: 1 },
   dates: { gap: spacing.sm, paddingBottom: spacing.md },
   dateCell: { width: 52, height: 56, borderRadius: 8, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  dateActive: { backgroundColor: colors.forest },
-  dateInactive: { backgroundColor: colors.parchment },
+  dateActive: { backgroundColor: c.forest },
+  dateInactive: { backgroundColor: c.parchment },
   periods: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   period: { flex: 1, height: 40, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
-  periodActive: { backgroundColor: colors.forest },
-  periodInactive: { backgroundColor: colors.parchment, borderWidth: 0.5, borderColor: colors.linen },
+  periodActive: { backgroundColor: c.forest },
+  periodInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  totalValue: { ...typography.priceDisplay, color: colors.forest },
+  totalValue: { ...typography.priceDisplay, color: c.forest },
   footer: {
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.linen,
+    borderTopColor: c.linen,
   },
 })

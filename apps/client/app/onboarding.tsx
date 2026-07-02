@@ -1,4 +1,4 @@
-import { Button, colors, spacing, Text, typography } from '@pamyat/ui'
+import { Button, useColors, useThemedStyles, type ThemeColors, spacing, Text, typography } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -28,13 +28,15 @@ export default function OnboardingScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const listRef = useRef<FlatList<Slide>>(null)
   const [index, setIndex] = useState(0)
 
   const slides: Slide[] = [
-    { icon: '🌿', iconBg: colors.successBg, title: t('onboarding.slide1Title'), desc: t('onboarding.slide1Desc') },
-    { icon: '🧹', iconBg: colors.warningBg, title: t('onboarding.slide2Title'), desc: t('onboarding.slide2Desc') },
-    { icon: '📸', iconBg: colors.successBg, title: t('onboarding.slide3Title'), desc: t('onboarding.slide3Desc') },
+    { icon: '🌿', iconBg: c.successBg, title: t('onboarding.slide1Title'), desc: t('onboarding.slide1Desc') },
+    { icon: '🧹', iconBg: c.warningBg, title: t('onboarding.slide2Title'), desc: t('onboarding.slide2Desc') },
+    { icon: '📸', iconBg: c.successBg, title: t('onboarding.slide3Title'), desc: t('onboarding.slide3Desc') },
   ]
 
   const isLast = index === slides.length - 1
@@ -84,7 +86,7 @@ export default function OnboardingScreen() {
             key={s.title}
             style={[
               styles.segment,
-              { backgroundColor: i < index ? colors.sage : i === index ? colors.forest : colors.linen },
+              { backgroundColor: i < index ? c.sage : i === index ? c.forest : c.linen },
             ]}
           />
         ))}
@@ -102,8 +104,9 @@ export default function OnboardingScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   slide: { width, alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: spacing.xxl * 2 },
   illustration: { width: 90, height: 90, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
   emoji: { fontSize: 44 },

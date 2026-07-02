@@ -1,5 +1,5 @@
 import { membersApi, type Member, type MemberRole } from '@pamyat/api'
-import { Avatar, Badge, Button, Card, colors, Icon, SectionLabel, Skeleton, spacing, Text, TopBar } from '@pamyat/ui'
+import { Avatar, Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, Text, TopBar } from '@pamyat/ui'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -11,6 +11,8 @@ export default function InviteScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const [inviting, setInviting] = useState(false)
 
@@ -36,7 +38,7 @@ export default function InviteScreen() {
       <TopBar title={t('invite.title')} onBack={() => router.back()} />
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="surface" padding="lg" style={styles.hero}>
-          <Icon name="saved" size={28} color={colors.sage} />
+          <Icon name="saved" size={28} color={c.sage} />
           <Text variant="bodyMd" color="muted" center style={styles.heroText}>
             {t('invite.subtitle')}
           </Text>
@@ -59,6 +61,7 @@ export default function InviteScreen() {
 
 function MemberRow({ member }: { member: Member }) {
   const { t } = useTranslation()
+  const styles = useThemedStyles(makeStyles)
   const role = roleBadge(member.role, t)
   return (
     <Card padding="md" style={styles.row}>
@@ -85,8 +88,9 @@ function roleBadge(role: MemberRole, t: (k: string) => string) {
   }
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   hero: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
   heroText: { maxWidth: 260 },

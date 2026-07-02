@@ -3,9 +3,9 @@ import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated'
 
-import { colors } from '../tokens/colors'
 import { MIN_TOUCH_TARGET } from '../tokens/spacing'
 import { haptics } from '../utils/haptics'
+import { useColors } from '../theme/ThemeProvider'
 
 interface StarRatingProps {
   value: number
@@ -46,6 +46,7 @@ function Star({
   readonly: boolean
   onPress: () => void
 }) {
+  const c = useColors()
   const scale = useSharedValue(1)
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
@@ -67,7 +68,7 @@ function Star({
       <AnimatedStar
         size={size}
         weight={filled ? 'fill' : 'regular'}
-        color={filled ? colors.gold : colors.stone}
+        color={filled ? c.gold : c.stone}
         style={animatedStyle}
       />
     </Pressable>

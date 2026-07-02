@@ -1,4 +1,4 @@
-import { Button, Card, colors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { Button, Card, useThemedStyles, type ThemeColors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
 import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -15,6 +15,7 @@ export default function SmsScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { verifyCode, sendCode } = useAuthActions()
   const { phone } = useLocalSearchParams<{ phone: string }>()
@@ -126,8 +127,9 @@ export default function SmsScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
   subtitle: { marginTop: spacing.sm },
   cells: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xl },
@@ -135,16 +137,16 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 48,
     borderRadius: 8,
-    backgroundColor: colors.parchment,
+    backgroundColor: c.parchment,
     borderWidth: 1,
-    borderColor: colors.linen,
+    borderColor: c.linen,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  cellActive: { backgroundColor: colors.white, borderWidth: 1.5, borderColor: colors.sage },
-  cellFilled: { backgroundColor: colors.successBg, borderColor: colors.sage },
-  cellError: { backgroundColor: colors.errorBg, borderColor: colors.error },
-  cellText: { ...typography.headingLg, color: colors.forest },
+  cellActive: { backgroundColor: c.white, borderWidth: 1.5, borderColor: c.sage },
+  cellFilled: { backgroundColor: c.successBg, borderColor: c.sage },
+  cellError: { backgroundColor: c.errorBg, borderColor: c.error },
+  cellText: { ...typography.headingLg, color: c.forest },
   hiddenInput: { position: 'absolute', width: 1, height: 1, opacity: 0 },
   timer: { marginTop: spacing.lg, textAlign: 'center' },
   hint: { marginTop: spacing.xl },

@@ -1,5 +1,5 @@
 import type { Service } from '@pamyat/api'
-import { BottomSheet, Button, colors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, TopBar } from '@pamyat/ui'
+import { BottomSheet, Button, Divider, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
@@ -15,6 +15,8 @@ export default function CatalogScreen() {
   const { data: services, isLoading } = useServices()
   const { graveName, cemeteryName, selectService } = useOrderDraftStore()
   const [detail, setDetail] = useState<Service | null>(null)
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
 
   const quick = services?.filter(s => s.category === 'quick') ?? []
   const major = services?.filter(s => s.category === 'major') ?? []
@@ -65,7 +67,7 @@ export default function CatalogScreen() {
         {detail ? (
           <View style={styles.detail}>
             <View style={styles.detailHeader}>
-              <Icon name={detail.icon} size={28} color={colors.sage} />
+              <Icon name={detail.icon} size={28} color={c.sage} />
               <Text variant="headingLg" color="forest">
                 {detail.name}
               </Text>
@@ -86,9 +88,11 @@ export default function CatalogScreen() {
 
 function ServiceRow({ service, onPress }: { service: Service; onPress: () => void }) {
   const { t } = useTranslation()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   return (
     <Pressable style={styles.row} onPress={onPress}>
-      <Icon name={service.icon} size={20} color={colors.sage} />
+      <Icon name={service.icon} size={20} color={c.sage} />
       <View style={styles.rowBody}>
         <Text variant="headingMd" color="ink">
           {service.name}
@@ -104,8 +108,9 @@ function ServiceRow({ service, onPress }: { service: Service; onPress: () => voi
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
   context: { marginBottom: spacing.lg },
   skeletons: { gap: spacing.sm },

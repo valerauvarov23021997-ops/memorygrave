@@ -1,18 +1,19 @@
-import { colors, Icon } from '@pamyat/ui'
+import { Icon, useColors } from '@pamyat/ui'
 import { Tabs } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 
 export default function TabsLayout() {
   const { t } = useTranslation()
+  const c = useColors()
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: colors.forest,
-        tabBarInactiveTintColor: colors.stone,
+        tabBarActiveTintColor: c.forest,
+        tabBarInactiveTintColor: c.stone,
         tabBarStyle: {
-          backgroundColor: colors.cream,
-          borderTopColor: colors.linen,
+          backgroundColor: c.cream,
+          borderTopColor: c.linen,
         },
         tabBarLabelStyle: { fontFamily: 'DMSans_500Medium', fontSize: 11 },
       }}

@@ -1,5 +1,5 @@
 import { profileApi } from '@pamyat/api'
-import { Button, Card, colors, Icon, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
@@ -19,6 +19,7 @@ export default function SubscriptionScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
 
   const plans: Plan[] = [
@@ -75,6 +76,8 @@ export default function SubscriptionScreen() {
 
 function PlanCard({ plan, onChoose }: { plan: Plan; onChoose: () => void }) {
   const { t } = useTranslation()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const featured = plan.featured
   return (
     <View style={styles.planWrap}>
@@ -88,15 +91,15 @@ function PlanCard({ plan, onChoose }: { plan: Plan; onChoose: () => void }) {
           {plan.name}
         </Text>
         <View style={styles.priceRow}>
-          <Text style={[styles.price, { color: featured ? colors.sageXL : colors.forest }]}>{`${plan.price} ₽`}</Text>
+          <Text style={[styles.price, { color: featured ? c.sageXL : c.forest }]}>{`${plan.price} ₽`}</Text>
         </View>
-        <Text variant="bodySm" style={{ color: featured ? 'rgba(250,247,242,0.6)' : colors.light }}>
+        <Text variant="bodySm" style={{ color: featured ? 'rgba(250,247,242,0.6)' : c.light }}>
           {plan.period}
         </Text>
         <View style={styles.features}>
           {plan.features.map(f => (
             <View key={f} style={styles.feature}>
-              <Icon name="checkCircle" size={16} color={featured ? colors.sageL : colors.sage} weight="fill" />
+              <Icon name="checkCircle" size={16} color={featured ? c.sageL : c.sage} weight="fill" />
               <Text variant="bodySm" color={featured ? 'cream' : 'ink'} style={styles.featureText}>
                 {f}
               </Text>
@@ -109,8 +112,9 @@ function PlanCard({ plan, onChoose }: { plan: Plan; onChoose: () => void }) {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   description: { maxWidth: 280, alignSelf: 'center', marginBottom: spacing.xl },
   planWrap: { marginBottom: spacing.lg, paddingTop: spacing.sm },
@@ -119,12 +123,12 @@ const styles = StyleSheet.create({
     top: -6,
     alignSelf: 'center',
     zIndex: 1,
-    backgroundColor: colors.sage,
+    backgroundColor: c.sage,
     borderRadius: 999,
     paddingHorizontal: spacing.md,
     paddingVertical: 4,
   },
-  badgeText: { ...typography.caption, color: colors.white, fontFamily: 'DMSans_500Medium' },
+  badgeText: { ...typography.caption, color: c.white, fontFamily: 'DMSans_500Medium' },
   priceRow: { marginTop: spacing.sm },
   price: { ...typography.priceDisplay },
   features: { marginVertical: spacing.md, gap: spacing.sm },

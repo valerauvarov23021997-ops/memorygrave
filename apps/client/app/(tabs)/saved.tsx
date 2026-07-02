@@ -1,4 +1,4 @@
-import { AnimatedListItem, Button, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
+import { AnimatedListItem, Button, Icon, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
@@ -11,6 +11,8 @@ export default function SavedScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const { data, isLoading } = useSavedGraves()
 
   return (
@@ -29,7 +31,7 @@ export default function SavedScreen() {
         </View>
       ) : (data?.length ?? 0) === 0 ? (
         <View style={styles.empty}>
-          <Icon name="saved" size={48} color={colors.stone} />
+          <Icon name="saved" size={48} color={c.stone} />
           <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
             {t('saved.empty')}
           </Text>
@@ -51,8 +53,9 @@ export default function SavedScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },

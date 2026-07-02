@@ -1,4 +1,4 @@
-import { Button, Card, colors, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
@@ -11,6 +11,8 @@ export default function QrScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: grave } = useGrave(graveId ?? '')
@@ -28,7 +30,7 @@ export default function QrScreen() {
             </Text>
           ) : null}
           <View style={styles.qrBox}>
-            <QRCode value={url} size={220} color={colors.forest} backgroundColor={colors.white} />
+            <QRCode value={url} size={220} color={c.forest} backgroundColor={c.white} />
           </View>
         </Card>
 
@@ -42,11 +44,12 @@ export default function QrScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { flex: 1, paddingHorizontal: spacing.lg, paddingTop: spacing.xl, alignItems: 'center', gap: spacing.lg },
   qrCard: { alignItems: 'center', gap: spacing.lg },
   name: {},
-  qrBox: { padding: spacing.sm, backgroundColor: colors.white, borderRadius: 12 },
+  qrBox: { padding: spacing.sm, backgroundColor: c.white, borderRadius: 12 },
   hint: { maxWidth: 300 },
 })

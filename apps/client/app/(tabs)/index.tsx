@@ -1,4 +1,15 @@
-import { AnimatedListItem, Chip, colors, Icon, Skeleton, spacing, Text, typography } from '@pamyat/ui'
+import {
+  AnimatedListItem,
+  Chip,
+  Icon,
+  Skeleton,
+  spacing,
+  Text,
+  typography,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { useSearchStore } from '@pamyat/store'
 import { pluralResults } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
@@ -14,6 +25,8 @@ export default function SearchScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const { query, setQuery, city, cemeteryId } = useSearchStore()
   const [focused, setFocused] = useState(false)
 
@@ -26,7 +39,7 @@ export default function SearchScreen() {
 
   const addGraveCard = (
     <Pressable style={styles.addCard} onPress={() => router.push('/grave/add')}>
-      <Icon name="plus" size={18} color={colors.sage} />
+      <Icon name="plus" size={18} color={c.sage} />
       <Text variant="bodySm" color="sage" style={styles.addLabel}>
         {t('search.addGrave')}
       </Text>
@@ -40,26 +53,26 @@ export default function SearchScreen() {
           {t('search.appName')}
         </Text>
         <Pressable hitSlop={8}>
-          <Icon name="bell" size={22} color={colors.sage} />
+          <Icon name="bell" size={22} color={c.sage} />
         </Pressable>
       </View>
 
       <View style={styles.searchWrap}>
         <View style={[styles.searchBar, focused && styles.searchBarActive]}>
-          <Icon name="search" size={20} color={colors.sage} />
+          <Icon name="search" size={20} color={c.sage} />
           <TextInput
             value={query}
             onChangeText={setQuery}
             onFocus={() => setFocused(true)}
             onBlur={() => setFocused(false)}
             placeholder={t('search.placeholder')}
-            placeholderTextColor={colors.light}
+            placeholderTextColor={c.light}
             style={styles.searchInput}
             returnKeyType="search"
           />
           {hasQuery ? (
             <Pressable onPress={() => setQuery('')} hitSlop={8}>
-              <Icon name="close" size={18} color={colors.light} />
+              <Icon name="close" size={18} color={c.light} />
             </Pressable>
           ) : null}
         </View>
@@ -73,7 +86,7 @@ export default function SearchScreen() {
 
       {!hasQuery ? (
         <View style={styles.empty}>
-          <Icon name="search" size={48} color={colors.stone} />
+          <Icon name="search" size={48} color={c.stone} />
           <Text variant="headingLg" color="forest" center style={styles.emptyTitle}>
             {t('search.emptyTitle')}
           </Text>
@@ -117,8 +130,9 @@ export default function SearchScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -134,10 +148,10 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 8,
     paddingHorizontal: spacing.md,
-    backgroundColor: colors.parchment,
+    backgroundColor: c.parchment,
   },
-  searchBarActive: { backgroundColor: colors.white, borderWidth: 0.5, borderColor: colors.sage },
-  searchInput: { flex: 1, ...typography.bodyMd, color: colors.ink },
+  searchBarActive: { backgroundColor: c.white, borderWidth: 0.5, borderColor: c.sage },
+  searchInput: { flex: 1, ...typography.bodyMd, color: c.ink },
   chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
   emptyTitle: { marginTop: spacing.md },
@@ -154,7 +168,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     borderStyle: 'dashed',
-    borderColor: colors.stone,
+    borderColor: c.stone,
     marginTop: spacing.sm,
   },
   addLabel: { fontFamily: 'DMSans_500Medium' },

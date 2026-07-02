@@ -2,9 +2,10 @@ import React from 'react'
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
-import { colors } from '../tokens/colors'
-import { shadows, type ShadowToken } from '../tokens/shadows'
+import { type ThemeColors } from '../tokens/colors'
+import { shadowFor, type ShadowToken } from '../tokens/shadows'
 import { radii, spacing } from '../tokens/spacing'
+import { useColors } from '../theme/ThemeProvider'
 
 type CardVariant = 'default' | 'surface' | 'featured' | 'success' | 'warning'
 type Padding = 'sm' | 'md' | 'lg'
@@ -25,8 +26,6 @@ const paddingValues: Record<Padding, number> = {
   lg: spacing.lg,
 }
 
-// Тень по варианту: приподнятые белые карточки светятся мягко,
-// «поверхности» (parchment) остаются плоскими.
 const defaultShadow: Record<CardVariant, ShadowToken> = {
   default: 'sm',
   surface: 'none',
@@ -35,16 +34,33 @@ const defaultShadow: Record<CardVariant, ShadowToken> = {
   warning: 'none',
 }
 
+function variantStyle(variant: CardVariant, c: ThemeColors): ViewStyle {
+  switch (variant) {
+    case 'surface':
+      return { backgroundColor: c.parchment }
+    case 'featured':
+      return { backgroundColor: c.forest, borderWidth: 1, borderColor: c.forest }
+    case 'success':
+      return { backgroundColor: c.successBg, borderWidth: 0.5, borderColor: c.sageL }
+    case 'warning':
+      return { backgroundColor: c.warningBg, borderWidth: 0.5, borderColor: c.gold }
+    case 'default':
+    default:
+      return { backgroundColor: c.white, borderWidth: 0.5, borderColor: c.linen }
+  }
+}
+
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 export function Card({ children, variant = 'default', padding = 'md', onPress, style, shadow }: CardProps) {
+  const c = useColors()
   const scale = useSharedValue(1)
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))
 
   const composed: ViewStyle[] = [
     styles.base,
-    variantStyles[variant],
-    shadows[shadow ?? defaultShadow[variant]],
+    variantStyle(variant, c),
+    shadowFor(shadow ?? defaultShadow[variant], c),
     { padding: paddingValues[padding] },
     style,
   ].filter(Boolean) as ViewStyle[]
@@ -71,11 +87,3 @@ export function Card({ children, variant = 'default', padding = 'md', onPress, s
 const styles = StyleSheet.create({
   base: { borderRadius: radii.lg },
 })
-
-const variantStyles: Record<CardVariant, ViewStyle> = {
-  default: { backgroundColor: colors.white, borderWidth: 0.5, borderColor: colors.linen },
-  surface: { backgroundColor: colors.parchment },
-  featured: { backgroundColor: colors.forest, borderWidth: 1, borderColor: colors.forest },
-  success: { backgroundColor: colors.successBg, borderWidth: 0.5, borderColor: colors.sageL },
-  warning: { backgroundColor: colors.warningBg, borderWidth: 0.5, borderColor: '#D4A060' },
-}

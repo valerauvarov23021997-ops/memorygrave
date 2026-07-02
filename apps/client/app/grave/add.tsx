@@ -3,7 +3,7 @@ import {
   BottomSheet,
   Button,
   Card,
-  colors,
+  useColors, useThemedStyles, type ThemeColors,
   Icon,
   Input,
   spacing,
@@ -25,6 +25,8 @@ export default function AddGraveScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const qc = useQueryClient()
   const { data: cemeteries } = useCemeteries()
@@ -104,7 +106,7 @@ export default function AddGraveScreen() {
             onChangeText={() => {}}
             placeholder={t('addGrave.cemeteryPlaceholder')}
             editable={false}
-            rightElement={<Icon name="chevronRight" size={18} color={colors.light} />}
+            rightElement={<Icon name="chevronRight" size={18} color={c.light} />}
           />
         </Pressable>
 
@@ -153,8 +155,9 @@ export default function AddGraveScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   banner: { marginBottom: spacing.lg },
   field: { marginBottom: spacing.lg },
@@ -164,6 +167,6 @@ const styles = StyleSheet.create({
   cemeteryRow: {
     paddingVertical: spacing.md,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: colors.linen,
+    borderBottomColor: c.linen,
   },
 })

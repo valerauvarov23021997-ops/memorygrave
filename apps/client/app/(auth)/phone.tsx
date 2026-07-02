@@ -1,4 +1,4 @@
-import { Button, colors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { Button, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { formatPhoneMask, isPhoneComplete, normalizePhoneDigits } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -13,6 +13,8 @@ export default function PhoneScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { sendCode } = useAuthActions()
 
@@ -73,7 +75,7 @@ export default function PhoneScreen() {
 
         <View style={styles.socials}>
           <Pressable style={[styles.social, styles.apple]}>
-            <Icon name="User" size={20} color={colors.white} />
+            <Icon name="User" size={20} color={c.white} />
             <Text style={styles.appleLabel}>{t('auth.apple')}</Text>
           </Pressable>
           <Pressable style={[styles.social, styles.google]}>
@@ -95,14 +97,15 @@ export default function PhoneScreen() {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
   subtitle: { marginTop: spacing.sm },
   field: { marginTop: spacing.xl, marginBottom: spacing.lg },
   flag: { fontSize: 18, marginRight: spacing.sm },
   dividerRow: { flexDirection: 'row', alignItems: 'center', marginVertical: spacing.xl },
-  line: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: colors.linen },
+  line: { flex: 1, height: StyleSheet.hairlineWidth, backgroundColor: c.linen },
   orText: { marginHorizontal: spacing.md },
   socials: { flexDirection: 'row', gap: spacing.md },
   social: {
@@ -114,11 +117,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: spacing.sm,
     borderWidth: 1,
-    borderColor: colors.linen,
+    borderColor: c.linen,
   },
-  apple: { backgroundColor: colors.ink, borderColor: colors.ink },
-  appleLabel: { ...typography.bodyMd, color: colors.white },
-  google: { backgroundColor: colors.white },
-  googleG: { ...typography.headingMd, color: colors.info },
+  apple: { backgroundColor: c.ink, borderColor: c.ink },
+  appleLabel: { ...typography.bodyMd, color: c.white },
+  google: { backgroundColor: c.white },
+  googleG: { ...typography.headingMd, color: c.info },
   footer: { paddingHorizontal: spacing.lg },
 })

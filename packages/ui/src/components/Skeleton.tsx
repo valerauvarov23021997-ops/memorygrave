@@ -9,8 +9,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import { colors } from '../tokens/colors'
 import { radii } from '../tokens/spacing'
+import { useColors } from '../theme/ThemeProvider'
 
 interface SkeletonProps {
   width: DimensionValue
@@ -20,6 +20,7 @@ interface SkeletonProps {
 
 /** Shimmer-заглушка вместо спиннера. Цикл parchment → linen → parchment. */
 export function Skeleton({ width, height, radius = radii.md }: SkeletonProps) {
+  const c = useColors()
   const progress = useSharedValue(0)
 
   useEffect(() => {
@@ -31,10 +32,10 @@ export function Skeleton({ width, height, radius = radii.md }: SkeletonProps) {
   }))
 
   return (
-    <View style={[styles.container, { width, height, borderRadius: radius }]}>
+    <View style={[styles.container, { width, height, borderRadius: radius, backgroundColor: c.parchment }]}>
       <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
         <LinearGradient
-          colors={[colors.parchment, colors.linen, colors.parchment]}
+          colors={[c.parchment, c.linen, c.parchment]}
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 0 }}
           style={StyleSheet.absoluteFill}
@@ -45,5 +46,5 @@ export function Skeleton({ width, height, radius = radii.md }: SkeletonProps) {
 }
 
 const styles = StyleSheet.create({
-  container: { backgroundColor: colors.parchment, overflow: 'hidden' },
+  container: { overflow: 'hidden' },
 })

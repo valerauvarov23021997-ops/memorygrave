@@ -4,8 +4,8 @@ import { StyleSheet, View } from 'react-native'
 
 import { initials } from '@pamyat/utils'
 
-import { colors } from '../tokens/colors'
 import { typography } from '../tokens/typography'
+import { useColors } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
 interface AvatarProps {
@@ -15,6 +15,7 @@ interface AvatarProps {
 }
 
 export function Avatar({ name, size = 40, imageUri }: AvatarProps) {
+  const c = useColors()
   const radius = size / 2
   if (imageUri) {
     return (
@@ -26,13 +27,13 @@ export function Avatar({ name, size = 40, imageUri }: AvatarProps) {
     )
   }
   return (
-    <View style={[styles.placeholder, { width: size, height: size, borderRadius: radius }]}>
-      <Text style={[styles.initials, { fontSize: size * 0.35 }]}>{initials(name)}</Text>
+    <View style={[styles.placeholder, { width: size, height: size, borderRadius: radius, backgroundColor: c.sageXL }]}>
+      <Text style={[styles.initials, { fontSize: size * 0.35, color: c.forest }]}>{initials(name)}</Text>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  placeholder: { backgroundColor: colors.sageXL, alignItems: 'center', justifyContent: 'center' },
-  initials: { ...typography.label, color: colors.forest },
+  placeholder: { alignItems: 'center', justifyContent: 'center' },
+  initials: { ...typography.label },
 })

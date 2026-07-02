@@ -4,9 +4,10 @@ import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { colors } from '../tokens/colors'
+import { type ThemeColors } from '../tokens/colors'
 import { MIN_TOUCH_TARGET, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
+import { useColors, useThemedStyles, useTheme } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
 interface TopBarProps {
@@ -18,6 +19,9 @@ interface TopBarProps {
 
 export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps) {
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const { isDark } = useTheme()
+  const styles = useThemedStyles(makeStyles)
   const paddingTop = insets.top
 
   const content = (
@@ -25,7 +29,7 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
       <View style={styles.side}>
         {onBack ? (
           <Pressable accessibilityRole="button" accessibilityLabel="Назад" hitSlop={8} onPress={onBack} style={styles.touch}>
-            <Phosphor.CaretLeft size={24} color={colors.light} weight="regular" />
+            <Phosphor.CaretLeft size={24} color={c.light} weight="regular" />
           </Pressable>
         ) : null}
       </View>
@@ -42,7 +46,7 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
 
   if (transparent) {
     return (
-      <BlurView intensity={30} tint="light" style={[styles.transparent, { paddingTop }]}>
+      <BlurView intensity={30} tint={isDark ? 'dark' : 'light'} style={[styles.transparent, { paddingTop }]}>
         {content}
       </BlurView>
     )
@@ -51,18 +55,19 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
   return <View style={[styles.solid, { paddingTop }]}>{content}</View>
 }
 
-const styles = StyleSheet.create({
-  solid: { backgroundColor: colors.cream, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: colors.linen },
-  transparent: { backgroundColor: 'rgba(250,247,242,0.85)' },
-  row: {
-    height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-  },
-  side: { minWidth: MIN_TOUCH_TARGET, justifyContent: 'center' },
-  right: { alignItems: 'flex-end' },
-  touch: { minWidth: MIN_TOUCH_TARGET, minHeight: MIN_TOUCH_TARGET, justifyContent: 'center' },
-  title: { ...typography.headingLg, color: colors.forest, flex: 1, textAlign: 'center' },
-})
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    solid: { backgroundColor: c.cream, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.linen },
+    transparent: { backgroundColor: 'transparent' },
+    row: {
+      height: 52,
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+    },
+    side: { minWidth: MIN_TOUCH_TARGET, justifyContent: 'center' },
+    right: { alignItems: 'flex-end' },
+    touch: { minWidth: MIN_TOUCH_TARGET, minHeight: MIN_TOUCH_TARGET, justifyContent: 'center' },
+    title: { ...typography.headingLg, color: c.forest, flex: 1, textAlign: 'center' },
+  })

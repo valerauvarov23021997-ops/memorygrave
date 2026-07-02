@@ -1,5 +1,5 @@
 import type { Grave } from '@pamyat/api'
-import { Avatar, Badge, Card, colors, spacing, Text } from '@pamyat/ui'
+import { Avatar, Badge, Card, spacing, Text } from '@pamyat/ui'
 import { formatDate } from '@pamyat/utils'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
@@ -40,5 +40,5 @@ const styles = StyleSheet.create({
   card: { marginBottom: spacing.sm },
   row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   info: { flex: 1 },
-  name: { fontFamily: 'PlayfairDisplay_500Medium', color: colors.forest, marginBottom: 2 },
+  name: { fontFamily: 'PlayfairDisplay_500Medium', marginBottom: 2 },
 })

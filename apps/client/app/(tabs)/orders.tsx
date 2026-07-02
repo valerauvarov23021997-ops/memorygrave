@@ -1,5 +1,5 @@
 import type { Order } from '@pamyat/api'
-import { AnimatedListItem, Badge, Button, Card, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
+import { AnimatedListItem, Badge, Button, Card, Icon, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -16,6 +16,8 @@ export default function OrdersScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const [filter, setFilter] = useState<Filter>('all')
   const { data, isLoading, refetch, isRefetching } = useOrders(filter === 'all' ? undefined : filter)
 
@@ -42,7 +44,7 @@ export default function OrdersScreen() {
           >
             <Text
               variant="bodySm"
-              style={{ color: filter === f.key ? colors.cream : colors.muted, fontFamily: 'DMSans_500Medium' }}
+              style={{ color: filter === f.key ? c.cream : c.muted, fontFamily: 'DMSans_500Medium' }}
             >
               {f.label}
             </Text>
@@ -58,7 +60,7 @@ export default function OrdersScreen() {
         </View>
       ) : (data?.length ?? 0) === 0 ? (
         <View style={styles.empty}>
-          <Icon name="orders" size={48} color={colors.stone} />
+          <Icon name="orders" size={48} color={c.stone} />
           <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
             {t('orders.empty')}
           </Text>
@@ -84,6 +86,7 @@ export default function OrdersScreen() {
 
 function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   const { t } = useTranslation()
+  const styles = useThemedStyles(makeStyles)
   const badge = orderStatusBadge(order.status, t)
   return (
     <Card onPress={onPress} padding="md" style={styles.card}>
@@ -112,13 +115,14 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
   chip: { height: 36, paddingHorizontal: spacing.md, borderRadius: 999, justifyContent: 'center' },
-  chipActive: { backgroundColor: colors.forest },
-  chipInactive: { backgroundColor: colors.parchment, borderWidth: 0.5, borderColor: colors.linen },
+  chipActive: { backgroundColor: c.forest },
+  chipInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
   list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
   card: { marginBottom: spacing.sm },
   cardRow: { flexDirection: 'row' },

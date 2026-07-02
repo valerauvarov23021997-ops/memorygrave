@@ -1,5 +1,5 @@
 import { ordersApi } from '@pamyat/api'
-import { Avatar, Badge, Button, Card, colors, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import { Avatar, Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
 import { formatDate, formatPrice, pluralOrders } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -16,6 +16,7 @@ export default function OrderStatusScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
+  const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const qc = useQueryClient()
   const { id } = useLocalSearchParams<{ id: string }>()
@@ -130,6 +131,8 @@ function TimelineStep({
   state: 'completed' | 'current' | 'future'
   isLast: boolean
 }) {
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   const { t } = useTranslation()
   const pulse = useSharedValue(1)
   useEffect(() => {
@@ -137,7 +140,7 @@ function TimelineStep({
   }, [state, pulse])
   const dotStyle = useAnimatedStyle(() => ({ opacity: state === 'current' ? pulse.value : 1 }))
 
-  const dotColor = state === 'completed' ? colors.sage : state === 'current' ? colors.forest : colors.linen
+  const dotColor = state === 'completed' ? c.sage : state === 'current' ? c.forest : c.linen
 
   return (
     <View style={styles.step}>
@@ -171,8 +174,9 @@ function TimelineStep({
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   loading: { padding: spacing.lg, gap: spacing.md },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
@@ -184,9 +188,9 @@ const styles = StyleSheet.create({
   step: { flexDirection: 'row', gap: spacing.md },
   stepLeft: { alignItems: 'center' },
   dot: { width: 10, height: 10, borderRadius: 5, marginTop: 4 },
-  dotCurrent: { borderWidth: 2, borderColor: colors.sageL },
-  dotFuture: { borderWidth: 1, borderColor: colors.stone },
-  line: { width: 1, flex: 1, backgroundColor: colors.linen, marginVertical: 2 },
+  dotCurrent: { borderWidth: 2, borderColor: c.sageL },
+  dotFuture: { borderWidth: 1, borderColor: c.stone },
+  line: { width: 1, flex: 1, backgroundColor: c.linen, marginVertical: 2 },
   stepBody: { flex: 1, paddingBottom: spacing.lg },
   currentLabel: { fontFamily: 'DMSans_500Medium' },
 })

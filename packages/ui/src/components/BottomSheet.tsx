@@ -9,8 +9,8 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { colors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
+import { useColors } from '../theme/ThemeProvider'
 
 interface BottomSheetProps {
   visible: boolean
@@ -24,6 +24,7 @@ interface BottomSheetProps {
  */
 export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
   const insets = useSafeAreaInsets()
+  const c = useColors()
   const translateY = useSharedValue(600)
   const overlayOpacity = useSharedValue(0)
   const [mounted, setMounted] = React.useState(visible)
@@ -50,8 +51,10 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none">
       <View style={styles.root}>
         <AnimatedPressable style={[styles.overlay, overlayStyle]} onPress={onClose} />
-        <Animated.View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.lg }, sheetStyle]}>
-          <View style={styles.handle} />
+        <Animated.View
+          style={[styles.sheet, { backgroundColor: c.cream, paddingBottom: insets.bottom + spacing.lg }, sheetStyle]}
+        >
+          <View style={[styles.handle, { backgroundColor: c.stone }]} />
           {children}
         </Animated.View>
       </View>
@@ -65,7 +68,6 @@ const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
   overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(26,26,20,0.45)' },
   sheet: {
-    backgroundColor: colors.cream,
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,
     paddingHorizontal: spacing.lg,
@@ -75,7 +77,6 @@ const styles = StyleSheet.create({
     width: 36,
     height: 4,
     borderRadius: radii.full,
-    backgroundColor: colors.stone,
     alignSelf: 'center',
     marginBottom: spacing.lg,
   },

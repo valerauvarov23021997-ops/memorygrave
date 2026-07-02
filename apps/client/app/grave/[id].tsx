@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Card,
-  colors,
   Divider,
   FullscreenGallery,
   haptics,
@@ -14,7 +13,10 @@ import {
   StarRating,
   Text,
   typography,
+  useColors,
+  useThemedStyles,
   useToast,
+  type ThemeColors,
 } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatDate, formatLifespan } from '@pamyat/utils'
@@ -45,6 +47,8 @@ export default function GraveScreen() {
   const [saved, setSaved] = useState<boolean | null>(null)
   const [expanded, setExpanded] = useState(false)
   const [galleryOpen, setGalleryOpen] = useState(false)
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
 
   if (isLoading || !grave) {
     return (
@@ -83,7 +87,7 @@ export default function GraveScreen() {
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
         {/* Шапка-герой с градиентом и портретом */}
         <LinearGradient
-          colors={[colors.forest, colors.moss]}
+          colors={[c.forest, c.moss]}
           start={{ x: 0.1, y: 0 }}
           end={{ x: 0.9, y: 1 }}
           style={[styles.hero, { paddingTop: insets.top + 52 }]}
@@ -138,11 +142,11 @@ export default function GraveScreen() {
                   longitudeDelta: 0.008,
                 }}
               >
-                <Marker coordinate={grave.coordinates} pinColor={colors.forest} />
+                <Marker coordinate={grave.coordinates} pinColor={c.forest} />
               </MapView>
               {grave.plot ? (
                 <View style={styles.plotBadge}>
-                  <Icon name="mapPin" size={14} color={colors.white} />
+                  <Icon name="mapPin" size={14} color="#FFFFFF" />
                   <Text style={styles.plotText}>{`${grave.plot} · ${grave.cemeteryName}`}</Text>
                 </View>
               ) : null}
@@ -210,21 +214,24 @@ export default function GraveScreen() {
 }
 
 function RoundButton({ icon, onPress }: { icon: string; onPress: () => void }) {
+  const styles = useThemedStyles(makeStyles)
   return (
     <Pressable style={styles.roundBtn} onPress={onPress} hitSlop={8}>
-      <Icon name={icon} size={20} color={colors.white} />
+      <Icon name={icon} size={20} color="#FFFFFF" />
     </Pressable>
   )
 }
 
 function MoreRow({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   return (
     <Pressable style={styles.moreRow} onPress={onPress}>
-      <Icon name={icon} size={20} color={colors.sage} />
+      <Icon name={icon} size={20} color={c.sage} />
       <Text variant="bodyMd" color="ink" style={styles.moreLabel}>
         {label}
       </Text>
-      <Icon name="chevronRight" size={18} color={colors.light} />
+      <Icon name="chevronRight" size={18} color={c.light} />
     </Pressable>
   )
 }
@@ -240,10 +247,12 @@ function ActionTile({
   active?: boolean
   onPress: () => void
 }) {
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
   return (
     <Card variant={active ? 'featured' : 'default'} padding="md" onPress={onPress} style={styles.tile}>
       <View style={styles.tileInner}>
-        <Icon name={icon} size={24} color={active ? colors.cream : colors.sage} weight={active ? 'fill' : 'regular'} />
+        <Icon name={icon} size={24} color={active ? c.cream : c.sage} weight={active ? 'fill' : 'regular'} />
         <Text variant="bodySm" center color={active ? 'cream' : 'muted'}>
           {label}
         </Text>
@@ -252,8 +261,9 @@ function ActionTile({
   )
 }
 
-const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: colors.cream },
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+  root: { flex: 1, backgroundColor: c.cream },
   scroll: { paddingBottom: 0 },
   hero: {
     paddingBottom: spacing.xl,
@@ -272,7 +282,7 @@ const styles = StyleSheet.create({
   heroName: { marginTop: spacing.md },
   heroDates: { ...typography.bodySm, color: 'rgba(250,247,242,0.75)', marginTop: spacing.xs, textAlign: 'center' },
   heroBadge: { marginTop: spacing.md },
-  heroSkeleton: { alignItems: 'center', backgroundColor: colors.forest, paddingBottom: spacing.xl, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
+  heroSkeleton: { alignItems: 'center', backgroundColor: c.forest, paddingBottom: spacing.xl, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
   loadingBody: { padding: spacing.lg, gap: spacing.md },
   topActions: {
     position: 'absolute',
@@ -298,7 +308,7 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     marginBottom: spacing.lg,
     borderWidth: 0.5,
-    borderColor: colors.linen,
+    borderColor: c.linen,
   },
   map: { ...StyleSheet.absoluteFillObject },
   plotBadge: {
@@ -313,7 +323,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.sm,
     paddingVertical: 5,
   },
-  plotText: { ...typography.caption, color: colors.white },
+  plotText: { ...typography.caption, color: "#FFFFFF" },
   actions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   candleWrap: { marginBottom: spacing.lg },
   moreCard: { marginBottom: spacing.lg },
@@ -330,8 +340,8 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: spacing.lg,
     paddingTop: spacing.md,
-    backgroundColor: colors.cream,
+    backgroundColor: c.cream,
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: colors.linen,
+    borderTopColor: c.linen,
   },
 })
