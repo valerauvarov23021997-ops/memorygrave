@@ -13,7 +13,7 @@ export default function SavedScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
-  const { data, isLoading } = useSavedGraves()
+  const { data, isLoading, refetch, isRefetching } = useSavedGraves()
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -41,6 +41,8 @@ export default function SavedScreen() {
           data={data ?? []}
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
+          onRefresh={refetch}
+          refreshing={isRefetching}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
               <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />

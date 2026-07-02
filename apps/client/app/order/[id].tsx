@@ -1,9 +1,9 @@
 import { ordersApi } from '@pamyat/api'
-import { Avatar, Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import { Avatar, Badge, BottomSheet, Button, Card, useColors, useThemedStyles, type ThemeColors, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
 import { formatDate, formatPrice, pluralOrders } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
@@ -21,12 +21,14 @@ export default function OrderStatusScreen() {
   const qc = useQueryClient()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: order, isLoading } = useOrder(id ?? '')
+  const [confirmCancel, setConfirmCancel] = useState(false)
 
   const cancel = useMutation({
     mutationFn: () => ordersApi.cancel(id ?? ''),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['orders'] })
       void qc.invalidateQueries({ queryKey: ['order', id] })
+      setConfirmCancel(false)
       showToast(t('orderStatus.cancelled'), 'success')
       router.back()
     },
@@ -113,11 +115,38 @@ export default function OrderStatusScreen() {
           </>
         ) : null}
 
+        {order.status === 'completed' ? (
+          <Button
+            label={t('orderStatus.viewReport')}
+            onPress={() => router.push(`/report/${order.id}`)}
+            fullWidth
+          />
+        ) : null}
+
         {canCancel ? (
-          <Button label={t('orderStatus.cancelOrder')} variant="destructive" onPress={() => cancel.mutate()} fullWidth />
+          <Button label={t('orderStatus.cancelOrder')} variant="destructive" onPress={() => setConfirmCancel(true)} fullWidth />
         ) : null}
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
+
+      <BottomSheet visible={confirmCancel} onClose={() => setConfirmCancel(false)}>
+        <Text variant="headingLg" color="forest" style={styles.confirmTitle}>
+          {t('orderStatus.cancelConfirmTitle')}
+        </Text>
+        <Text variant="bodyMd" color="muted" style={styles.confirmText}>
+          {t('orderStatus.cancelConfirmText')}
+        </Text>
+        <View style={styles.confirmButtons}>
+          <Button
+            label={t('orderStatus.cancelConfirm')}
+            variant="destructive"
+            onPress={() => cancel.mutate()}
+            loading={cancel.isPending}
+            fullWidth
+          />
+          <Button label={t('orderStatus.cancelKeep')} variant="ghost" onPress={() => setConfirmCancel(false)} fullWidth />
+        </View>
+      </BottomSheet>
     </View>
   )
 }
@@ -193,4 +222,7 @@ const makeStyles = (c: ThemeColors) =>
   line: { width: 1, flex: 1, backgroundColor: c.linen, marginVertical: 2 },
   stepBody: { flex: 1, paddingBottom: spacing.lg },
   currentLabel: { fontFamily: 'DMSans_500Medium' },
+  confirmTitle: { marginBottom: spacing.sm },
+  confirmText: { marginBottom: spacing.lg },
+  confirmButtons: { gap: spacing.sm },
 })

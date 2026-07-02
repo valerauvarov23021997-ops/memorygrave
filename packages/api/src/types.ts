@@ -205,6 +205,22 @@ export interface ExecutorOrder {
   notes: string | null
 }
 
+/** Тип уведомления в центре уведомлений. */
+export type NotificationType = 'order' | 'date' | 'candle' | 'system'
+
+/** Запись в центре уведомлений. */
+export interface AppNotification {
+  id: string
+  type: NotificationType
+  title: string
+  body: string
+  createdAt: string
+  isRead: boolean
+  /** Куда ведёт нажатие: id заказа или захоронения. */
+  orderId?: string
+  graveId?: string
+}
+
 /** Профиль исполнителя со статистикой. */
 export interface ExecutorProfile {
   id: string

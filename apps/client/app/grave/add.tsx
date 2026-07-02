@@ -11,7 +11,7 @@ import {
   TopBar,
   useToast,
 } from '@pamyat/ui'
-import { validateFullName } from '@pamyat/utils'
+import { dateMaskToIso, formatDateMask, validateFullName } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -56,11 +56,16 @@ export default function AddGraveScreen() {
     const nameError = validateFullName(fullName)
     if (nameError) return setError(nameError)
     if (!cemeteryId) return setError(t('addGrave.cemetery'))
+    // Даты необязательны, но если введены — должны существовать
+    const birthIso = birthDate ? dateMaskToIso(birthDate) : null
+    const deathIso = deathDate ? dateMaskToIso(deathDate) : null
+    if (birthDate && !birthIso) return setError(t('addGrave.dateInvalid'))
+    if (deathDate && !deathIso) return setError(t('addGrave.dateInvalid'))
     setError(undefined)
     mutation.mutate({
       fullName: fullName.trim(),
-      birthDate: birthDate || null,
-      deathDate: deathDate || null,
+      birthDate: birthIso,
+      deathDate: deathIso,
       cemeteryId,
       plot: plot || null,
       biography: biography || null,
@@ -96,10 +101,22 @@ export default function AddGraveScreen() {
 
         <View style={styles.dates}>
           <View style={styles.dateCol}>
-            <Input label={t('addGrave.birthDate')} value={birthDate} onChangeText={setBirthDate} placeholder="ГГГГ-ММ-ДД" />
+            <Input
+              label={t('addGrave.birthDate')}
+              value={birthDate}
+              onChangeText={text => setBirthDate(formatDateMask(text))}
+              placeholder="ДД.ММ.ГГГГ"
+              keyboardType="number-pad"
+            />
           </View>
           <View style={styles.dateCol}>
-            <Input label={t('addGrave.deathDate')} value={deathDate} onChangeText={setDeathDate} placeholder="ГГГГ-ММ-ДД" />
+            <Input
+              label={t('addGrave.deathDate')}
+              value={deathDate}
+              onChangeText={text => setDeathDate(formatDateMask(text))}
+              placeholder="ДД.ММ.ГГГГ"
+              keyboardType="number-pad"
+            />
           </View>
         </View>
 

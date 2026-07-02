@@ -13,6 +13,7 @@ import {
   gravesMock,
   membersMock,
   memoriesMock,
+  notificationsMock,
   ordersMock,
   paymentMethodsMock,
   remindersMock,
@@ -22,6 +23,7 @@ import {
 } from './mocks'
 import type {
   ApiResponse,
+  AppNotification,
   AuthTokens,
   Cemetery,
   City,
@@ -320,6 +322,7 @@ export const remindersApi = {
         isEnabled: true,
         autoOrder: input.autoOrder,
       }
+      remindersMock.push(reminder)
       return mockDelay(reminder)
     }
     return unwrap<Reminder>(client.post('/reminders', input))
@@ -505,6 +508,26 @@ export const executorApi = {
   setOnline(isOnline: boolean): Promise<{ success: boolean }> {
     if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.put('/executor/profile', { isOnline }))
+  },
+}
+
+// ─── Уведомления ──────────────────────────────────────────────
+
+export const notificationsApi = {
+  list(): Promise<AppNotification[]> {
+    if (USE_MOCKS) return mockDelay([...notificationsMock])
+    // TODO: согласовать с бэкендом
+    return unwrap<AppNotification[]>(client.get('/notifications'))
+  },
+  markAllRead(): Promise<{ success: boolean }> {
+    if (USE_MOCKS) {
+      notificationsMock.forEach(n => {
+        n.isRead = true
+      })
+      return mockDelay({ success: true })
+    }
+    // TODO: согласовать с бэкендом
+    return unwrap(client.post('/notifications/read-all'))
   },
 }
 

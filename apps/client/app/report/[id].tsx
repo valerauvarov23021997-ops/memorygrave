@@ -1,10 +1,11 @@
 import { ordersApi } from '@pamyat/api'
-import { Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, FullscreenGallery, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
 import { useMutation } from '@tanstack/react-query'
+import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder, useReport } from '../../src/hooks/queries'
@@ -21,6 +22,7 @@ export default function ReportScreen() {
   const { data: report, isLoading } = useReport(id ?? '')
 
   const [rating, setRating] = useState(0)
+  const [gallery, setGallery] = useState<{ photos: string[]; index: number } | null>(null)
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -41,8 +43,19 @@ export default function ReportScreen() {
 
   useEffect(() => () => (debounce.current ? clearTimeout(debounce.current) : undefined), [])
 
-  const beforeCount = report?.photosBefore.length ?? 0
-  const afterCount = report?.photosAfter.length ?? 0
+  const onShare = async () => {
+    if (!order) return
+    try {
+      await Share.share({
+        message: t('report.shareMessage', { service: order.serviceName, cemetery: order.cemeteryName }),
+      })
+    } catch {
+      // пользователь мог закрыть окно шэринга — не ошибка
+    }
+  }
+
+  const before = report?.photosBefore ?? []
+  const after = report?.photosAfter ?? []
 
   return (
     <View style={styles.root}>
@@ -65,14 +78,24 @@ export default function ReportScreen() {
         </Card>
 
         {isLoading ? (
-          <Skeleton width="100%" height={100} radius={10} />
+          <View style={styles.loadingGrid}>
+            <Skeleton width="48%" height={140} radius={12} />
+            <Skeleton width="48%" height={140} radius={12} />
+          </View>
         ) : (
           <>
-            <SectionLabel>{t('report.before')}</SectionLabel>
-            <PhotoGrid count={Math.max(beforeCount, 2)} variant="before" />
-
-            <SectionLabel>{t('report.after')}</SectionLabel>
-            <PhotoGrid count={Math.max(afterCount, 2)} variant="after" />
+            {before.length > 0 ? (
+              <>
+                <SectionLabel>{t('report.before')}</SectionLabel>
+                <PhotoGrid photos={before} onOpen={index => setGallery({ photos: before, index })} />
+              </>
+            ) : null}
+            {after.length > 0 ? (
+              <>
+                <SectionLabel>{t('report.after')}</SectionLabel>
+                <PhotoGrid photos={after} onOpen={index => setGallery({ photos: after, index })} />
+              </>
+            ) : null}
           </>
         )}
 
@@ -83,27 +106,29 @@ export default function ReportScreen() {
 
         <View style={styles.buttons}>
           <Button label={t('report.orderAgain')} onPress={() => router.push('/order/catalog')} fullWidth />
-          <Button label={t('report.download')} variant="secondary" onPress={() => showToast(t('report.download'), 'info')} fullWidth />
+          <Button label={t('report.share')} variant="secondary" onPress={onShare} fullWidth />
         </View>
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
+
+      <FullscreenGallery
+        visible={gallery !== null}
+        photos={gallery?.photos ?? []}
+        initialIndex={gallery?.index ?? 0}
+        onClose={() => setGallery(null)}
+      />
     </View>
   )
 }
 
-function PhotoGrid({ count, variant }: { count: number; variant: 'before' | 'after' }) {
-  const c = useColors()
+function PhotoGrid({ photos, onOpen }: { photos: string[]; onOpen: (index: number) => void }) {
   const styles = useThemedStyles(makeStyles)
   return (
     <View style={styles.grid}>
-      {Array.from({ length: count }).map((_, i) => (
-        <View key={i} style={[styles.photoBox, variant === 'after' ? styles.photoAfter : styles.photoBefore]}>
-          <Icon
-            name={variant === 'after' ? 'checkCircle' : 'camera'}
-            size={22}
-            color={variant === 'after' ? c.success : c.stone}
-          />
-        </View>
+      {photos.map((uri, i) => (
+        <Pressable key={uri} style={styles.photoBox} onPress={() => onOpen(i)}>
+          <Image source={{ uri }} style={styles.photo} contentFit="cover" transition={200} />
+        </Pressable>
       ))}
     </View>
   )
@@ -115,10 +140,16 @@ const makeStyles = (c: ThemeColors) =>
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
   done: { marginBottom: spacing.lg },
   doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+  loadingGrid: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
-  photoBox: { width: '48%', height: 100, borderRadius: 8, alignItems: 'center', justifyContent: 'center' },
-  photoBefore: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.stone },
-  photoAfter: { backgroundColor: c.successBg, borderWidth: 0.5, borderColor: c.sageL },
+  photoBox: {
+    width: '48%',
+    aspectRatio: 1,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: c.parchment,
+  },
+  photo: { width: '100%', height: '100%' },
   rating: { marginBottom: spacing.lg },
   buttons: { gap: spacing.sm },
 })

@@ -11,8 +11,10 @@ import {
   useThemedStyles,
   type ThemeColors,
 } from '@pamyat/ui'
+import { notificationsApi } from '@pamyat/api'
 import { useSearchStore } from '@pamyat/store'
 import { pluralResults } from '@pamyat/utils'
+import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -47,6 +49,8 @@ export default function SearchScreen() {
     [query, city, cemeteryId]
   )
   const { data, isLoading } = useGraveSearch(params, active)
+  const { data: notifications } = useQuery({ queryKey: ['notifications'], queryFn: () => notificationsApi.list() })
+  const hasUnread = (notifications ?? []).some(n => !n.isRead)
 
   const addGraveCard = (
     <Pressable style={styles.addCard} onPress={() => router.push('/grave/add')}>
@@ -63,8 +67,11 @@ export default function SearchScreen() {
         <Text variant="displayMd" color="forest">
           {t('search.appName')}
         </Text>
-        <Pressable hitSlop={8}>
-          <Icon name="bell" size={22} color={c.sage} />
+        <Pressable hitSlop={8} onPress={() => router.push('/notifications')}>
+          <View>
+            <Icon name="bell" size={22} color={c.sage} />
+            {hasUnread ? <View style={styles.bellDot} /> : null}
+          </View>
         </Pressable>
       </View>
 
@@ -188,6 +195,17 @@ const makeStyles = (c: ThemeColors) =>
     justifyContent: 'space-between',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
+  },
+  bellDot: {
+    position: 'absolute',
+    top: -1,
+    right: -1,
+    width: 9,
+    height: 9,
+    borderRadius: 5,
+    backgroundColor: c.gold,
+    borderWidth: 1.5,
+    borderColor: c.cream,
   },
   searchWrap: { paddingHorizontal: spacing.lg },
   searchBar: {

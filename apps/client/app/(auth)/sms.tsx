@@ -3,7 +3,7 @@ import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, TextInput, View } from 'react-native'
+import { Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useAuthActions } from '../../src/hooks/useAuthActions'
@@ -74,7 +74,7 @@ export default function SmsScreen() {
           {t('auth.smsSubtitle', { phone: formatPhoneMask(phone ?? '') })}
         </Text>
 
-        <View style={styles.cells}>
+        <Pressable style={styles.cells} onPress={() => inputRef.current?.focus()}>
           {Array.from({ length: CODE_LENGTH }).map((_, i) => {
             const char = code[i] ?? ''
             const active = i === code.length
@@ -103,7 +103,7 @@ export default function SmsScreen() {
             maxLength={CODE_LENGTH}
             style={styles.hiddenInput}
           />
-        </View>
+        </Pressable>
 
         {seconds > 0 ? (
           <Text variant="bodyMd" color="muted" style={styles.timer}>

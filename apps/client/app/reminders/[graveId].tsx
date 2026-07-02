@@ -1,11 +1,11 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
-import { Card, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
+import { BottomSheet, Button, Card, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
-import { daysUntilAnnual, formatDayMonth, pluralDays } from '@pamyat/utils'
+import { dateMaskToIso, daysUntilAnnual, formatDateMask, formatDayMonth, pluralDays } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -36,6 +36,39 @@ export default function RemindersScreen() {
   useEffect(() => {
     if (reminders) void syncReminders(reminders)
   }, [reminders])
+
+  const [adding, setAdding] = useState(false)
+  const [newLabel, setNewLabel] = useState('')
+  const [newDate, setNewDate] = useState('')
+  const [dateError, setDateError] = useState<string | undefined>()
+
+  const create = useMutation({
+    mutationFn: async () => {
+      const iso = dateMaskToIso(newDate)
+      if (!iso) throw new Error('date')
+      const reminder = await remindersApi.create({
+        graveId: graveId ?? '',
+        type: 'custom',
+        date: iso,
+        label: newLabel.trim(),
+        autoOrder: [],
+      })
+      const granted = await ensureNotificationPermission()
+      if (granted) await scheduleReminder(reminder)
+      return reminder
+    },
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.reminders(graveId) })
+      setAdding(false)
+      setNewLabel('')
+      setNewDate('')
+      setDateError(undefined)
+      showToast(t('reminders.added'), 'success')
+    },
+    onError: () => setDateError(t('reminders.dateInvalid')),
+  })
+
+  const canCreate = newLabel.trim().length > 0 && newDate.length === 10
 
   const toggle = useMutation({
     mutationFn: async ({ reminder, next }: { reminder: Reminder; next: boolean }) => {
@@ -86,7 +119,7 @@ export default function RemindersScreen() {
           ))
         )}
 
-        <Pressable style={styles.addRow}>
+        <Pressable style={styles.addRow} onPress={() => setAdding(true)}>
           <Icon name="plus" size={20} color={c.sage} />
           <Text variant="bodyMd" color="sage">
             {t('reminders.addDate')}
@@ -122,6 +155,40 @@ export default function RemindersScreen() {
         </Card>
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
+
+      <BottomSheet visible={adding} onClose={() => setAdding(false)}>
+        <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
+          {t('reminders.addDate')}
+        </Text>
+        <View style={styles.sheetField}>
+          <Input
+            label={t('reminders.labelField')}
+            value={newLabel}
+            onChangeText={setNewLabel}
+            placeholder={t('reminders.labelPlaceholder')}
+          />
+        </View>
+        <View style={styles.sheetField}>
+          <Input
+            label={t('reminders.dateField')}
+            value={newDate}
+            onChangeText={text => {
+              setNewDate(formatDateMask(text))
+              setDateError(undefined)
+            }}
+            placeholder="ДД.ММ.ГГГГ"
+            keyboardType="number-pad"
+            error={dateError}
+          />
+        </View>
+        <Button
+          label={t('common.save')}
+          onPress={() => create.mutate()}
+          disabled={!canCreate}
+          loading={create.isPending}
+          fullWidth
+        />
+      </BottomSheet>
     </View>
   )
 }
@@ -167,6 +234,8 @@ const makeStyles = (c: ThemeColors) =>
   iconWrap: { width: 26, height: 26, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
   reminderBody: { flex: 1 },
   addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md },
+  sheetTitle: { marginBottom: spacing.md },
+  sheetField: { marginBottom: spacing.md },
   autoDesc: { marginBottom: spacing.sm },
   autoService: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
   configureRow: { marginTop: spacing.sm },

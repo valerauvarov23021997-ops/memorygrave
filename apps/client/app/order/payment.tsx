@@ -1,11 +1,12 @@
 import { ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
-import { Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { BottomSheet, Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { usePaymentMethods } from '../../src/hooks/queries'
@@ -22,7 +23,9 @@ export default function PaymentScreen() {
   const { data: methods, isLoading } = usePaymentMethods()
 
   const amount = draft.priceFrom ?? 0
-  const defaultMethod = methods?.find(m => m.isDefault) ?? methods?.[0]
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [choosing, setChoosing] = useState(false)
+  const method = methods?.find(m => m.id === selectedId) ?? methods?.find(m => m.isDefault) ?? methods?.[0]
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -36,7 +39,7 @@ export default function PaymentScreen() {
         recurringPeriod: draft.recurringPeriod,
       }
       const order = await ordersApi.create(input)
-      if (defaultMethod) await paymentsApi.create(order.id, defaultMethod.id)
+      if (method) await paymentsApi.create(order.id, method.id)
       return order
     },
     onSuccess: order => {
@@ -68,23 +71,25 @@ export default function PaymentScreen() {
         <SectionLabel>{t('payment.method')}</SectionLabel>
         {isLoading ? (
           <Skeleton width="100%" height={56} radius={10} />
-        ) : defaultMethod ? (
+        ) : method ? (
           <Card padding="md">
             <View style={styles.methodRow}>
               <Icon name="orders" size={20} color={c.sage} />
               <View style={styles.methodInfo}>
-                <Text variant="headingMd" color="ink">{`${defaultMethod.brand} •••• ${defaultMethod.last4}`}</Text>
+                <Text variant="headingMd" color="ink">{`${method.brand} •••• ${method.last4}`}</Text>
                 <Text variant="bodySm" color="muted">
-                  {defaultMethod.expiry}
+                  {method.expiry}
                 </Text>
               </View>
               <Icon name="checkCircle" size={20} color={c.sage} weight="fill" />
             </View>
           </Card>
         ) : null}
-        <Text variant="bodySm" color="sage" style={styles.otherMethod}>
-          {t('payment.otherMethod')}
-        </Text>
+        <Pressable onPress={() => setChoosing(true)} hitSlop={8}>
+          <Text variant="bodySm" color="sage" style={styles.otherMethod}>
+            {t('payment.otherMethod')}
+          </Text>
+        </Pressable>
 
         <Divider />
 
@@ -118,6 +123,34 @@ export default function PaymentScreen() {
         <Button label={t('payment.pay', { amount: formatPrice(amount) })} onPress={() => mutation.mutate()} loading={mutation.isPending} fullWidth />
         <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
       </View>
+
+      <BottomSheet visible={choosing} onClose={() => setChoosing(false)}>
+        <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
+          {t('payment.method')}
+        </Text>
+        {(methods ?? []).map(m => {
+          const active = m.id === method?.id
+          return (
+            <Pressable
+              key={m.id}
+              style={styles.methodOption}
+              onPress={() => {
+                setSelectedId(m.id)
+                setChoosing(false)
+              }}
+            >
+              <Icon name="orders" size={20} color={active ? c.sage : c.light} />
+              <View style={styles.methodInfo}>
+                <Text variant="bodyLg" color="ink">{`${m.brand} •••• ${m.last4}`}</Text>
+                <Text variant="bodySm" color="light">
+                  {m.expiry}
+                </Text>
+              </View>
+              {active ? <Icon name="checkCircle" size={20} color={c.sage} weight="fill" /> : null}
+            </Pressable>
+          )
+        })}
+      </BottomSheet>
     </View>
   )
 }
@@ -131,6 +164,15 @@ const makeStyles = (c: ThemeColors) =>
   methodRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   methodInfo: { flex: 1 },
   otherMethod: { marginTop: spacing.md },
+  sheetTitle: { marginBottom: spacing.md },
+  methodOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: c.linen,
+  },
   line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs },
   total: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34, color: c.forest },
   footer: {

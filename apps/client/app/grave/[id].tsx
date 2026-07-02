@@ -24,7 +24,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -82,6 +82,16 @@ export default function GraveScreen() {
     router.push('/order/catalog')
   }
 
+  const onShare = async () => {
+    try {
+      await Share.share({
+        message: t('grave.shareMessage', { name: grave.fullName, url: `pamyat://grave/${grave.id}` }),
+      })
+    } catch {
+      // пользователь мог закрыть окно шэринга — не ошибка
+    }
+  }
+
   return (
     <View style={styles.root}>
       <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
@@ -109,7 +119,7 @@ export default function GraveScreen() {
         {/* Плавающие кнопки поверх шапки */}
         <View style={[styles.topActions, { top: insets.top + spacing.xs }]}>
           <RoundButton icon="back" onPress={() => router.back()} />
-          <RoundButton icon="share" onPress={() => showToast(t('grave.share'), 'info')} />
+          <RoundButton icon="share" onPress={() => void onShare()} />
         </View>
 
         <View style={styles.body}>
