@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Modal, Pressable, StyleSheet, View } from 'react-native'
+import { KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, View } from 'react-native'
 import Animated, {
   Easing,
   runOnJS,
@@ -49,7 +49,10 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
 
   return (
     <Modal transparent visible={mounted} onRequestClose={onClose} animationType="none">
-      <View style={styles.root}>
+      <KeyboardAvoidingView
+        style={styles.root}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
         <AnimatedPressable style={[styles.overlay, overlayStyle]} onPress={onClose} />
         <Animated.View
           style={[styles.sheet, { backgroundColor: c.cream, paddingBottom: insets.bottom + spacing.lg }, sheetStyle]}
@@ -57,7 +60,7 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
           <View style={[styles.handle, { backgroundColor: c.stone }]} />
           {children}
         </Animated.View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   )
 }

@@ -71,7 +71,12 @@ export default function AddGraveScreen() {
   return (
     <View style={styles.root}>
       <TopBar title={t('addGrave.title')} onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
         <Card variant="success" padding="md" style={styles.banner}>
           <Text variant="bodySm" color="success">
             {t('addGrave.banner')}

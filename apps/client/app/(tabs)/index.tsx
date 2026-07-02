@@ -123,6 +123,7 @@ export default function SearchScreen() {
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="on-drag"
           ListHeaderComponent={
             <Text variant="caption" color="muted" style={styles.count}>
               {t('search.found', { value: pluralResults(data?.length ?? 0) })}

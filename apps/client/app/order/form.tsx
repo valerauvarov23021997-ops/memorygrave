@@ -71,7 +71,12 @@ export default function OrderFormScreen() {
   return (
     <View style={styles.root}>
       <TopBar title={t('orderForm.title')} onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={styles.content}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
         <Card variant="surface" padding="md" style={styles.serviceCard}>
           <View style={styles.serviceRow}>
             {draft.serviceIcon ? <Icon name={draft.serviceIcon} size={22} color={c.sage} /> : null}

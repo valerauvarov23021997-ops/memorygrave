@@ -38,7 +38,12 @@ export default function PhoneScreen() {
   return (
     <View style={styles.root}>
       <TopBar />
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="interactive"
+        automaticallyAdjustKeyboardInsets
+      >
         <Text variant="displayMd" color="forest">
           {t('auth.title')}
         </Text>
