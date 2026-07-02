@@ -5,9 +5,11 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Pressable, StyleSheet, View } from 'react-native'
 
-// Ключ Яндекс Static API (необязателен). Без ключа показываем плитку с
-// кнопкой «Открыть в Яндекс.Картах» — карта откроется в приложении/браузере.
-const YANDEX_KEY = process.env.EXPO_PUBLIC_YANDEX_MAPS_API_KEY
+// Ключ Яндекс Static API. Клиентский по своей природе (виден в URL картинки
+// карты) — это нормально для карт-ключей; лимиты настраиваются в Яндекс.Кабинете.
+// Переопределяется через EXPO_PUBLIC_YANDEX_MAPS_API_KEY.
+const YANDEX_KEY =
+  process.env.EXPO_PUBLIC_YANDEX_MAPS_API_KEY ?? 'a10371ea-1a73-41b5-9c09-594319693b5d'
 
 interface MapPreviewProps {
   coordinates: Coordinates
