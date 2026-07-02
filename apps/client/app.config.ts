@@ -13,7 +13,7 @@ const config: ExpoConfig = {
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
-    backgroundColor: '#1C3318',
+    backgroundColor: '#F0EBE0',
   },
   assetBundlePatterns: ['**/*'],
   ios: {
@@ -31,7 +31,7 @@ const config: ExpoConfig = {
     versionCode: 1,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
-      backgroundColor: '#1C3318',
+      backgroundColor: '#F0EBE0',
     },
   },
   plugins: [
