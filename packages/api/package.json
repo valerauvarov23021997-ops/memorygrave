@@ -9,10 +9,12 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "axios": "^1.7.0",
-    "expo-secure-store": "~13.0.0"
+    "axios": "^1.7.0"
+  },
+  "peerDependencies": {
+    "expo-secure-store": ">=15.0.0"
   },
   "devDependencies": {
-    "typescript": "^5.4.0"
+    "typescript": "~5.9.2"
   }
 }
