@@ -4,6 +4,7 @@ import {
   Button,
   Card,
   colors,
+  Divider,
   haptics,
   Icon,
   SectionLabel,
@@ -25,6 +26,7 @@ import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps'
 import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { MemoryBook } from '../../src/components/MemoryBook'
 import { MemoryCandle } from '../../src/components/MemoryCandle'
 import { useGrave, useToggleSaved } from '../../src/hooks/queries'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
@@ -160,6 +162,15 @@ export default function GraveScreen() {
             <MemoryCandle graveId={grave.id} />
           </View>
 
+          <MemoryBook graveId={grave.id} />
+
+          <SectionLabel>{t('grave.more')}</SectionLabel>
+          <Card padding="sm" style={styles.moreCard}>
+            <MoreRow icon="saved" label={t('invite.title')} onPress={() => router.push(`/invite/${grave.id}`)} />
+            <Divider />
+            <MoreRow icon="QrCode" label={t('qr.title')} onPress={() => router.push(`/qr/${grave.id}`)} />
+          </Card>
+
           {grave.lastOrder ? (
             <>
               <SectionLabel>{t('grave.lastOrder')}</SectionLabel>
@@ -194,6 +205,18 @@ function RoundButton({ icon, onPress }: { icon: string; onPress: () => void }) {
   return (
     <Pressable style={styles.roundBtn} onPress={onPress} hitSlop={8}>
       <Icon name={icon} size={20} color={colors.white} />
+    </Pressable>
+  )
+}
+
+function MoreRow({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
+  return (
+    <Pressable style={styles.moreRow} onPress={onPress}>
+      <Icon name={icon} size={20} color={colors.sage} />
+      <Text variant="bodyMd" color="ink" style={styles.moreLabel}>
+        {label}
+      </Text>
+      <Icon name="chevronRight" size={18} color={colors.light} />
     </Pressable>
   )
 }
@@ -285,6 +308,9 @@ const styles = StyleSheet.create({
   plotText: { ...typography.caption, color: colors.white },
   actions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   candleWrap: { marginBottom: spacing.lg },
+  moreCard: { marginBottom: spacing.lg },
+  moreRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
+  moreLabel: { flex: 1 },
   tile: { flex: 1 },
   tileInner: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
   lastOrderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

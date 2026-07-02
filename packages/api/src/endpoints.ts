@@ -11,6 +11,8 @@ import {
   executorOrdersMock,
   executorProfileMock,
   gravesMock,
+  membersMock,
+  memoriesMock,
   ordersMock,
   paymentMethodsMock,
   remindersMock,
@@ -26,6 +28,8 @@ import type {
   ExecutorOrder,
   ExecutorProfile,
   Grave,
+  Member,
+  Memory,
   Order,
   OrderStatus,
   PaymentMethod,
@@ -371,6 +375,58 @@ export const candlesApi = {
       return mockDelay(next)
     }
     return unwrap<CandleStatus>(client.post(`/graves/${graveId}/candles`))
+  },
+}
+
+// ─── Книга воспоминаний ───────────────────────────────────────
+
+// Мок-хранилище воспоминаний (переживает добавления в рамках сессии).
+const memoriesStore: Memory[] = [...memoriesMock]
+
+export interface CreateMemoryInput {
+  graveId: string
+  authorName: string
+  text: string
+  photos?: string[]
+}
+
+export const memoriesApi = {
+  list(graveId: string): Promise<Memory[]> {
+    if (USE_MOCKS) {
+      const list = memoriesStore
+        .filter(m => m.graveId === graveId)
+        .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+      return mockDelay(list)
+    }
+    return unwrap<Memory[]>(client.get(`/graves/${graveId}/memories`))
+  },
+  add(input: CreateMemoryInput): Promise<Memory> {
+    if (USE_MOCKS) {
+      const memory: Memory = {
+        id: `mem-new-${Date.now()}`,
+        graveId: input.graveId,
+        authorName: input.authorName,
+        text: input.text,
+        createdAt: new Date().toISOString(),
+        photos: input.photos ?? [],
+      }
+      memoriesStore.unshift(memory)
+      return mockDelay(memory)
+    }
+    return unwrap<Memory>(client.post(`/graves/${input.graveId}/memories`, input))
+  },
+}
+
+// ─── Совместный доступ ────────────────────────────────────────
+
+export const membersApi = {
+  list(graveId: string): Promise<Member[]> {
+    if (USE_MOCKS) return mockDelay(membersMock)
+    return unwrap<Member[]>(client.get(`/graves/${graveId}/members`))
+  },
+  inviteLink(graveId: string): Promise<{ url: string }> {
+    if (USE_MOCKS) return mockDelay({ url: `https://pamyat.app/join/${graveId}` })
+    return unwrap<{ url: string }>(client.post(`/graves/${graveId}/invite`))
   },
 }
 

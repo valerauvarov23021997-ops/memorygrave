@@ -112,6 +112,26 @@ export interface PhotoReport {
   photosAfter: string[]
 }
 
+/** Запись в книге воспоминаний о человеке. */
+export interface Memory {
+  id: string
+  graveId: string
+  authorName: string
+  text: string
+  createdAt: string
+  photos: string[]
+}
+
+/** Участник совместного доступа к странице памяти. */
+export type MemberRole = 'owner' | 'editor' | 'viewer'
+
+export interface Member {
+  id: string
+  name: string
+  role: MemberRole
+  avatarUrl: string | null
+}
+
 export type ReminderType = 'birthday' | 'anniversary' | 'custom'
 
 export interface Reminder {
