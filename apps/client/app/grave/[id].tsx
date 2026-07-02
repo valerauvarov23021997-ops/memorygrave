@@ -25,6 +25,7 @@ import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps'
 import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { MemoryCandle } from '../../src/components/MemoryCandle'
 import { useGrave, useToggleSaved } from '../../src/hooks/queries'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
 
@@ -155,6 +156,10 @@ export default function GraveScreen() {
             <ActionTile icon="bell" label={t('grave.remind')} onPress={() => router.push(`/reminders/${grave.id}`)} />
           </View>
 
+          <View style={styles.candleWrap}>
+            <MemoryCandle graveId={grave.id} />
+          </View>
+
           {grave.lastOrder ? (
             <>
               <SectionLabel>{t('grave.lastOrder')}</SectionLabel>
@@ -279,6 +284,7 @@ const styles = StyleSheet.create({
   },
   plotText: { ...typography.caption, color: colors.white },
   actions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+  candleWrap: { marginBottom: spacing.lg },
   tile: { flex: 1 },
   tileInner: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
   lastOrderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },

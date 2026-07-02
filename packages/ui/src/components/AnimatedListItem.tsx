@@ -1,22 +1,17 @@
 import React from 'react'
-import Animated, { FadeInDown } from 'react-native-reanimated'
+import Animated, { FadeIn } from 'react-native-reanimated'
 
 interface AnimatedListItemProps {
-  /** Индекс в списке — задаёт задержку для каскадного появления. */
+  /** Индекс в списке — задаёт лёгкую задержку для мягкого проявления. */
   index: number
   children: React.ReactNode
 }
 
 /**
- * Обёртка для элементов списка: мягкое каскадное «выплывание» снизу.
- * Задержка растёт с индексом, но ограничена, чтобы длинные списки
- * не появлялись слишком долго.
+ * Обёртка для элементов списка: спокойное проявление по прозрачности,
+ * без сдвига и пружин — чтобы список не «дёргался», а мягко проступал.
  */
 export function AnimatedListItem({ index, children }: AnimatedListItemProps) {
-  const delay = Math.min(index, 8) * 45
-  return (
-    <Animated.View entering={FadeInDown.delay(delay).duration(340).springify().damping(18)}>
-      {children}
-    </Animated.View>
-  )
+  const delay = Math.min(index, 6) * 40
+  return <Animated.View entering={FadeIn.delay(delay).duration(400)}>{children}</Animated.View>
 }

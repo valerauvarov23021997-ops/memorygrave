@@ -334,6 +334,46 @@ export const remindersApi = {
   },
 }
 
+// ─── Свеча памяти ─────────────────────────────────────────────
+
+export interface CandleStatus {
+  /** Всего зажжённых свечей у этого захоронения. */
+  count: number
+  /** Зажигал ли текущий пользователь свечу сегодня. */
+  litToday: boolean
+}
+
+// Мок-хранилище зажжённых свечей в рамках сессии.
+const candleState: Record<string, CandleStatus> = {}
+
+// Детерминированный «стартовый» счётчик — чтобы у разных людей были
+// разные, но стабильные числа, без реального бэкенда.
+function baseCandleCount(graveId: string): number {
+  let hash = 0
+  for (let i = 0; i < graveId.length; i++) hash = (hash * 31 + graveId.charCodeAt(i)) % 400
+  return 12 + hash
+}
+
+export const candlesApi = {
+  status(graveId: string): Promise<CandleStatus> {
+    if (USE_MOCKS) {
+      const state = candleState[graveId] ?? { count: baseCandleCount(graveId), litToday: false }
+      candleState[graveId] = state
+      return mockDelay(state)
+    }
+    return unwrap<CandleStatus>(client.get(`/graves/${graveId}/candles`))
+  },
+  light(graveId: string): Promise<CandleStatus> {
+    if (USE_MOCKS) {
+      const prev = candleState[graveId] ?? { count: baseCandleCount(graveId), litToday: false }
+      const next: CandleStatus = { count: prev.count + (prev.litToday ? 0 : 1), litToday: true }
+      candleState[graveId] = next
+      return mockDelay(next)
+    }
+    return unwrap<CandleStatus>(client.post(`/graves/${graveId}/candles`))
+  },
+}
+
 // ─── Профиль ──────────────────────────────────────────────────
 
 export const profileApi = {
