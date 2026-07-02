@@ -32,12 +32,16 @@ export default function RootLayout() {
 
   // Нажатие на уведомление о памятной дате открывает страницу человека.
   useEffect(() => {
-    const sub = Notifications.addNotificationResponseReceivedListener(response => {
-      const graveId = response.notification.request.content.data?.graveId
+    const openFromResponse = (response: Notifications.NotificationResponse | null) => {
+      const graveId = response?.notification.request.content.data?.graveId
       if (typeof graveId === 'string') {
         router.navigate({ pathname: '/grave/[id]', params: { id: graveId } })
       }
-    })
+    }
+    // Холодный старт: приложение открыли нажатием на уведомление.
+    void Notifications.getLastNotificationResponseAsync().then(openFromResponse)
+    // Приложение уже запущено.
+    const sub = Notifications.addNotificationResponseReceivedListener(openFromResponse)
     return () => sub.remove()
   }, [])
 

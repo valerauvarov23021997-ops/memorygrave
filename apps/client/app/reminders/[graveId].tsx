@@ -1,6 +1,7 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
 import { Card, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
+import { useOrderDraftStore } from '@pamyat/store'
 import { daysUntilAnnual, formatDayMonth, pluralDays } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -29,6 +30,7 @@ export default function RemindersScreen() {
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: reminders, isLoading } = useReminders(graveId)
   const { data: services } = useServices()
+  const startOrder = useOrderDraftStore(s => s.startOrder)
 
   // Синхронизируем расписание уведомлений с включёнными напоминаниями.
   useEffect(() => {
@@ -106,7 +108,13 @@ export default function RemindersScreen() {
               </Text>
             </View>
           ))}
-          <Pressable style={styles.configureRow} onPress={() => router.push('/order/catalog')}>
+          <Pressable
+            style={styles.configureRow}
+            onPress={() => {
+              if (first) startOrder({ id: first.graveId, name: first.graveName, cemetery: first.cemeteryName })
+              router.push('/order/catalog')
+            }}
+          >
             <Text variant="bodySm" color="sage">
               {t('reminders.configureAuto')}
             </Text>

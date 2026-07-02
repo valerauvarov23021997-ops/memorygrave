@@ -13,7 +13,10 @@ export const gravesMock: Grave[] = [
     plot: 'уч. 14, ряд 3',
     biography:
       'Инженер-конструктор, ветеран труда. Более тридцати лет отдал авиастроению, воспитал двоих детей и четверых внуков. Любил рыбалку и русскую классическую литературу.',
-    photos: [],
+    photos: [
+      'https://placehold.co/800x1000/EDE7D9/6B6B5E/png',
+      'https://placehold.co/800x1000/F0EBE0/9A9A8E/png',
+    ],
     coordinates: { latitude: 55.7239, longitude: 37.5566 },
     status: 'digitized',
     isSaved: true,

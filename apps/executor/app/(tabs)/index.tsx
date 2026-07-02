@@ -1,14 +1,17 @@
 import type { ExecutorOrder } from '@pamyat/api'
 import { executorApi } from '@pamyat/api'
-import { Button, Card, colors, Icon, SectionLabel, Skeleton, spacing, Text, typography, useToast } from '@pamyat/ui'
+import { BottomSheet, Button, Card, colors, Icon, Input, SectionLabel, Skeleton, spacing, Text, typography, useToast } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Alert, FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { executorKeys, useExecutorOrders } from '../../src/hooks/queries'
+
+const ACTIVE_STATUSES = ['pending', 'assigned', 'on_the_way', 'working']
 
 export default function ActiveOrdersScreen() {
   const { t } = useTranslation()
@@ -17,6 +20,12 @@ export default function ActiveOrdersScreen() {
   const showToast = useToast()
   const qc = useQueryClient()
   const { data, isLoading } = useExecutorOrders()
+
+  const [rejectId, setRejectId] = useState<string | null>(null)
+  const [reason, setReason] = useState('')
+
+  // Активная вкладка — только незавершённые заказы.
+  const orders = (data ?? []).filter(o => ACTIVE_STATUSES.includes(o.status))
 
   const accept = useMutation({
     mutationFn: (id: string) => executorApi.accept(id),
@@ -28,18 +37,14 @@ export default function ActiveOrdersScreen() {
   })
 
   const reject = useMutation({
-    mutationFn: ({ id, reason }: { id: string; reason: string }) => executorApi.reject(id, reason),
+    mutationFn: ({ id, reason: r }: { id: string; reason: string }) => executorApi.reject(id, r),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: executorKeys.orders() })
       showToast(t('active.rejected'), 'info')
+      setRejectId(null)
+      setReason('')
     },
   })
-
-  const onReject = (id: string) => {
-    Alert.prompt?.(t('active.rejectReason'), undefined, reason => reject.mutate({ id, reason: reason ?? '' }))
-    // Android без Alert.prompt — отклоняем без причины.
-    if (!Alert.prompt) reject.mutate({ id, reason: '' })
-  }
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -54,7 +59,7 @@ export default function ActiveOrdersScreen() {
             <Skeleton key={i} width="100%" height={150} radius={10} />
           ))}
         </View>
-      ) : (data?.length ?? 0) === 0 ? (
+      ) : orders.length === 0 ? (
         <View style={styles.empty}>
           <Icon name="orders" size={48} color={colors.stone} />
           <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
@@ -63,19 +68,41 @@ export default function ActiveOrdersScreen() {
         </View>
       ) : (
         <FlatList
-          data={data ?? []}
+          data={orders}
           keyExtractor={o => o.id}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <OrderCard
               order={item}
               onAccept={() => accept.mutate(item.id)}
-              onReject={() => onReject(item.id)}
+              onReject={() => setRejectId(item.id)}
               onOpen={() => router.push(`/execution/${item.id}`)}
             />
           )}
         />
       )}
+
+      <BottomSheet visible={rejectId !== null} onClose={() => setRejectId(null)}>
+        <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
+          {t('active.rejectReason')}
+        </Text>
+        <View style={styles.sheetField}>
+          <Input
+            value={reason}
+            onChangeText={setReason}
+            placeholder={t('active.rejectPlaceholder')}
+            multiline
+            maxLength={300}
+          />
+        </View>
+        <Button
+          label={t('active.reject')}
+          variant="destructive"
+          onPress={() => rejectId && reject.mutate({ id: rejectId, reason })}
+          loading={reject.isPending}
+          fullWidth
+        />
+      </BottomSheet>
     </View>
   )
 }
@@ -145,4 +172,6 @@ const styles = StyleSheet.create({
   actionCol: { flex: 1 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },
   emptyText: { maxWidth: 220 },
+  sheetTitle: { marginBottom: spacing.md },
+  sheetField: { marginBottom: spacing.md },
 })

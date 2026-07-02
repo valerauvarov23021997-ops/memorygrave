@@ -1,8 +1,6 @@
 /** Русский словарь приложения исполнителя. */
 export const ru = {
   common: {
-    ruble: '₽',
-    cancel: 'Отмена',
     error: 'Что-то пошло не так',
     continue: 'Продолжить',
   },
@@ -27,6 +25,7 @@ export const ru = {
     accepted: 'Заказ принят',
     rejected: 'Заказ отклонён',
     rejectReason: 'Причина отклонения',
+    rejectPlaceholder: 'Например: далеко, занят в это время…',
   },
   execution: {
     title: 'Выполнение',
@@ -43,11 +42,9 @@ export const ru = {
     complete: 'Завершить заказ',
     completed: 'Заказ выполнен',
     photoHint: 'Загрузите минимум 2 фотографии',
-    addPhoto: 'Сделать фото',
     photosCount: 'Фото: {{count}}',
   },
   profile: {
-    title: 'Профиль',
     online: 'Онлайн',
     offline: 'Офлайн',
     onlineHint: 'Когда вы онлайн — приходят новые заказы',

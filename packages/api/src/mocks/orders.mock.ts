@@ -127,8 +127,20 @@ export const ordersMock: Order[] = [
   },
 ]
 
-/** Фотоотчёты по id заказа. Пустые массивы = плейсхолдеры в UI. */
+/** Фотоотчёты по id заказа (нейтральные плейсхолдеры для демонстрации). */
 export const reportsMock: Record<string, PhotoReport> = {
-  'order-1': { photosBefore: [], photosAfter: [] },
-  'order-3': { photosBefore: [], photosAfter: [] },
+  'order-1': {
+    photosBefore: [
+      'https://placehold.co/600x600/F0EBE0/854F0B/png',
+      'https://placehold.co/600x600/EDE7D9/854F0B/png',
+    ],
+    photosAfter: [
+      'https://placehold.co/600x600/EAF3DE/27500A/png',
+      'https://placehold.co/600x600/E8F0DC/27500A/png',
+    ],
+  },
+  'order-3': {
+    photosBefore: ['https://placehold.co/600x600/F0EBE0/854F0B/png'],
+    photosAfter: ['https://placehold.co/600x600/EAF3DE/27500A/png'],
+  },
 }

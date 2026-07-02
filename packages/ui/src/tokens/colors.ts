@@ -37,35 +37,5 @@ export const lightColors = {
 export type ColorToken = keyof typeof lightColors
 export type ThemeColors = Record<ColorToken, string>
 
-/**
- * Вечерняя палитра. Подобрана так, чтобы пары «фон↔текст» оставались
- * читаемыми: forest/sage — светло-зелёные (текст и кнопки на тёмном),
- * cream — тёмный фон, ink — светлый текст.
- */
-export const darkColors: ThemeColors = {
-  forest: '#84B87B', // бренд-зелёный: заголовки и фон кнопок на тёмном
-  moss: '#6DA063',
-  sage: '#84B87B',
-  sageL: '#A9D3A1',
-  sageXL: '#2A3A26', // бледный фон success/аватары → тёмно-зелёный
-  cream: '#141410', // основной тёмный фон
-  parchment: '#20201A', // поля ввода, поверхности
-  linen: '#33332B', // разделители, рамки
-  stone: '#55554B', // плейсхолдеры
-  gold: '#C9A567',
-  ink: '#EFEADF', // основной текст → светлый
-  muted: '#ABAB9C',
-  light: '#7C7C70',
-  successBg: '#1E2A16',
-  success: '#A9D3A1',
-  warningBg: '#2A2412',
-  warning: '#E0B562',
-  errorBg: '#2E1616',
-  error: '#E88C8C',
-  infoBg: '#122430',
-  info: '#7FB3E0',
-  white: '#20201A', // «приподнятая» поверхность → тёмная
-}
-
 /** Палитра по умолчанию (светлая). Тема-aware код использует useColors(). */
 export const colors = lightColors
