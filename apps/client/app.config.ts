@@ -19,13 +19,10 @@ const config: ExpoConfig = {
     buildNumber: '1',
     supportsTablet: false,
     infoPlist: {
-      NSLocationWhenInUseUsageDescription: 'Приложению нужен доступ к геолокации, чтобы показать кладбище на карте',
       NSCameraUsageDescription: 'Доступ к камере нужен, чтобы прикреплять фотографии к воспоминаниям и заказам',
       NSPhotoLibraryUsageDescription: 'Доступ к фото нужен, чтобы выбрать снимки для страницы памяти',
       ITSAppUsesNonExemptEncryption: false,
     },
-    // Ключ Google Maps для iOS (react-native-maps не поставляет config-plugin).
-    config: { googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY },
   },
   android: {
     package: 'app.pamyat.client',
@@ -34,7 +31,6 @@ const config: ExpoConfig = {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#1C3318',
     },
-    config: { googleMaps: { apiKey: process.env.GOOGLE_MAPS_API_KEY } },
   },
   plugins: [
     'expo-router',

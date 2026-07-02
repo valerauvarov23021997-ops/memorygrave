@@ -5,7 +5,7 @@ import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useExecutorOrder } from '../../src/hooks/queries'
@@ -42,15 +42,12 @@ export default function ExecutionScreen() {
   const allChecked = order.executionSteps.every(s => checked[s])
 
   const openNavigator = () => {
-    const c = order.coordinates
-    const url = c
-      ? Platform.select({
-          ios: `http://maps.apple.com/?daddr=${c.latitude},${c.longitude}`,
-          android: `geo:0,0?q=${c.latitude},${c.longitude}(${encodeURIComponent(order.cemeteryName)})`,
-          default: `https://maps.google.com/?q=${c.latitude},${c.longitude}`,
-        })
-      : `https://maps.google.com/?q=${encodeURIComponent(order.address)}`
-    void Linking.openURL(url as string)
+    const coords = order.coordinates
+    // Маршрут в Яндекс.Навигаторе/Картах (актуально для региона).
+    const url = coords
+      ? `https://yandex.ru/maps/?rtext=~${coords.latitude},${coords.longitude}&rtt=auto`
+      : `https://yandex.ru/maps/?text=${encodeURIComponent(order.address)}`
+    void Linking.openURL(url)
   }
 
   const arrive = async () => {

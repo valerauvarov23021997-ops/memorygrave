@@ -25,10 +25,10 @@ import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
-import MapView, { Marker, PROVIDER_DEFAULT } from 'react-native-maps'
 import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { MapPreview } from '../../src/components/MapPreview'
 import { MemoryBook } from '../../src/components/MemoryBook'
 import { MemoryCandle } from '../../src/components/MemoryCandle'
 import { useGrave, useToggleSaved } from '../../src/hooks/queries'
@@ -129,27 +129,11 @@ export default function GraveScreen() {
           ) : null}
 
           {grave.coordinates ? (
-            <View style={styles.mapCard}>
-              <MapView
-                style={styles.map}
-                provider={PROVIDER_DEFAULT}
-                scrollEnabled={false}
-                pointerEvents="none"
-                initialRegion={{
-                  latitude: grave.coordinates.latitude,
-                  longitude: grave.coordinates.longitude,
-                  latitudeDelta: 0.008,
-                  longitudeDelta: 0.008,
-                }}
-              >
-                <Marker coordinate={grave.coordinates} pinColor={c.forest} />
-              </MapView>
-              {grave.plot ? (
-                <View style={styles.plotBadge}>
-                  <Icon name="mapPin" size={14} color="#FFFFFF" />
-                  <Text style={styles.plotText}>{`${grave.plot} · ${grave.cemeteryName}`}</Text>
-                </View>
-              ) : null}
+            <View style={styles.mapWrap}>
+              <MapPreview
+                coordinates={grave.coordinates}
+                label={[grave.plot, grave.cemeteryName].filter(Boolean).join(' · ')}
+              />
             </View>
           ) : null}
 
@@ -302,28 +286,7 @@ const makeStyles = (c: ThemeColors) =>
   body: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   bioCard: { marginBottom: spacing.lg },
   readMore: { marginTop: spacing.sm },
-  mapCard: {
-    height: 160,
-    borderRadius: 16,
-    overflow: 'hidden',
-    marginBottom: spacing.lg,
-    borderWidth: 0.5,
-    borderColor: c.linen,
-  },
-  map: { ...StyleSheet.absoluteFillObject },
-  plotBadge: {
-    position: 'absolute',
-    bottom: spacing.sm,
-    left: spacing.sm,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(26,26,20,0.72)',
-    borderRadius: 8,
-    paddingHorizontal: spacing.sm,
-    paddingVertical: 5,
-  },
-  plotText: { ...typography.caption, color: "#FFFFFF" },
+  mapWrap: { marginBottom: spacing.lg },
   actions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   candleWrap: { marginBottom: spacing.lg },
   moreCard: { marginBottom: spacing.lg },
