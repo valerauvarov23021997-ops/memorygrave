@@ -432,13 +432,19 @@ export const membersApi = {
 
 // ─── Профиль ──────────────────────────────────────────────────
 
+// Мутируемая копия профиля — чтобы правки имени/аватара сохранялись в сессии.
+let userProfileState: UserProfile = { ...userProfileMock }
+
 export const profileApi = {
   get(): Promise<UserProfile> {
-    if (USE_MOCKS) return mockDelay(userProfileMock)
+    if (USE_MOCKS) return mockDelay(userProfileState)
     return unwrap<UserProfile>(client.get('/user/profile'))
   },
   update(patch: { name?: string; avatarUrl?: string }): Promise<UserProfile> {
-    if (USE_MOCKS) return mockDelay({ ...userProfileMock, ...patch })
+    if (USE_MOCKS) {
+      userProfileState = { ...userProfileState, ...patch }
+      return mockDelay(userProfileState)
+    }
     return unwrap<UserProfile>(client.put('/user/profile', patch))
   },
   subscription(): Promise<Subscription> {

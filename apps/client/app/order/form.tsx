@@ -1,7 +1,8 @@
-import type { RecurringPeriod } from '@pamyat/api'
-import { Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { ordersApi, type CreateOrderInput, type RecurringPeriod } from '@pamyat/api'
+import { Button, Card, haptics, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +17,32 @@ export default function OrderFormScreen() {
   const insets = useSafeAreaInsets()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
+  const showToast = useToast()
+  const qc = useQueryClient()
   const draft = useOrderDraftStore()
+
+  // Крупные работы — заявка без немедленной оплаты, но заказ всё равно создаётся.
+  const request = useMutation({
+    mutationFn: () => {
+      const input: CreateOrderInput = {
+        graveId: draft.graveId ?? '',
+        serviceId: draft.serviceId ?? '',
+        date: draft.date ?? '',
+        notes: draft.notes || null,
+        isRecurring: draft.recurringPeriod !== 'once',
+        recurringPeriod: draft.recurringPeriod,
+      }
+      return ordersApi.create(input)
+    },
+    onSuccess: () => {
+      haptics.success()
+      void qc.invalidateQueries({ queryKey: ['orders'] })
+      showToast(t('orderForm.requestSent'), 'success')
+      draft.reset()
+      router.replace('/(tabs)/orders')
+    },
+    onError: () => showToast(t('common.error'), 'error'),
+  })
 
   const days = useMemo(() => {
     const today = new Date()
@@ -39,10 +65,7 @@ export default function OrderFormScreen() {
   const onProceed = () => {
     if (!canProceed) return
     if (draft.fixedPrice) router.push('/order/payment')
-    else {
-      // Крупные работы — заявка без немедленной оплаты.
-      router.replace('/(tabs)/orders')
-    }
+    else request.mutate()
   }
 
   return (
@@ -128,6 +151,7 @@ export default function OrderFormScreen() {
           label={draft.fixedPrice ? t('orderForm.toPayment') : t('orderForm.leaveRequest')}
           onPress={onProceed}
           disabled={!canProceed}
+          loading={!draft.fixedPrice && request.isPending}
           fullWidth
         />
       </View>

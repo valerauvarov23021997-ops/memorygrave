@@ -75,8 +75,14 @@ export async function cancelReminder(reminderId: string): Promise<void> {
 
 /** Синхронизирует расписание со списком напоминаний (включённые — планирует). */
 export async function syncReminders(reminders: Reminder[]): Promise<void> {
+  // Планируем только если разрешение уже выдано — не дёргаем запрос при пассивной синхронизации.
+  const { granted } = await Notifications.getPermissionsAsync()
   for (const reminder of reminders) {
-    if (reminder.isEnabled) await scheduleReminder(reminder)
-    else await cancelReminder(reminder.id)
+    try {
+      if (reminder.isEnabled && granted) await scheduleReminder(reminder)
+      else if (!reminder.isEnabled) await cancelReminder(reminder.id)
+    } catch {
+      // не критично — расписание не должно ронять экран
+    }
   }
 }
