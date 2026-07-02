@@ -1,7 +1,6 @@
 import {
   Avatar,
   Button,
-  Chip,
   Divider,
   Icon,
   SectionLabel,
@@ -10,11 +9,9 @@ import {
   Text,
   typography,
   useColors,
-  useTheme,
   useThemedStyles,
   useToast,
   type ThemeColors,
-  type ThemeMode,
 } from '@pamyat/ui'
 import { formatDate } from '@pamyat/utils'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -33,7 +30,6 @@ export default function ProfileScreen() {
   const showToast = useToast()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
-  const { mode, setMode } = useTheme()
   const { logout } = useAuthActions()
   const { data, isLoading } = useProfile()
 
@@ -41,12 +37,6 @@ export default function ProfileScreen() {
     await logout()
     router.replace('/(auth)/phone')
   }
-
-  const modes: { key: ThemeMode; label: string }[] = [
-    { key: 'light', label: t('profile.themeLight') },
-    { key: 'dark', label: t('profile.themeDark') },
-    { key: 'system', label: t('profile.themeSystem') },
-  ]
 
   return (
     <ScrollView
@@ -94,13 +84,6 @@ export default function ProfileScreen() {
         </LinearGradient>
       ) : null}
 
-      <SectionLabel>{t('profile.appearance')}</SectionLabel>
-      <View style={styles.themeRow}>
-        {modes.map(m => (
-          <Chip key={m.key} label={m.label} active={mode === m.key} onPress={() => setMode(m.key)} />
-        ))}
-      </View>
-
       <SectionLabel>{t('profile.mine')}</SectionLabel>
       <ProfileRow icon="saved" label={t('profile.savedGraves')} onPress={() => router.push('/(tabs)/saved')} />
       <ProfileRow icon="bell" label={t('profile.memorialDates')} onPress={() => router.push('/reminders/grave-1')} />
@@ -141,7 +124,6 @@ const makeStyles = (c: ThemeColors) =>
     subLabel: { ...typography.sectionLabel, color: c.sageL },
     subValid: { ...typography.bodySm, color: 'rgba(250,247,242,0.7)' },
     manageBtn: { alignSelf: 'flex-start', marginTop: spacing.sm },
-    themeRow: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
     row: {
       flexDirection: 'row',
       alignItems: 'center',
