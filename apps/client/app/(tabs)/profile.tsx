@@ -24,11 +24,12 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { queryKeys, useProfile, useSavedGraves } from '../../src/hooks/queries'
 import { useAuthActions } from '../../src/hooks/useAuthActions'
+import { links } from '../../src/lib/links'
 
 export default function ProfileScreen() {
   const { t } = useTranslation()
@@ -72,6 +73,14 @@ export default function ProfileScreen() {
   const onLogout = async () => {
     await logout()
     router.replace('/(auth)/phone')
+  }
+
+  const openLink = async (url: string) => {
+    try {
+      await Linking.openURL(url)
+    } catch {
+      showToast(t('profile.linkError'), 'error')
+    }
   }
 
   return (
@@ -134,8 +143,9 @@ export default function ProfileScreen() {
       <Divider />
 
       <SectionLabel>{t('profile.help')}</SectionLabel>
-      <ProfileRow icon="support" label={t('profile.support')} onPress={() => showToast('t.me/pamyat_support', 'info')} />
-      <ProfileRow icon="lock" label={t('profile.terms')} onPress={() => showToast(t('profile.terms'), 'info')} />
+      <ProfileRow icon="support" label={t('profile.support')} onPress={() => openLink(links.support)} />
+      <ProfileRow icon="lock" label={t('profile.terms')} onPress={() => openLink(links.terms)} />
+      <ProfileRow icon="lock" label={t('profile.privacy')} onPress={() => openLink(links.privacy)} />
 
       <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
 
