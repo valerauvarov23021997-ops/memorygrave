@@ -5,6 +5,7 @@ import {
   Card,
   colors,
   Divider,
+  FullscreenGallery,
   haptics,
   Icon,
   SectionLabel,
@@ -43,6 +44,7 @@ export default function GraveScreen() {
 
   const [saved, setSaved] = useState<boolean | null>(null)
   const [expanded, setExpanded] = useState(false)
+  const [galleryOpen, setGalleryOpen] = useState(false)
 
   if (isLoading || !grave) {
     return (
@@ -148,7 +150,11 @@ export default function GraveScreen() {
           ) : null}
 
           <View style={styles.actions}>
-            <ActionTile icon="camera" label={t('grave.photosCount', { count: grave.photos.length })} onPress={() => showToast(t('grave.photos'), 'info')} />
+            <ActionTile
+              icon="camera"
+              label={t('grave.photosCount', { count: grave.photos.length })}
+              onPress={() => (grave.photos.length ? setGalleryOpen(true) : showToast(t('grave.photos'), 'info'))}
+            />
             <ActionTile
               icon="saved"
               label={t('grave.save')}
@@ -197,6 +203,8 @@ export default function GraveScreen() {
       <View style={[styles.sticky, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button label={t('grave.orderCare')} onPress={onOrder} fullWidth />
       </View>
+
+      <FullscreenGallery visible={galleryOpen} photos={grave.photos} onClose={() => setGalleryOpen(false)} />
     </View>
   )
 }

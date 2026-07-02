@@ -5,6 +5,7 @@ import {
   Button,
   Card,
   colors,
+  FullscreenGallery,
   Icon,
   Input,
   SectionLabel,
@@ -14,13 +15,15 @@ import {
 } from '@pamyat/ui'
 import { formatDate } from '@pamyat/utils'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 
 import { useProfile } from '../hooks/queries'
 
-/** Книга воспоминаний: истории близких о человеке + форма добавления. */
+/** Книга воспоминаний: истории близких о человеке + форма добавления с фото. */
 export function MemoryBook({ graveId }: { graveId: string }) {
   const { t } = useTranslation()
   const qc = useQueryClient()
@@ -35,21 +38,38 @@ export function MemoryBook({ graveId }: { graveId: string }) {
   const [open, setOpen] = useState(false)
   const [author, setAuthor] = useState('')
   const [text, setText] = useState('')
+  const [photos, setPhotos] = useState<string[]>([])
+
+  // Просмотр фото на весь экран
+  const [viewer, setViewer] = useState<{ photos: string[]; index: number } | null>(null)
 
   const add = useMutation({
     mutationFn: () =>
-      memoriesApi.add({ graveId, authorName: author.trim() || profile?.name || 'Аноним', text: text.trim() }),
+      memoriesApi.add({
+        graveId,
+        authorName: author.trim() || profile?.name || 'Аноним',
+        text: text.trim(),
+        photos,
+      }),
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: ['memories', graveId] })
       showToast(t('memoryBook.added'), 'success')
       setOpen(false)
       setText('')
+      setPhotos([])
     },
   })
 
   const openForm = () => {
     setAuthor(profile?.name ?? '')
     setOpen(true)
+  }
+
+  const pickPhoto = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!perm.granted) return
+    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8, allowsMultipleSelection: false })
+    if (!result.canceled && result.assets[0]) setPhotos(prev => [...prev, result.assets[0]!.uri])
   }
 
   const canSubmit = text.trim().length > 0
@@ -63,7 +83,9 @@ export function MemoryBook({ graveId }: { graveId: string }) {
           {t('memoryBook.empty')}
         </Text>
       ) : (
-        memories?.map(m => <MemoryCard key={m.id} memory={m} />)
+        memories?.map(m => (
+          <MemoryCard key={m.id} memory={m} onOpenPhoto={index => setViewer({ photos: m.photos, index })} />
+        ))
       )}
 
       <Pressable style={styles.addRow} onPress={openForm}>
@@ -95,6 +117,16 @@ export function MemoryBook({ graveId }: { graveId: string }) {
             maxLength={1000}
           />
         </View>
+
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoRow}>
+          {photos.map((uri, i) => (
+            <Image key={i} source={{ uri }} style={styles.thumb} contentFit="cover" />
+          ))}
+          <Pressable style={styles.addPhoto} onPress={pickPhoto}>
+            <Icon name="camera" size={22} color={colors.sage} />
+          </Pressable>
+        </ScrollView>
+
         <Button
           label={t('memoryBook.submit')}
           onPress={() => add.mutate()}
@@ -103,11 +135,18 @@ export function MemoryBook({ graveId }: { graveId: string }) {
           fullWidth
         />
       </BottomSheet>
+
+      <FullscreenGallery
+        visible={!!viewer}
+        photos={viewer?.photos ?? []}
+        initialIndex={viewer?.index ?? 0}
+        onClose={() => setViewer(null)}
+      />
     </View>
   )
 }
 
-function MemoryCard({ memory }: { memory: Memory }) {
+function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (index: number) => void }) {
   return (
     <Card padding="md" style={styles.card}>
       <View style={styles.cardHead}>
@@ -124,6 +163,15 @@ function MemoryCard({ memory }: { memory: Memory }) {
       <Text variant="bodyMd" color="ink" style={styles.cardText}>
         {memory.text}
       </Text>
+      {memory.photos.length > 0 ? (
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardPhotos}>
+          {memory.photos.map((uri, i) => (
+            <Pressable key={i} onPress={() => onOpenPhoto(i)}>
+              <Image source={{ uri }} style={styles.cardThumb} contentFit="cover" />
+            </Pressable>
+          ))}
+        </ScrollView>
+      ) : null}
     </Card>
   )
 }
@@ -135,7 +183,22 @@ const styles = StyleSheet.create({
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
   cardMeta: { flex: 1 },
   cardText: { lineHeight: 24 },
+  cardPhotos: { gap: spacing.sm, marginTop: spacing.sm },
+  cardThumb: { width: 72, height: 72, borderRadius: 8 },
   addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md },
   sheetTitle: { marginBottom: spacing.md },
   field: { marginBottom: spacing.md },
+  photoRow: { gap: spacing.sm, marginBottom: spacing.lg, alignItems: 'center' },
+  thumb: { width: 64, height: 64, borderRadius: 8 },
+  addPhoto: {
+    width: 64,
+    height: 64,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderStyle: 'dashed',
+    borderColor: colors.stone,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.parchment,
+  },
 })
