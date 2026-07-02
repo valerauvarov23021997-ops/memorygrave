@@ -1,6 +1,6 @@
 import type { ExecutorOrder } from '@pamyat/api'
 import { executorApi } from '@pamyat/api'
-import { BottomSheet, Button, Card, colors, Icon, Input, SectionLabel, Skeleton, spacing, Text, typography, useToast } from '@pamyat/ui'
+import { BottomSheet, Button, Card, colors, EmptyState, Icon, Input, SectionLabel, Skeleton, spacing, Text, typography, useToast } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -60,12 +60,7 @@ export default function ActiveOrdersScreen() {
           ))}
         </View>
       ) : orders.length === 0 ? (
-        <View style={styles.empty}>
-          <Icon name="orders" size={48} color={colors.stone} />
-          <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
-            {t('active.empty')}
-          </Text>
-        </View>
+        <EmptyState icon="orders" title={t('active.empty')} />
       ) : (
         <FlatList
           data={orders}

@@ -1,4 +1,4 @@
-import { Button, useColors, useThemedStyles, type ThemeColors, spacing, Text, typography } from '@pamyat/ui'
+import { Button, radii, shadows, useColors, useThemedStyles, type ThemeColors, spacing, Text } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -67,13 +67,15 @@ export default function OnboardingScreen() {
         onMomentumScrollEnd={onScroll}
         renderItem={({ item }: ListRenderItemInfo<Slide>) => (
           <View style={styles.slide}>
-            <View style={[styles.illustration, { backgroundColor: item.iconBg }]}>
-              <Text style={styles.emoji}>{item.icon}</Text>
+            <View style={[styles.ring, { backgroundColor: item.iconBg }]}>
+              <View style={styles.innerDisc}>
+                <Text style={styles.emoji}>{item.icon}</Text>
+              </View>
             </View>
             <Text variant="displayMd" color="forest" center style={styles.title}>
               {item.title}
             </Text>
-            <Text variant="bodyMd" color="muted" center style={styles.desc}>
+            <Text variant="bodyLg" color="muted" center style={styles.desc}>
               {item.desc}
             </Text>
           </View>
@@ -108,11 +110,26 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
   root: { flex: 1, backgroundColor: c.cream },
   slide: { width, alignItems: 'center', paddingHorizontal: spacing.xl, paddingTop: spacing.xxl * 2 },
-  illustration: { width: 90, height: 90, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  emoji: { fontSize: 44 },
+  ring: {
+    width: 152,
+    height: 152,
+    borderRadius: radii.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  innerDisc: {
+    width: 108,
+    height: 108,
+    borderRadius: radii.full,
+    backgroundColor: c.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    ...shadows.md,
+  },
+  emoji: { fontSize: 50 },
   title: { marginTop: spacing.xl },
-  desc: { marginTop: spacing.md, maxWidth: 300, ...typography.bodyMd, lineHeight: 22 },
+  desc: { marginTop: spacing.md, maxWidth: 300, lineHeight: 24 },
   progress: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },
-  segment: { flex: 1, height: 3, borderRadius: 2 },
+  segment: { flex: 1, height: 4, borderRadius: radii.full },
   footer: { paddingHorizontal: spacing.lg, gap: spacing.sm },
 })

@@ -1,4 +1,4 @@
-import { Card, colors, Icon, Skeleton, spacing, Text } from '@pamyat/ui'
+import { Card, colors, EmptyState, Skeleton, spacing, Text } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
@@ -25,12 +25,7 @@ export default function HistoryScreen() {
           ))}
         </View>
       ) : (data?.length ?? 0) === 0 ? (
-        <View style={styles.empty}>
-          <Icon name="checkCircle" size={48} color={colors.stone} />
-          <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
-            {t('history.empty')}
-          </Text>
-        </View>
+        <EmptyState icon="checkCircle" title={t('history.empty')} />
       ) : (
         <FlatList
           data={data ?? []}

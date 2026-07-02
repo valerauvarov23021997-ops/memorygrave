@@ -1,5 +1,5 @@
 import type { Order } from '@pamyat/api'
-import { AnimatedListItem, Badge, Button, Card, Icon, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, Badge, Card, EmptyState, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -59,13 +59,12 @@ export default function OrdersScreen() {
           ))}
         </View>
       ) : (data?.length ?? 0) === 0 ? (
-        <View style={styles.empty}>
-          <Icon name="orders" size={48} color={c.stone} />
-          <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
-            {t('orders.empty')}
-          </Text>
-          <Button label={t('orders.findGrave')} variant="secondary" onPress={() => router.push('/(tabs)')} />
-        </View>
+        <EmptyState
+          icon="orders"
+          title={t('orders.empty')}
+          actionLabel={t('orders.findGrave')}
+          onAction={() => router.push('/(tabs)')}
+        />
       ) : (
         <FlatList
           data={data ?? []}

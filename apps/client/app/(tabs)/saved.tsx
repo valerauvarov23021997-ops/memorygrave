@@ -1,4 +1,4 @@
-import { AnimatedListItem, Button, Icon, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, EmptyState, Skeleton, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
@@ -11,7 +11,6 @@ export default function SavedScreen() {
   const { t } = useTranslation()
   const router = useRouter()
   const insets = useSafeAreaInsets()
-  const c = useColors()
   const styles = useThemedStyles(makeStyles)
   const { data, isLoading } = useSavedGraves()
 
@@ -30,13 +29,12 @@ export default function SavedScreen() {
           ))}
         </View>
       ) : (data?.length ?? 0) === 0 ? (
-        <View style={styles.empty}>
-          <Icon name="saved" size={48} color={c.stone} />
-          <Text variant="bodyMd" color="muted" center style={styles.emptyText}>
-            {t('saved.empty')}
-          </Text>
-          <Button label={t('saved.findGrave')} variant="secondary" onPress={() => router.push('/(tabs)')} />
-        </View>
+        <EmptyState
+          icon="saved"
+          title={t('saved.empty')}
+          actionLabel={t('saved.findGrave')}
+          onAction={() => router.push('/(tabs)')}
+        />
       ) : (
         <FlatList
           data={data ?? []}
@@ -55,9 +53,7 @@ export default function SavedScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },
-  emptyText: { maxWidth: 220 },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+    list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+  })

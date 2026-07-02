@@ -2,6 +2,7 @@ import {
   AnimatedListItem,
   BottomSheet,
   Chip,
+  EmptyState,
   Icon,
   Skeleton,
   spacing,
@@ -102,15 +103,7 @@ export default function SearchScreen() {
       </View>
 
       {!active ? (
-        <View style={styles.empty}>
-          <Icon name="search" size={48} color={c.stone} />
-          <Text variant="headingLg" color="forest" center style={styles.emptyTitle}>
-            {t('search.emptyTitle')}
-          </Text>
-          <Text variant="bodySm" color="muted" center style={styles.emptyHint}>
-            {t('search.emptyHint')}
-          </Text>
-        </View>
+        <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
       ) : isLoading ? (
         <View style={styles.list}>
           {Array.from({ length: 5 }).map((_, i) => (
