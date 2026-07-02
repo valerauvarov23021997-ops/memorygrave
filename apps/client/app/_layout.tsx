@@ -10,9 +10,10 @@ import * as Notifications from 'expo-notifications'
 import { router, Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
+import { AnimatedSplash } from '../src/components/AnimatedSplash'
 import '../src/lib/i18n'
 import { queryClient } from '../src/lib/queryClient'
 
@@ -25,8 +26,11 @@ export default function RootLayout() {
     DMSans_400Regular,
     DMSans_500Medium,
   })
+  // Пока анимированный сплэш не доиграл — держим его поверх приложения.
+  const [splashDone, setSplashDone] = useState(false)
 
   useEffect(() => {
+    // Прячем нативный сплэш, как только готовы шрифты — дальше играет наш.
     if (fontsLoaded || fontError) void SplashScreen.hideAsync()
   }, [fontsLoaded, fontError])
 
@@ -65,6 +69,7 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
             </Stack>
+            {!splashDone ? <AnimatedSplash onFinish={() => setSplashDone(true)} /> : null}
           </ToastProvider>
         </QueryClientProvider>
       </ThemeProvider>
