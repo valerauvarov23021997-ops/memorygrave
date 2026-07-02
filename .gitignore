@@ -12,3 +12,9 @@ coverage/
 ios/Pods/
 android/.gradle/
 android/app/build/
+
+# App Store / Google Play secrets
+google-play-key.json
+**/google-play-key.json
+*.p8
+*.mobileprovision

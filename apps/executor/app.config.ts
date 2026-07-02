@@ -7,6 +7,7 @@ const config: ExpoConfig = {
   scheme: 'pamyat-executor',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
+  primaryColor: '#1C3318',
   icon: './assets/icon.png',
   splash: {
     image: './assets/splash.png',
@@ -16,15 +17,18 @@ const config: ExpoConfig = {
   assetBundlePatterns: ['**/*'],
   ios: {
     bundleIdentifier: 'app.pamyat.executor',
+    buildNumber: '1',
     supportsTablet: false,
     infoPlist: {
-      NSLocationWhenInUseUsageDescription: 'Для маршрута к кладбищу',
-      NSCameraUsageDescription: 'Для фотоотчёта о выполненной работе',
-      NSPhotoLibraryUsageDescription: 'Для выбора фото из галереи',
+      NSLocationWhenInUseUsageDescription: 'Доступ к геолокации нужен, чтобы построить маршрут к кладбищу',
+      NSCameraUsageDescription: 'Доступ к камере нужен для фотоотчёта о выполненной работе',
+      NSPhotoLibraryUsageDescription: 'Доступ к фото нужен, чтобы выбрать снимки для отчёта',
+      ITSAppUsesNonExemptEncryption: false,
     },
   },
   android: {
     package: 'app.pamyat.executor',
+    versionCode: 1,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#1C3318',

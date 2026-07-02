@@ -12,6 +12,7 @@
     "preview": {
       "distribution": "internal",
       "ios": { "simulator": false },
+      "android": { "buildType": "apk" },
       "env": { "EXPO_PUBLIC_USE_MOCKS": "true" }
     },
     "production": {
@@ -20,6 +21,17 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "ios": {
+        "language": "ru-RU",
+        "appleId": "APPLE_ID_EMAIL",
+        "ascAppId": "APP_STORE_CONNECT_APP_ID",
+        "appleTeamId": "APPLE_TEAM_ID"
+      },
+      "android": {
+        "serviceAccountKeyPath": "./google-play-key.json",
+        "track": "internal"
+      }
+    }
   }
 }

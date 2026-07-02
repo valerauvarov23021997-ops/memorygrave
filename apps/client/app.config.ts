@@ -7,6 +7,8 @@ const config: ExpoConfig = {
   scheme: 'pamyat',
   orientation: 'portrait',
   userInterfaceStyle: 'light',
+  primaryColor: '#1C3318',
+  // projectId подставляется автоматически после `eas init` (см. docs/RELEASE.md)
   icon: './assets/icon.png',
   splash: {
     image: './assets/splash.png',
@@ -37,6 +39,13 @@ const config: ExpoConfig = {
     'expo-secure-store',
     'expo-font',
     ['expo-notifications', { icon: './assets/notification-icon.png' }],
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Доступ к фото нужен, чтобы выбрать снимки для страницы памяти',
+        cameraPermission: 'Доступ к камере нужен, чтобы прикреплять фотографии к воспоминаниям',
+      },
+    ],
   ],
   experiments: {
     typedRoutes: true,
