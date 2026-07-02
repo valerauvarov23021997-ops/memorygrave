@@ -1,4 +1,4 @@
-import { Button, Card, useThemedStyles, type ThemeColors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { Button, Card, radii, useThemedStyles, type ThemeColors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
 import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -136,7 +136,7 @@ const makeStyles = (c: ThemeColors) =>
   cell: {
     flex: 1,
     height: 48,
-    borderRadius: 8,
+    borderRadius: radii.md,
     backgroundColor: c.parchment,
     borderWidth: 1,
     borderColor: c.linen,

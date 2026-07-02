@@ -1,5 +1,5 @@
 import { ordersApi, type CreateOrderInput, type RecurringPeriod } from '@pamyat/api'
-import { Button, Card, haptics, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { Button, Card, haptics, radii, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -172,7 +172,7 @@ const makeStyles = (c: ThemeColors) =>
   serviceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   serviceInfo: { flex: 1 },
   dates: { gap: spacing.sm, paddingBottom: spacing.md },
-  dateCell: { width: 52, height: 56, borderRadius: 8, alignItems: 'center', justifyContent: 'center', gap: 2 },
+  dateCell: { width: 52, height: 56, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', gap: 2 },
   dateActive: { backgroundColor: c.forest },
   dateInactive: { backgroundColor: c.parchment },
   periods: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },

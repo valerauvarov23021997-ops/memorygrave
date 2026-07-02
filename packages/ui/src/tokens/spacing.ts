@@ -8,10 +8,10 @@ export const spacing = {
 } as const
 
 export const radii = {
-  sm: 6,
-  md: 8, // поля ввода, карточки
-  lg: 10, // карточки по умолчанию
-  xl: 16, // BottomSheet
+  sm: 8,
+  md: 12, // поля ввода, компактные элементы
+  lg: 16, // карточки по умолчанию
+  xl: 24, // BottomSheet, крупные поверхности
   full: 999, // круглые (badge, avatar)
 } as const
 

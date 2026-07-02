@@ -22,28 +22,28 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.search'),
-          tabBarIcon: ({ color }) => <Icon name="search" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="search" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="saved"
         options={{
           title: t('tabs.saved'),
-          tabBarIcon: ({ color }) => <Icon name="saved" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="saved" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="orders"
         options={{
           title: t('tabs.orders'),
-          tabBarIcon: ({ color }) => <Icon name="orders" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="orders" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
-          tabBarIcon: ({ color }) => <Icon name="profile" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="profile" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
     </Tabs>

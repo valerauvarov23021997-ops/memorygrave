@@ -1,5 +1,5 @@
 import type { Coordinates } from '@pamyat/api'
-import { Icon, spacing, Text, typography, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { Icon, radii, spacing, Text, typography, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { Image } from 'expo-image'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -82,7 +82,7 @@ const makeStyles = (c: ThemeColors) =>
       alignItems: 'center',
       gap: 4,
       backgroundColor: 'rgba(26,26,20,0.72)',
-      borderRadius: 8,
+      borderRadius: radii.lg,
       paddingHorizontal: spacing.sm,
       paddingVertical: 5,
     },

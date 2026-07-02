@@ -6,9 +6,9 @@ import type { TextStyle } from 'react-native'
  */
 export const typography = {
   // Playfair Display (пакет не содержит вес 300 Light — используем 400 Regular)
-  displayLg: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 34, lineHeight: 42 },
-  displayMd: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 22, lineHeight: 28 },
-  headingLg: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 18, lineHeight: 24 },
+  displayLg: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 34, lineHeight: 42, letterSpacing: -0.5 },
+  displayMd: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 24, lineHeight: 30, letterSpacing: -0.3 },
+  headingLg: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 18, lineHeight: 24, letterSpacing: -0.2 },
   priceDisplay: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34 },
 
   // DM Sans (пакет не содержит вес 300 Light — используем 400 Regular)

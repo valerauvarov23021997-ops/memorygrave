@@ -1,4 +1,4 @@
-import { Button, FlameLogo, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { Button, FlameLogo, radii, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { formatPhoneMask, isPhoneComplete, normalizePhoneDigits } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -120,7 +120,7 @@ const makeStyles = (c: ThemeColors) =>
   social: {
     flex: 1,
     height: 44,
-    borderRadius: 8,
+    borderRadius: radii.md,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
