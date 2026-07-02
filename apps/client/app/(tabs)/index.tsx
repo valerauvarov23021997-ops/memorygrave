@@ -1,5 +1,6 @@
 import {
   AnimatedListItem,
+  BottomSheet,
   Chip,
   Icon,
   Skeleton,
@@ -19,7 +20,9 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultCard } from '../../src/components/GraveResultCard'
-import { useGraveSearch } from '../../src/hooks/queries'
+import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
+
+type Picker = 'city' | 'cemetery' | null
 
 export default function SearchScreen() {
   const { t } = useTranslation()
@@ -27,15 +30,22 @@ export default function SearchScreen() {
   const insets = useSafeAreaInsets()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
-  const { query, setQuery, city, cemeteryId } = useSearchStore()
+  const { query, setQuery, city, cemeteryId, setCity, setCemetery } = useSearchStore()
   const [focused, setFocused] = useState(false)
+  const [picker, setPicker] = useState<Picker>(null)
+
+  const { data: cities } = useCities()
+  const { data: cemeteries } = useCemeteries()
+  const cemeteryName = cemeteries?.find(cm => cm.id === cemeteryId)?.name
 
   const hasQuery = query.trim().length > 0
+  const hasFilters = !!city || !!cemeteryId
+  const active = hasQuery || hasFilters
   const params = useMemo(
     () => ({ q: query.trim(), city: city ?? undefined, cemeteryId: cemeteryId ?? undefined }),
     [query, city, cemeteryId]
   )
-  const { data, isLoading } = useGraveSearch(params, hasQuery)
+  const { data, isLoading } = useGraveSearch(params, active)
 
   const addGraveCard = (
     <Pressable style={styles.addCard} onPress={() => router.push('/grave/add')}>
@@ -79,12 +89,19 @@ export default function SearchScreen() {
       </View>
 
       <View style={styles.chips}>
-        <Chip label={t('search.filterCity')} active={!!city} />
-        <Chip label={t('search.filterCemetery')} active={!!cemeteryId} />
-        <Chip label={t('search.filterYear')} />
+        <Chip
+          label={city ?? t('search.filterCity')}
+          active={!!city}
+          onPress={() => (city ? setCity(null) : setPicker('city'))}
+        />
+        <Chip
+          label={cemeteryName ?? t('search.filterCemetery')}
+          active={!!cemeteryId}
+          onPress={() => (cemeteryId ? setCemetery(null) : setPicker('cemetery'))}
+        />
       </View>
 
-      {!hasQuery ? (
+      {!active ? (
         <View style={styles.empty}>
           <Icon name="search" size={48} color={c.stone} />
           <Text variant="headingLg" color="forest" center style={styles.emptyTitle}>
@@ -126,6 +143,44 @@ export default function SearchScreen() {
           ListFooterComponent={addGraveCard}
         />
       )}
+
+      <BottomSheet visible={picker !== null} onClose={() => setPicker(null)}>
+        <Text variant="headingLg" color="forest" style={styles.pickerTitle}>
+          {picker === 'city' ? t('search.filterCity') : t('search.filterCemetery')}
+        </Text>
+        {picker === 'city'
+          ? (cities ?? []).map(item => (
+              <Pressable
+                key={item.id}
+                style={styles.pickerRow}
+                onPress={() => {
+                  setCity(item.name)
+                  setPicker(null)
+                }}
+              >
+                <Text variant="bodyLg" color="ink">
+                  {item.name}
+                </Text>
+              </Pressable>
+            ))
+          : (cemeteries ?? []).map(item => (
+              <Pressable
+                key={item.id}
+                style={styles.pickerRow}
+                onPress={() => {
+                  setCemetery(item.id)
+                  setPicker(null)
+                }}
+              >
+                <Text variant="bodyLg" color="ink">
+                  {item.name}
+                </Text>
+                <Text variant="bodySm" color="light">
+                  {item.cityName}
+                </Text>
+              </Pressable>
+            ))}
+      </BottomSheet>
     </View>
   )
 }
@@ -172,4 +227,10 @@ const makeStyles = (c: ThemeColors) =>
     marginTop: spacing.sm,
   },
   addLabel: { fontFamily: 'DMSans_500Medium' },
+  pickerTitle: { marginBottom: spacing.md },
+  pickerRow: {
+    paddingVertical: spacing.md,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: c.linen,
+  },
 })

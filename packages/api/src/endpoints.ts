@@ -425,7 +425,7 @@ export const membersApi = {
     return unwrap<Member[]>(client.get(`/graves/${graveId}/members`))
   },
   inviteLink(graveId: string): Promise<{ url: string }> {
-    if (USE_MOCKS) return mockDelay({ url: `https://pamyat.app/join/${graveId}` })
+    if (USE_MOCKS) return mockDelay({ url: `pamyat://grave/${graveId}` })
     return unwrap<{ url: string }>(client.post(`/graves/${graveId}/invite`))
   },
 }

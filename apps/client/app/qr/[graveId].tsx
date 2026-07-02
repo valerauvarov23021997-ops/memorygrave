@@ -17,7 +17,8 @@ export default function QrScreen() {
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: grave } = useGrave(graveId ?? '')
 
-  const url = `https://pamyat.app/g/${graveId}`
+  // Deep link открывает страницу памяти прямо в приложении (схема pamyat://).
+  const url = `pamyat://grave/${graveId}`
 
   return (
     <View style={styles.root}>

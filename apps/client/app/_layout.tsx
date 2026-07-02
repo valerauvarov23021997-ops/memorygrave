@@ -6,7 +6,8 @@ import {
 } from '@expo-google-fonts/playfair-display'
 import { colors, ThemeProvider, ToastProvider } from '@pamyat/ui'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { Stack } from 'expo-router'
+import * as Notifications from 'expo-notifications'
+import { router, Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect } from 'react'
@@ -28,6 +29,17 @@ export default function RootLayout() {
   useEffect(() => {
     if (fontsLoaded || fontError) void SplashScreen.hideAsync()
   }, [fontsLoaded, fontError])
+
+  // Нажатие на уведомление о памятной дате открывает страницу человека.
+  useEffect(() => {
+    const sub = Notifications.addNotificationResponseReceivedListener(response => {
+      const graveId = response.notification.request.content.data?.graveId
+      if (typeof graveId === 'string') {
+        router.navigate({ pathname: '/grave/[id]', params: { id: graveId } })
+      }
+    })
+    return () => sub.remove()
+  }, [])
 
   if (!fontsLoaded && !fontError) return null
 

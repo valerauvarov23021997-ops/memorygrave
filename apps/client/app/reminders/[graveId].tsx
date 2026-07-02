@@ -1,15 +1,22 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
-import { Card, useColors, useThemedStyles, type ThemeColors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
+import { Card, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
 import { daysUntilAnnual, formatDayMonth, pluralDays } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useReminders, useServices } from '../../src/hooks/queries'
 import { queryKeys } from '../../src/hooks/queries'
+import {
+  cancelReminder,
+  ensureNotificationPermission,
+  scheduleReminder,
+  syncReminders,
+} from '../../src/lib/localReminders'
 
 export default function RemindersScreen() {
   const { t } = useTranslation()
@@ -18,14 +25,31 @@ export default function RemindersScreen() {
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   const qc = useQueryClient()
+  const showToast = useToast()
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: reminders, isLoading } = useReminders(graveId)
   const { data: services } = useServices()
 
+  // Синхронизируем расписание уведомлений с включёнными напоминаниями.
+  useEffect(() => {
+    if (reminders) void syncReminders(reminders)
+  }, [reminders])
+
   const toggle = useMutation({
-    mutationFn: ({ id, isEnabled }: { id: string; isEnabled: boolean }) =>
-      remindersApi.update(id, { isEnabled }),
-    onSuccess: () => void qc.invalidateQueries({ queryKey: queryKeys.reminders(graveId) }),
+    mutationFn: async ({ reminder, next }: { reminder: Reminder; next: boolean }) => {
+      const updated = await remindersApi.update(reminder.id, { isEnabled: next })
+      if (next) {
+        const granted = await ensureNotificationPermission()
+        if (granted) await scheduleReminder({ ...reminder, isEnabled: true })
+      } else {
+        await cancelReminder(reminder.id)
+      }
+      return updated
+    },
+    onSuccess: (_res, { next }) => {
+      void qc.invalidateQueries({ queryKey: queryKeys.reminders(graveId) })
+      showToast(next ? t('reminders.enabled') : t('reminders.disabled'), 'success')
+    },
   })
 
   const first = reminders?.[0]
@@ -56,7 +80,7 @@ export default function RemindersScreen() {
           </Text>
         ) : (
           reminders?.map(r => (
-            <ReminderRow key={r.id} reminder={r} onToggle={next => toggle.mutate({ id: r.id, isEnabled: next })} />
+            <ReminderRow key={r.id} reminder={r} onToggle={next => toggle.mutate({ reminder: r, next })} />
           ))
         )}
 

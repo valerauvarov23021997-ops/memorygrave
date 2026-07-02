@@ -16,17 +16,20 @@ const config: ExpoConfig = {
   assetBundlePatterns: ['**/*'],
   ios: {
     bundleIdentifier: 'app.pamyat.client',
+    buildNumber: '1',
     supportsTablet: false,
     infoPlist: {
-      NSLocationWhenInUseUsageDescription: 'Для отображения кладбища на карте',
-      NSCameraUsageDescription: 'Для загрузки фотографий',
-      NSPhotoLibraryUsageDescription: 'Для выбора фото из галереи',
+      NSLocationWhenInUseUsageDescription: 'Приложению нужен доступ к геолокации, чтобы показать кладбище на карте',
+      NSCameraUsageDescription: 'Доступ к камере нужен, чтобы прикреплять фотографии к воспоминаниям и заказам',
+      NSPhotoLibraryUsageDescription: 'Доступ к фото нужен, чтобы выбрать снимки для страницы памяти',
+      ITSAppUsesNonExemptEncryption: false,
     },
     // Ключ Google Maps для iOS (react-native-maps не поставляет config-plugin).
     config: { googleMapsApiKey: process.env.GOOGLE_MAPS_API_KEY },
   },
   android: {
     package: 'app.pamyat.client',
+    versionCode: 1,
     adaptiveIcon: {
       foregroundImage: './assets/adaptive-icon.png',
       backgroundColor: '#1C3318',

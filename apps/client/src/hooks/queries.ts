@@ -46,6 +46,10 @@ export function useCemeteries(cityId?: string) {
   return useQuery({ queryKey: queryKeys.cemeteries(cityId), queryFn: () => gravesApi.cemeteries(cityId) })
 }
 
+export function useCities() {
+  return useQuery({ queryKey: ['cities'], queryFn: () => gravesApi.cities() })
+}
+
 export function useToggleSaved() {
   const qc = useQueryClient()
   return useMutation({
