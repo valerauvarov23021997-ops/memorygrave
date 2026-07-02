@@ -1,19 +1,12 @@
-import { profileApi } from '@pamyat/api'
-import { Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { profileApi, type PlanInfo, type SubscriptionPlan } from '@pamyat/api'
+import { Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, Skeleton, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-interface Plan {
-  id: string
-  name: string
-  price: string
-  period: string
-  features: string[]
-  featured: boolean
-  badge?: string
-}
+import { queryKeys, useProfile } from '../src/hooks/queries'
 
 export default function SubscriptionScreen() {
   const { t } = useTranslation()
@@ -21,39 +14,24 @@ export default function SubscriptionScreen() {
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
+  const qc = useQueryClient()
+  const { data: profile } = useProfile()
+  const { data: plans, isLoading } = useQuery({ queryKey: ['plans'], queryFn: () => profileApi.plans() })
 
-  const plans: Plan[] = [
-    {
-      id: 'basic',
-      name: 'Базовый',
-      price: '0',
-      period: t('subscription.forever'),
-      features: ['Поиск захоронений', 'Разовые заказы и фотоотчёты'],
-      featured: false,
+  const change = useMutation({
+    mutationFn: (plan: SubscriptionPlan) => profileApi.changePlan(plan),
+    onSuccess: sub => {
+      void qc.invalidateQueries({ queryKey: queryKeys.profile })
+      showToast(t('subscription.changed', { plan: sub.planName }), 'success')
     },
-    {
-      id: 'standard',
-      name: 'Стандарт',
-      price: '299',
-      period: `${t('subscription.perMonth')} · до 3 захоронений`,
-      features: ['Всё из базового', 'Напоминания о датах', 'Автозаказ к годовщинам', 'Приоритетные исполнители'],
-      featured: true,
-      badge: t('subscription.popular'),
-    },
-    {
-      id: 'premium',
-      name: 'Премиум',
-      price: '699',
-      period: `${t('subscription.perMonth')} · без ограничений`,
-      features: ['Всё из стандарта', 'Персональный менеджер', 'Скидка 15% на услуги'],
-      featured: false,
-    },
-  ]
+  })
 
   const restore = async () => {
     await profileApi.restoreSubscription()
     showToast(t('subscription.restore'), 'success')
   }
+
+  const currentPlan = profile?.subscription.plan
 
   return (
     <View style={styles.root}>
@@ -63,9 +41,23 @@ export default function SubscriptionScreen() {
           {t('subscription.description')}
         </Text>
 
-        {plans.map(plan => (
-          <PlanCard key={plan.id} plan={plan} onChoose={() => showToast(`${t('subscription.choose')}: ${plan.name}`, 'success')} />
-        ))}
+        {isLoading ? (
+          <>
+            <Skeleton width="100%" height={220} radius={12} />
+            <View style={{ height: spacing.lg }} />
+            <Skeleton width="100%" height={220} radius={12} />
+          </>
+        ) : (
+          (plans ?? []).map(plan => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              isCurrent={plan.id === currentPlan}
+              changing={change.isPending && change.variables === plan.id}
+              onChoose={() => change.mutate(plan.id)}
+            />
+          ))
+        )}
 
         <Button label={t('subscription.restore')} variant="ghost" onPress={restore} />
         <View style={{ height: insets.bottom + spacing.lg }} />
@@ -74,27 +66,40 @@ export default function SubscriptionScreen() {
   )
 }
 
-function PlanCard({ plan, onChoose }: { plan: Plan; onChoose: () => void }) {
+function PlanCard({
+  plan,
+  isCurrent,
+  changing,
+  onChoose,
+}: {
+  plan: PlanInfo
+  isCurrent: boolean
+  changing: boolean
+  onChoose: () => void
+}) {
   const { t } = useTranslation()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   const featured = plan.featured
   return (
     <View style={styles.planWrap}>
-      {plan.badge ? (
+      {featured && !isCurrent ? (
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{plan.badge}</Text>
+          <Text style={styles.badgeText}>{t('subscription.popular')}</Text>
         </View>
       ) : null}
       <Card variant={featured ? 'featured' : 'default'} padding="lg">
-        <Text variant="headingLg" color={featured ? 'cream' : 'forest'}>
-          {plan.name}
-        </Text>
+        <View style={styles.planHeader}>
+          <Text variant="headingLg" color={featured ? 'cream' : 'forest'}>
+            {plan.name}
+          </Text>
+          {isCurrent ? <Badge label={t('subscription.current')} variant="success" /> : null}
+        </View>
         <View style={styles.priceRow}>
           <Text style={[styles.price, { color: featured ? c.sageXL : c.forest }]}>{`${plan.price} ₽`}</Text>
         </View>
         <Text variant="bodySm" style={{ color: featured ? 'rgba(250,247,242,0.6)' : c.light }}>
-          {plan.period}
+          {plan.periodNote}
         </Text>
         <View style={styles.features}>
           {plan.features.map(f => (
@@ -106,7 +111,14 @@ function PlanCard({ plan, onChoose }: { plan: Plan; onChoose: () => void }) {
             </View>
           ))}
         </View>
-        <Button label={t('subscription.choose')} variant={featured ? 'primary' : 'secondary'} onPress={onChoose} fullWidth />
+        <Button
+          label={isCurrent ? t('subscription.yourPlan') : t('subscription.choose')}
+          variant={featured ? 'primary' : 'secondary'}
+          onPress={onChoose}
+          disabled={isCurrent}
+          loading={changing}
+          fullWidth
+        />
       </Card>
     </View>
   )
@@ -129,6 +141,7 @@ const makeStyles = (c: ThemeColors) =>
     paddingVertical: 4,
   },
   badgeText: { ...typography.caption, color: c.white, fontFamily: 'DMSans_500Medium' },
+  planHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   priceRow: { marginTop: spacing.sm },
   price: { ...typography.priceDisplay },
   features: { marginVertical: spacing.md, gap: spacing.sm },

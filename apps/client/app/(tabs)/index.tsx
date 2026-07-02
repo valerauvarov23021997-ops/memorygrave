@@ -23,6 +23,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultCard } from '../../src/components/GraveResultCard'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
+import { UpcomingDateCard } from '../../src/components/UpcomingDateCard'
 import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
 
 type Picker = 'city' | 'cemetery' | null
@@ -110,7 +111,10 @@ export default function SearchScreen() {
       </View>
 
       {!active ? (
-        <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
+        <View style={styles.idle}>
+          <UpcomingDateCard />
+          <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
+        </View>
       ) : isLoading ? (
         <View style={styles.list}>
           {Array.from({ length: 5 }).map((_, i) => (
@@ -220,6 +224,7 @@ const makeStyles = (c: ThemeColors) =>
   searchBarActive: { backgroundColor: c.white, borderWidth: 0.5, borderColor: c.sage },
   searchInput: { flex: 1, ...typography.bodyMd, color: c.ink },
   chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+  idle: { flex: 1 },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
   emptyTitle: { marginTop: spacing.md },
   emptyHint: { maxWidth: 200 },

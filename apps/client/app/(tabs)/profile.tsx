@@ -27,7 +27,7 @@ import { useTranslation } from 'react-i18next'
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { queryKeys, useProfile, useSavedGraves } from '../../src/hooks/queries'
+import { queryKeys, useProfile } from '../../src/hooks/queries'
 import { useAuthActions } from '../../src/hooks/useAuthActions'
 import { links } from '../../src/lib/links'
 
@@ -41,8 +41,6 @@ export default function ProfileScreen() {
   const qc = useQueryClient()
   const { logout } = useAuthActions()
   const { data, isLoading } = useProfile()
-  const { data: saved } = useSavedGraves()
-  const firstSavedId = saved?.[0]?.id
 
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
@@ -131,13 +129,7 @@ export default function ProfileScreen() {
 
       <SectionLabel>{t('profile.mine')}</SectionLabel>
       <ProfileRow icon="saved" label={t('profile.savedGraves')} onPress={() => router.push('/(tabs)/saved')} />
-      <ProfileRow
-        icon="bell"
-        label={t('profile.memorialDates')}
-        onPress={() =>
-          firstSavedId ? router.push(`/reminders/${firstSavedId}`) : showToast(t('saved.empty'), 'info')
-        }
-      />
+      <ProfileRow icon="bell" label={t('profile.memorialDates')} onPress={() => router.push('/dates')} />
       <ProfileRow icon="orders" label={t('profile.orderHistory')} onPress={() => router.push('/(tabs)/orders')} />
 
       <Divider />

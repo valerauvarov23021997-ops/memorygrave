@@ -16,6 +16,7 @@ import {
   notificationsMock,
   ordersMock,
   paymentMethodsMock,
+  plansMock,
   remindersMock,
   reportsMock,
   servicesMock,
@@ -36,12 +37,14 @@ import type {
   OrderStatus,
   PaymentMethod,
   PhotoReport,
+  PlanInfo,
   RecurringPeriod,
   Reminder,
   ReminderType,
   Service,
   ServiceCategory,
   Subscription,
+  SubscriptionPlan,
   UserProfile,
 } from './types'
 
@@ -451,8 +454,33 @@ export const profileApi = {
     return unwrap<UserProfile>(client.put('/user/profile', patch))
   },
   subscription(): Promise<Subscription> {
-    if (USE_MOCKS) return mockDelay(userProfileMock.subscription)
+    if (USE_MOCKS) return mockDelay(userProfileState.subscription)
     return unwrap<Subscription>(client.get('/user/subscription'))
+  },
+  plans(): Promise<PlanInfo[]> {
+    if (USE_MOCKS) return mockDelay(plansMock)
+    // TODO: согласовать с бэкендом
+    return unwrap<PlanInfo[]>(client.get('/subscriptions/plans'))
+  },
+  changePlan(plan: SubscriptionPlan): Promise<Subscription> {
+    if (USE_MOCKS) {
+      const info = plansMock.find(p => p.id === plan)
+      const paid = (info?.price ?? 0) > 0
+      const until = new Date()
+      until.setMonth(until.getMonth() + 1)
+      userProfileState = {
+        ...userProfileState,
+        subscription: {
+          plan,
+          planName: info?.name ?? plan,
+          validUntil: paid ? until.toISOString().slice(0, 10) : null,
+          gravesLimit: plan === 'premium' ? 99 : plan === 'standard' ? 3 : 1,
+        },
+      }
+      return mockDelay(userProfileState.subscription)
+    }
+    // TODO: согласовать с бэкендом
+    return unwrap<Subscription>(client.post('/subscriptions/change', { plan }))
   },
   restoreSubscription(): Promise<{ success: boolean }> {
     if (USE_MOCKS) return mockDelay({ success: true })

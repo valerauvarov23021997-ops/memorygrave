@@ -219,6 +219,21 @@ export const ru = {
     labelPlaceholder: 'Например: День свадьбы',
     dateField: 'Дата',
   },
+  home: {
+    upcoming: 'Ближайшая дата',
+    anniversary: 'Годовщина памяти',
+    birthday: 'День рождения',
+    today: 'сегодня',
+    tomorrow: 'завтра',
+    inDays: 'через {{value}}',
+  },
+  dates: {
+    title: 'Памятные даты',
+    personal: 'Мои даты',
+    national: 'Дни поминовения',
+    empty: 'Дат пока нет',
+    emptyHint: 'Сохраните захоронение — даты появятся автоматически',
+  },
   notifications: {
     title: 'Уведомления',
     empty: 'Пока тихо',
@@ -255,6 +270,9 @@ export const ru = {
     forever: 'навсегда бесплатно',
     popular: 'Популярный',
     choose: 'Выбрать',
+    current: 'Ваш тариф',
+    yourPlan: 'Подключён',
+    changed: 'Тариф «{{plan}}» подключён',
     restore: 'Восстановить покупки',
   },
 } as const

@@ -163,6 +163,17 @@ export interface Subscription {
   gravesLimit: number
 }
 
+/** Тариф подписки для витрины. */
+export interface PlanInfo {
+  id: SubscriptionPlan
+  name: string
+  /** Цена в рублях за месяц; 0 = бесплатно. */
+  price: number
+  periodNote: string
+  features: string[]
+  featured: boolean
+}
+
 export interface UserProfile {
   id: string
   name: string
