@@ -4,7 +4,6 @@ import {
   Chip,
   EmptyState,
   Icon,
-  Skeleton,
   spacing,
   Text,
   typography,
@@ -21,6 +20,7 @@ import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultCard } from '../../src/components/GraveResultCard'
+import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
 
 type Picker = 'city' | 'cemetery' | null
@@ -107,7 +107,7 @@ export default function SearchScreen() {
       ) : isLoading ? (
         <View style={styles.list}>
           {Array.from({ length: 5 }).map((_, i) => (
-            <Skeleton key={i} width="100%" height={72} radius={10} />
+            <GraveResultSkeleton key={i} />
           ))}
         </View>
       ) : (

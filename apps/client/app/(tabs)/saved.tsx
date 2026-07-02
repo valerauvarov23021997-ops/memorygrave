@@ -1,10 +1,11 @@
-import { AnimatedListItem, EmptyState, Skeleton, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, EmptyState, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultCard } from '../../src/components/GraveResultCard'
+import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useSavedGraves } from '../../src/hooks/queries'
 
 export default function SavedScreen() {
@@ -25,7 +26,7 @@ export default function SavedScreen() {
       {isLoading ? (
         <View style={styles.list}>
           {Array.from({ length: 3 }).map((_, i) => (
-            <Skeleton key={i} width="100%" height={72} radius={10} />
+            <GraveResultSkeleton key={i} />
           ))}
         </View>
       ) : (data?.length ?? 0) === 0 ? (

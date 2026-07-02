@@ -1,5 +1,5 @@
 import type { Order } from '@pamyat/api'
-import { AnimatedListItem, Badge, Card, EmptyState, Skeleton, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, Badge, Card, EmptyState, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -7,6 +7,7 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { OrderCardSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useOrders } from '../../src/hooks/queries'
 import { orderStatusBadge } from '../../src/lib/statusMaps'
 
@@ -55,7 +56,7 @@ export default function OrdersScreen() {
       {isLoading ? (
         <View style={styles.list}>
           {Array.from({ length: 4 }).map((_, i) => (
-            <Skeleton key={i} width="100%" height={76} radius={10} />
+            <OrderCardSkeleton key={i} />
           ))}
         </View>
       ) : (data?.length ?? 0) === 0 ? (
