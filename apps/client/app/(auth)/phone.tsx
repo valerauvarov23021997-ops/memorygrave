@@ -1,4 +1,4 @@
-import { Button, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
+import { Button, FlameLogo, useColors, useThemedStyles, type ThemeColors, Divider, Icon, Input, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { formatPhoneMask, isPhoneComplete, normalizePhoneDigits } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -44,10 +44,13 @@ export default function PhoneScreen() {
         keyboardDismissMode="interactive"
         automaticallyAdjustKeyboardInsets
       >
-        <Text variant="displayMd" color="forest">
+        <View style={styles.brand}>
+          <FlameLogo size={84} />
+        </View>
+        <Text variant="displayMd" color="forest" center>
           {t('auth.title')}
         </Text>
-        <Text variant="bodyMd" color="muted" style={styles.subtitle}>
+        <Text variant="bodyMd" color="muted" center style={styles.subtitle}>
           {t('auth.subtitle')}
         </Text>
 
@@ -79,11 +82,11 @@ export default function PhoneScreen() {
         </View>
 
         <View style={styles.socials}>
-          <Pressable style={[styles.social, styles.apple]}>
+          <Pressable style={[styles.social, styles.apple]} onPress={() => showToast(t('auth.soon'), 'info')}>
             <Icon name="User" size={20} color={c.white} />
             <Text style={styles.appleLabel}>{t('auth.apple')}</Text>
           </Pressable>
-          <Pressable style={[styles.social, styles.google]}>
+          <Pressable style={[styles.social, styles.google]} onPress={() => showToast(t('auth.soon'), 'info')}>
             <Text style={styles.googleG}>G</Text>
             <Text variant="bodyMd" color="ink">
               {t('auth.google')}
@@ -106,6 +109,7 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
   root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
+  brand: { alignItems: 'center', marginBottom: spacing.lg },
   subtitle: { marginTop: spacing.sm },
   field: { marginTop: spacing.xl, marginBottom: spacing.lg },
   flag: { fontSize: 18, marginRight: spacing.sm },
