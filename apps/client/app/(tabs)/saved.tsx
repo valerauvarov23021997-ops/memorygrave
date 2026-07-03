@@ -1,7 +1,7 @@
-import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { FlatList, StyleSheet, View } from 'react-native'
+import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
@@ -13,6 +13,7 @@ export default function SavedScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
+  const c = useColors()
   const { data, isLoading, refetch, isRefetching } = useSavedGraves()
 
   return (
@@ -41,8 +42,9 @@ export default function SavedScreen() {
           data={data ?? []}
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isRefetching}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={c.gold} colors={[c.gold]} />
+          }
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
               <GroupedRow

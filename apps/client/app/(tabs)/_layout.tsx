@@ -16,21 +16,21 @@ export default function TabsLayout() {
         tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: c.forest,
         tabBarInactiveTintColor: c.stone,
-        // Парящий стеклянный таб-бар
+        // Стеклянный таб-бар, прижатый к нижнему краю
         tabBarStyle: {
           position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: Math.max(insets.bottom - 18, 10),
-          height: 68,
-          borderRadius: radii.xl,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          height: 58 + insets.bottom,
+          paddingBottom: insets.bottom > 0 ? insets.bottom - 6 : 8,
           borderTopWidth: 0,
           backgroundColor: 'transparent',
           elevation: 0,
           shadowColor: c.forest,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.12,
-          shadowRadius: 20,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 14,
           paddingTop: 6,
         },
         tabBarBackground: () => (
@@ -40,10 +40,11 @@ export default function TabsLayout() {
             style={[
               StyleSheet.absoluteFill,
               {
-                borderRadius: radii.xl,
+                borderTopLeftRadius: radii.xl,
+                borderTopRightRadius: radii.xl,
                 overflow: 'hidden',
-                backgroundColor: 'rgba(250,247,242,0.78)',
-                borderWidth: 1,
+                backgroundColor: 'rgba(250,247,242,0.86)',
+                borderTopWidth: 1,
                 borderColor: c.linen,
               },
             ]}

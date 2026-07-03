@@ -3,6 +3,7 @@ import {
   Badge,
   Button,
   Card,
+  FlameLoader,
   FullscreenGallery,
   GroupedRow,
   GroupedSection,
@@ -25,8 +26,14 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
-import Animated, { FadeIn } from 'react-native-reanimated'
+import { Linking, type NativeScrollEvent, type NativeSyntheticEvent, Pressable, Share, StyleSheet, View } from 'react-native'
+import Animated, {
+  FadeIn,
+  interpolate,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { MapPreview } from '../../src/components/MapPreview'
@@ -41,7 +48,7 @@ export default function GraveScreen() {
   const insets = useSafeAreaInsets()
   const showToast = useToast()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { data: grave, isLoading } = useGrave(id ?? '')
+  const { data: grave, isLoading, refetch, isRefetching } = useGrave(id ?? '')
   const toggleSaved = useToggleSaved()
   const startOrder = useOrderDraftStore(s => s.startOrder)
 
@@ -50,6 +57,22 @@ export default function GraveScreen() {
   const [galleryOpen, setGalleryOpen] = useState(false)
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
+
+  // Оттягивание страницы вниз: огонёк проявляется по мере жеста
+  const pullY = useSharedValue(0)
+  const onScroll = useAnimatedScrollHandler(e => {
+    pullY.value = e.contentOffset.y
+  })
+  const pullFlameStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pullY.value, [-24, -64], [0, 1], 'clamp'),
+    transform: [{ scale: interpolate(pullY.value, [-24, -80], [0.5, 1], 'clamp') }],
+  }))
+  const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    if (e.nativeEvent.contentOffset.y < -70 && !isRefetching) {
+      haptics.light()
+      void refetch()
+    }
+  }
 
   if (isLoading || !grave) {
     return (
@@ -101,7 +124,15 @@ export default function GraveScreen() {
 
   return (
     <View style={styles.root}>
-      <ScrollView contentContainerStyle={styles.scroll} showsVerticalScrollIndicator={false}>
+      <Animated.ScrollView
+        contentContainerStyle={styles.scroll}
+        showsVerticalScrollIndicator={false}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onScrollEndDrag={onScrollEndDrag}
+      >
+        {/* Зелёный «хвост» — при оттягивании вниз сверху остаётся фирменный фон */}
+        <View style={styles.bleed} pointerEvents="none" />
         {/* Шапка-герой с градиентом и портретом */}
         <LinearGradient
           colors={[c.forest, c.moss]}
@@ -197,7 +228,18 @@ export default function GraveScreen() {
 
           <View style={{ height: 96 }} />
         </View>
-      </ScrollView>
+      </Animated.ScrollView>
+
+      {/* Огонёк обновления: растёт при оттягивании, горит пока обновляемся */}
+      {isRefetching ? (
+        <View style={[styles.pullFlame, { top: insets.top + 52 }]} pointerEvents="none">
+          <FlameLoader size={26} />
+        </View>
+      ) : (
+        <Animated.View style={[styles.pullFlame, { top: insets.top + 52 }, pullFlameStyle]} pointerEvents="none">
+          <FlameLoader size={26} />
+        </Animated.View>
+      )}
 
       <View style={[styles.sticky, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button label={t('grave.orderCare')} onPress={onOrder} fullWidth />
@@ -246,6 +288,8 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
   root: { flex: 1, backgroundColor: c.cream },
   scroll: { paddingBottom: 0 },
+  bleed: { position: 'absolute', top: -600, left: 0, right: 0, height: 600, backgroundColor: c.forest },
+  pullFlame: { position: 'absolute', alignSelf: 'center', zIndex: 5 },
   hero: {
     paddingBottom: spacing.xl + 30,
     borderBottomLeftRadius: 28,

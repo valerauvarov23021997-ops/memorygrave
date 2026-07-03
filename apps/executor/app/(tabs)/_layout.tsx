@@ -27,9 +27,9 @@ export default function TabsLayout() {
           backgroundColor: 'transparent',
           elevation: 0,
           shadowColor: colors.forest,
-          shadowOffset: { width: 0, height: 8 },
-          shadowOpacity: 0.12,
-          shadowRadius: 20,
+          shadowOffset: { width: 0, height: -4 },
+          shadowOpacity: 0.08,
+          shadowRadius: 14,
           paddingTop: 6,
         },
         tabBarBackground: () => (
@@ -39,10 +39,11 @@ export default function TabsLayout() {
             style={[
               StyleSheet.absoluteFill,
               {
-                borderRadius: radii.xl,
+                borderTopLeftRadius: radii.xl,
+                borderTopRightRadius: radii.xl,
                 overflow: 'hidden',
-                backgroundColor: 'rgba(250,247,242,0.78)',
-                borderWidth: 1,
+                backgroundColor: 'rgba(250,247,242,0.86)',
+                borderTopWidth: 1,
                 borderColor: colors.linen,
               },
             ]}

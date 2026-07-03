@@ -4,7 +4,7 @@ import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, StyleSheet, View } from 'react-native'
+import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { OrderCardSkeleton } from '../../src/components/GraveResultSkeleton'
@@ -71,8 +71,9 @@ export default function OrdersScreen() {
           data={data ?? []}
           keyExtractor={o => o.id}
           contentContainerStyle={styles.list}
-          onRefresh={refetch}
-          refreshing={isRefetching}
+          refreshControl={
+            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={c.gold} colors={[c.gold]} />
+          }
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
               <OrderCard order={item} onPress={() => router.push(`/order/${item.id}`)} />
