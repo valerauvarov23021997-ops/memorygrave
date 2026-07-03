@@ -140,16 +140,20 @@ function Candle({ lit }: { lit: boolean }) {
     transform: [{ scale: 0.5 + ignite.value * 0.5 + flicker.value * 0.06 }],
   }))
 
-  const flameStyle = useAnimatedStyle(() => ({
-    opacity: ignite.value,
-    transform: [
-      // Растём от фитиля: сдвиг вниз компенсирует уменьшение
-      { translateY: (1 - ignite.value) * 14 },
-      { rotate: `${(sway.value - 0.5) * 4}deg` },
-      { scaleY: ignite.value * (0.9 + flicker.value * 0.16) },
-      { scaleX: ignite.value * (1 - flicker.value * 0.06) },
-    ],
-  }))
+  const flameStyle = useAnimatedStyle(() => {
+    const scaleY = ignite.value * (0.9 + flicker.value * 0.16)
+    return {
+      opacity: ignite.value,
+      transform: [
+        // Масштаб считается от центра, поэтому компенсируем сдвигом:
+        // основание пламени всегда стоит на фитиле, рост — только вверх
+        { translateY: (1 - ignite.value) * 12 - (scaleY - 1) * 21 },
+        { rotate: `${(sway.value - 0.5) * 4}deg` },
+        { scaleY },
+        { scaleX: ignite.value * (1 - flicker.value * 0.06) },
+      ],
+    }
+  })
 
   return (
     <View style={styles.candle}>
@@ -247,7 +251,7 @@ const styles = StyleSheet.create({
   candle: { alignItems: 'center' },
   flameSlot: { height: 50, width: 96, alignItems: 'center', justifyContent: 'flex-end' },
   glow: { position: 'absolute', bottom: -34, width: 96, height: 96 },
-  flame: { position: 'absolute', bottom: -14, zIndex: 1 },
+  flame: { position: 'absolute', bottom: -8, zIndex: 1 },
   ember: {
     position: 'absolute',
     bottom: 14,
