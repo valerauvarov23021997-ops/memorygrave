@@ -157,7 +157,7 @@ function OrderCard({
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.cream },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.md },
+  list: { paddingHorizontal: spacing.lg, paddingBottom: 120, gap: spacing.md },
   card: { gap: spacing.xs },
   cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   cardInfo: { flex: 1 },

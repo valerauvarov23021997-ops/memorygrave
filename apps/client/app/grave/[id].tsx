@@ -3,8 +3,9 @@ import {
   Badge,
   Button,
   Card,
-  Divider,
   FullscreenGallery,
+  GroupedRow,
+  GroupedSection,
   haptics,
   Icon,
   SectionLabel,
@@ -24,7 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
+import { Linking, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -82,6 +83,12 @@ export default function GraveScreen() {
     router.push('/order/catalog')
   }
 
+  const onRoute = () => {
+    if (!grave.coordinates) return
+    const { latitude, longitude } = grave.coordinates
+    void Linking.openURL(`https://yandex.ru/maps/?ll=${longitude},${latitude}&z=17&pt=${longitude},${latitude},pm2rdm`)
+  }
+
   const onShare = async () => {
     try {
       await Share.share({
@@ -122,6 +129,25 @@ export default function GraveScreen() {
           <RoundButton icon="share" onPress={() => void onShare()} />
         </View>
 
+        {/* Круглые действия поверх нижнего края героя — как в Apple Wallet */}
+        <View style={styles.roundActions}>
+          <RoundAction
+            icon="camera"
+            label={t('grave.actPhoto')}
+            onPress={() => (grave.photos.length ? setGalleryOpen(true) : showToast(t('grave.photos'), 'info'))}
+          />
+          <RoundAction
+            icon="saved"
+            label={isSaved ? t('grave.actSaved') : t('grave.actSave')}
+            active={isSaved}
+            onPress={onToggleSave}
+          />
+          <RoundAction icon="bell" label={t('grave.actDates')} onPress={() => router.push(`/reminders/${grave.id}`)} />
+          {grave.coordinates ? (
+            <RoundAction icon="mapPin" label={t('grave.actRoute')} onPress={onRoute} />
+          ) : null}
+        </View>
+
         <View style={styles.body}>
           {grave.biography ? (
             <Card variant="surface" padding="lg" style={styles.bioCard}>
@@ -147,21 +173,6 @@ export default function GraveScreen() {
             </View>
           ) : null}
 
-          <View style={styles.actions}>
-            <ActionTile
-              icon="camera"
-              label={t('grave.photosCount', { count: grave.photos.length })}
-              onPress={() => (grave.photos.length ? setGalleryOpen(true) : showToast(t('grave.photos'), 'info'))}
-            />
-            <ActionTile
-              icon="saved"
-              label={t('grave.save')}
-              active={isSaved}
-              onPress={onToggleSave}
-            />
-            <ActionTile icon="bell" label={t('grave.remind')} onPress={() => router.push(`/reminders/${grave.id}`)} />
-          </View>
-
           <View style={styles.candleWrap}>
             <MemoryCandle graveId={grave.id} />
           </View>
@@ -169,30 +180,20 @@ export default function GraveScreen() {
           <MemoryBook graveId={grave.id} />
 
           <SectionLabel>{t('grave.more')}</SectionLabel>
-          <Card padding="sm" style={styles.moreCard}>
-            <MoreRow icon="saved" label={t('invite.title')} onPress={() => router.push(`/invite/${grave.id}`)} />
-            <Divider />
-            <MoreRow icon="QrCode" label={t('qr.title')} onPress={() => router.push(`/qr/${grave.id}`)} />
-          </Card>
-
-          {grave.lastOrder ? (
-            <>
-              <SectionLabel>{t('grave.lastOrder')}</SectionLabel>
-              <Card padding="md" onPress={() => router.push(`/report/${grave.lastOrder?.id}`)}>
-                <View style={styles.lastOrderRow}>
-                  <View style={styles.lastOrderInfo}>
-                    <Text variant="headingMd" color="ink">
-                      {grave.lastOrder.serviceName}
-                    </Text>
-                    <Text variant="bodySm" color="muted">
-                      {formatDate(grave.lastOrder.date)}
-                    </Text>
-                  </View>
-                  {grave.lastOrder.rating != null ? <StarRating value={grave.lastOrder.rating} size={18} /> : null}
-                </View>
-              </Card>
-            </>
-          ) : null}
+          <GroupedSection style={styles.moreCard}>
+            <GroupedRow icon="saved" title={t('invite.title')} onPress={() => router.push(`/invite/${grave.id}`)} position="first" />
+            <GroupedRow icon="QrCode" title={t('qr.title')} onPress={() => router.push(`/qr/${grave.id}`)} position={grave.lastOrder ? 'middle' : 'last'} />
+            {grave.lastOrder ? (
+              <GroupedRow
+                icon="camera"
+                title={grave.lastOrder.serviceName}
+                subtitle={formatDate(grave.lastOrder.date)}
+                right={grave.lastOrder.rating != null ? <StarRating value={grave.lastOrder.rating} size={16} /> : undefined}
+                onPress={() => router.push(`/report/${grave.lastOrder?.id}`)}
+                position="last"
+              />
+            ) : null}
+          </GroupedSection>
 
           <View style={{ height: 96 }} />
         </View>
@@ -216,21 +217,7 @@ function RoundButton({ icon, onPress }: { icon: string; onPress: () => void }) {
   )
 }
 
-function MoreRow({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
-  const c = useColors()
-  const styles = useThemedStyles(makeStyles)
-  return (
-    <Pressable style={styles.moreRow} onPress={onPress}>
-      <Icon name={icon} size={20} color={c.sage} />
-      <Text variant="bodyMd" color="ink" style={styles.moreLabel}>
-        {label}
-      </Text>
-      <Icon name="chevronRight" size={18} color={c.light} />
-    </Pressable>
-  )
-}
-
-function ActionTile({
+function RoundAction({
   icon,
   label,
   active,
@@ -244,14 +231,14 @@ function ActionTile({
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   return (
-    <Card variant={active ? 'featured' : 'default'} padding="md" onPress={onPress} style={styles.tile}>
-      <View style={styles.tileInner}>
-        <Icon name={icon} size={24} color={active ? c.cream : c.sage} weight={active ? 'fill' : 'regular'} />
-        <Text variant="bodySm" center color={active ? 'cream' : 'muted'}>
-          {label}
-        </Text>
+    <Pressable style={styles.roundAction} onPress={onPress}>
+      <View style={[styles.roundCircle, active ? styles.roundCircleActive : null]}>
+        <Icon name={icon} size={22} color={active ? c.cream : c.forest} weight={active ? 'fill' : 'regular'} />
       </View>
-    </Card>
+      <Text variant="caption" color={active ? 'forest' : 'muted'} center>
+        {label}
+      </Text>
+    </Pressable>
   )
 }
 
@@ -260,7 +247,7 @@ const makeStyles = (c: ThemeColors) =>
   root: { flex: 1, backgroundColor: c.cream },
   scroll: { paddingBottom: 0 },
   hero: {
-    paddingBottom: spacing.xl,
+    paddingBottom: spacing.xl + 30,
     borderBottomLeftRadius: 28,
     borderBottomRightRadius: 28,
     alignItems: 'center',
@@ -293,19 +280,34 @@ const makeStyles = (c: ThemeColors) =>
     alignItems: 'center',
     justifyContent: 'center',
   },
+  roundActions: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: spacing.lg,
+    marginTop: -34,
+    paddingHorizontal: spacing.lg,
+  },
+  roundAction: { alignItems: 'center', gap: 6, width: 64 },
+  roundCircle: {
+    width: 54,
+    height: 54,
+    borderRadius: 27,
+    backgroundColor: c.white,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: c.forest,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.14,
+    shadowRadius: 12,
+    elevation: 4,
+  },
+  roundCircleActive: { backgroundColor: c.forest },
   body: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
   bioCard: { marginBottom: spacing.lg },
   readMore: { marginTop: spacing.sm },
   mapWrap: { marginBottom: spacing.lg },
-  actions: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
   candleWrap: { marginBottom: spacing.lg },
   moreCard: { marginBottom: spacing.lg },
-  moreRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.md, paddingHorizontal: spacing.sm },
-  moreLabel: { flex: 1 },
-  tile: { flex: 1 },
-  tileInner: { alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
-  lastOrderRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
-  lastOrderInfo: { flex: 1 },
   sticky: {
     position: 'absolute',
     bottom: 0,

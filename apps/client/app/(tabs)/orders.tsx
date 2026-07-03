@@ -123,7 +123,7 @@ const makeStyles = (c: ThemeColors) =>
   chip: { height: 36, paddingHorizontal: spacing.md, borderRadius: 999, justifyContent: 'center' },
   chipActive: { backgroundColor: c.forest },
   chipInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+  list: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
   card: { marginBottom: spacing.sm },
   cardRow: { flexDirection: 'row' },
   cardInfo: { flex: 1 },

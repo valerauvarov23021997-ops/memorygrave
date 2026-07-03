@@ -3,7 +3,8 @@ import {
   Avatar,
   BottomSheet,
   Button,
-  Divider,
+  GroupedRow,
+  GroupedSection,
   Icon,
   Input,
   radii,
@@ -85,7 +86,7 @@ export default function ProfileScreen() {
   return (
     <View style={styles.root}>
     <ScrollView
-      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xl }]}
+      contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 110 }]}
     >
       {isLoading || !data ? (
         <Skeleton width="100%" height={64} radius={10} />
@@ -129,16 +130,18 @@ export default function ProfileScreen() {
       ) : null}
 
       <SectionLabel>{t('profile.mine')}</SectionLabel>
-      <ProfileRow icon="saved" label={t('profile.savedGraves')} onPress={() => router.push('/(tabs)/saved')} />
-      <ProfileRow icon="bell" label={t('profile.memorialDates')} onPress={() => router.push('/dates')} />
-      <ProfileRow icon="orders" label={t('profile.orderHistory')} onPress={() => router.push('/(tabs)/orders')} />
-
-      <Divider />
+      <GroupedSection style={styles.group}>
+        <GroupedRow icon="saved" title={t('profile.savedGraves')} onPress={() => router.push('/(tabs)/saved')} position="first" />
+        <GroupedRow icon="bell" title={t('profile.memorialDates')} onPress={() => router.push('/dates')} />
+        <GroupedRow icon="orders" title={t('profile.orderHistory')} onPress={() => router.push('/(tabs)/orders')} position="last" />
+      </GroupedSection>
 
       <SectionLabel>{t('profile.help')}</SectionLabel>
-      <ProfileRow icon="support" label={t('profile.support')} onPress={() => openLink(links.support)} />
-      <ProfileRow icon="lock" label={t('profile.terms')} onPress={() => openLink(links.terms)} />
-      <ProfileRow icon="lock" label={t('profile.privacy')} onPress={() => openLink(links.privacy)} />
+      <GroupedSection style={styles.group}>
+        <GroupedRow icon="support" title={t('profile.support')} onPress={() => openLink(links.support)} position="first" />
+        <GroupedRow icon="lock" title={t('profile.terms')} onPress={() => openLink(links.terms)} />
+        <GroupedRow icon="lock" title={t('profile.privacy')} onPress={() => openLink(links.privacy)} position="last" />
+      </GroupedSection>
 
       <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
     </ScrollView>
@@ -172,20 +175,6 @@ export default function ProfileScreen() {
   )
 }
 
-function ProfileRow({ icon, label, onPress }: { icon: string; label: string; onPress: () => void }) {
-  const c = useColors()
-  const styles = useThemedStyles(makeStyles)
-  return (
-    <Pressable style={styles.row} onPress={onPress}>
-      <Icon name={icon} size={20} color={c.sage} />
-      <Text variant="bodyMd" color="ink" style={styles.rowLabel}>
-        {label}
-      </Text>
-      <Icon name="chevronRight" size={18} color={c.light} />
-    </Pressable>
-  )
-}
-
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: c.cream },
@@ -202,13 +191,5 @@ const makeStyles = (c: ThemeColors) =>
     avatarImg: { width: 72, height: 72, borderRadius: 36 },
     changePhoto: {},
     editField: { marginBottom: spacing.md },
-    row: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      gap: spacing.md,
-      minHeight: 48,
-      borderBottomWidth: StyleSheet.hairlineWidth,
-      borderBottomColor: c.linen,
-    },
-    rowLabel: { flex: 1 },
+    group: { marginBottom: spacing.sm },
   })

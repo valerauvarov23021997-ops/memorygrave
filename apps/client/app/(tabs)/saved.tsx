@@ -1,12 +1,12 @@
-import { AnimatedListItem, EmptyState, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { FlatList, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { GraveResultCard } from '../../src/components/GraveResultCard'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useSavedGraves } from '../../src/hooks/queries'
+import { graveMeta, groupedPosition } from '../../src/lib/graveMeta'
 
 export default function SavedScreen() {
   const { t } = useTranslation()
@@ -45,7 +45,15 @@ export default function SavedScreen() {
           refreshing={isRefetching}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
-              <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
+              <GroupedRow
+                serif
+                avatarName={item.fullName}
+                avatarUri={item.photos[0]}
+                title={item.fullName}
+                subtitle={graveMeta(item)}
+                onPress={() => router.push(`/grave/${item.id}`)}
+                position={groupedPosition(index, data?.length ?? 0)}
+              />
             </AnimatedListItem>
           )}
         />
@@ -58,5 +66,5 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: c.cream },
     header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-    list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl },
+    list: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
   })

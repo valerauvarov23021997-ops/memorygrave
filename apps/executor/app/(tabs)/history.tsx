@@ -57,7 +57,7 @@ export default function HistoryScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.cream },
   header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: spacing.sm },
+  list: { paddingHorizontal: spacing.lg, paddingBottom: 120, gap: spacing.sm },
   card: {},
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   info: { flex: 1 },

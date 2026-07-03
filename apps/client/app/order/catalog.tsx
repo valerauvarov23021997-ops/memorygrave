@@ -1,11 +1,11 @@
 import type { Service } from '@pamyat/api'
-import { BottomSheet, Button, Divider, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { BottomSheet, Button, GroupedRow, GroupedSection, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
 import { formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 
 import { useServices } from '../../src/hooks/queries'
 
@@ -50,15 +50,18 @@ export default function CatalogScreen() {
         ) : (
           <>
             <SectionLabel>{t('catalog.quick')}</SectionLabel>
-            {quick.map(s => (
-              <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} />
-            ))}
+            <GroupedSection style={styles.group}>
+              {quick.map((s, i) => (
+                <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} position={pos(i, quick.length)} />
+              ))}
+            </GroupedSection>
 
-            <Divider />
             <SectionLabel>{t('catalog.major')}</SectionLabel>
-            {major.map(s => (
-              <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} />
-            ))}
+            <GroupedSection style={styles.group}>
+              {major.map((s, i) => (
+                <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} position={pos(i, major.length)} />
+              ))}
+            </GroupedSection>
           </>
         )}
       </ScrollView>
@@ -86,25 +89,37 @@ export default function CatalogScreen() {
   )
 }
 
-function ServiceRow({ service, onPress }: { service: Service; onPress: () => void }) {
+/** Положение строки в группе по индексу. */
+function pos(i: number, total: number): 'first' | 'middle' | 'last' | 'single' {
+  if (total <= 1) return 'single'
+  if (i === 0) return 'first'
+  if (i === total - 1) return 'last'
+  return 'middle'
+}
+
+function ServiceRow({
+  service,
+  onPress,
+  position,
+}: {
+  service: Service
+  onPress: () => void
+  position: 'first' | 'middle' | 'last' | 'single'
+}) {
   const { t } = useTranslation()
-  const c = useColors()
-  const styles = useThemedStyles(makeStyles)
   return (
-    <Pressable style={styles.row} onPress={onPress}>
-      <Icon name={service.icon} size={20} color={c.sage} />
-      <View style={styles.rowBody}>
-        <Text variant="headingMd" color="ink">
-          {service.name}
+    <GroupedRow
+      icon={service.icon}
+      title={service.name}
+      subtitle={service.description}
+      right={
+        <Text variant="headingMd" color="forest">
+          {t('catalog.priceFrom', { price: formatPrice(service.priceFrom) })}
         </Text>
-        <Text variant="bodySm" color="muted" numberOfLines={1}>
-          {service.description}
-        </Text>
-      </View>
-      <Text variant="headingMd" color="forest">
-        {t('catalog.priceFrom', { price: formatPrice(service.priceFrom) })}
-      </Text>
-    </Pressable>
+      }
+      onPress={onPress}
+      position={position}
+    />
   )
 }
 
@@ -114,8 +129,7 @@ const makeStyles = (c: ThemeColors) =>
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
   context: { marginBottom: spacing.lg },
   skeletons: { gap: spacing.sm },
-  row: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 56, paddingVertical: spacing.sm },
-  rowBody: { flex: 1 },
+  group: { marginBottom: spacing.lg },
   detail: { gap: spacing.md, paddingBottom: spacing.md },
   detailHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
   detailDesc: {},

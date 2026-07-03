@@ -41,7 +41,7 @@ export default function ExecutorProfileScreen() {
   }
 
   return (
-    <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xl }]}>
+    <ScrollView style={styles.root} contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 110 }]}>
       <View style={styles.userRow}>
         <Avatar name={data.name} size={48} />
         <View style={styles.userInfo}>

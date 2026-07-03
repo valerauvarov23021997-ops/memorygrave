@@ -1,16 +1,52 @@
-import { colors, Icon } from '@pamyat/ui'
+import { colors, Icon, radii } from '@pamyat/ui'
+import { BlurView } from 'expo-blur'
 import { Tabs } from 'expo-router'
 import { useTranslation } from 'react-i18next'
+import { StyleSheet } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 export default function TabsLayout() {
   const { t } = useTranslation()
+  const insets = useSafeAreaInsets()
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
         tabBarActiveTintColor: colors.forest,
         tabBarInactiveTintColor: colors.stone,
-        tabBarStyle: { backgroundColor: colors.cream, borderTopColor: colors.linen },
+        // Парящий стеклянный таб-бар — как в клиентском приложении
+        tabBarStyle: {
+          position: 'absolute',
+          left: 16,
+          right: 16,
+          bottom: Math.max(insets.bottom, 12),
+          height: 68,
+          borderRadius: radii.xl,
+          borderTopWidth: 0,
+          backgroundColor: 'transparent',
+          elevation: 0,
+          shadowColor: colors.forest,
+          shadowOffset: { width: 0, height: 8 },
+          shadowOpacity: 0.12,
+          shadowRadius: 20,
+          paddingTop: 6,
+        },
+        tabBarBackground: () => (
+          <BlurView
+            intensity={40}
+            tint="light"
+            style={[
+              StyleSheet.absoluteFill,
+              {
+                borderRadius: radii.xl,
+                overflow: 'hidden',
+                backgroundColor: 'rgba(250,247,242,0.78)',
+                borderWidth: 1,
+                borderColor: colors.linen,
+              },
+            ]}
+          />
+        ),
         tabBarLabelStyle: { fontFamily: 'DMSans_500Medium', fontSize: 11 },
       }}
     >

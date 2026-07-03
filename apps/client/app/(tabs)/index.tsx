@@ -1,8 +1,10 @@
 import {
   AnimatedListItem,
+  Badge,
   BottomSheet,
   Chip,
   EmptyState,
+  GroupedRow,
   Icon,
   radii,
   spacing,
@@ -22,9 +24,10 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { GraveResultCard } from '../../src/components/GraveResultCard'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { UpcomingDateCard } from '../../src/components/UpcomingDateCard'
+import { graveMeta, groupedPosition } from '../../src/lib/graveMeta'
+import { graveStatusBadge } from '../../src/lib/statusMaps'
 import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
 
 type Picker = 'city' | 'cemetery' | null
@@ -134,11 +137,23 @@ export default function SearchScreen() {
               {t('search.found', { value: pluralResults(data?.length ?? 0) })}
             </Text>
           }
-          renderItem={({ item, index }) => (
-            <AnimatedListItem index={index}>
-              <GraveResultCard grave={item} onPress={() => router.push(`/grave/${item.id}`)} />
-            </AnimatedListItem>
-          )}
+          renderItem={({ item, index }) => {
+            const badge = graveStatusBadge(item.status, t)
+            return (
+              <AnimatedListItem index={index}>
+                <GroupedRow
+                  serif
+                  avatarName={item.fullName}
+                  avatarUri={item.photos[0]}
+                  title={item.fullName}
+                  subtitle={graveMeta(item)}
+                  right={<Badge label={badge.label} variant={badge.variant} />}
+                  onPress={() => router.push(`/grave/${item.id}`)}
+                  position={groupedPosition(index, data?.length ?? 0)}
+                />
+              </AnimatedListItem>
+            )
+          }}
           ListEmptyComponent={
             <View style={styles.noResults}>
               <Text variant="bodyMd" color="muted" center>
@@ -229,7 +244,7 @@ const makeStyles = (c: ThemeColors) =>
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
   emptyTitle: { marginTop: spacing.md },
   emptyHint: { maxWidth: 200 },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: spacing.xxl, gap: 0 },
+  list: { paddingHorizontal: spacing.lg, paddingBottom: 120, gap: 0 },
   count: { marginBottom: spacing.sm },
   noResults: { paddingVertical: spacing.xl },
   addCard: {
