@@ -21,7 +21,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { FlatList, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
@@ -67,7 +67,8 @@ export default function SearchScreen() {
   )
 
   return (
-    <View style={[styles.root, { paddingTop: insets.top }]}>
+    // Тап по любому пустому месту прячет клавиатуру (нажатия детей не блокируются)
+    <Pressable style={[styles.root, { paddingTop: insets.top }]} onPress={Keyboard.dismiss} accessible={false}>
       <View style={styles.header}>
         <Text variant="displayMd" color="forest">
           {t('search.appName')}
@@ -202,7 +203,7 @@ export default function SearchScreen() {
               </Pressable>
             ))}
       </BottomSheet>
-    </View>
+    </Pressable>
   )
 }
 

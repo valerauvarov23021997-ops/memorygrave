@@ -12,6 +12,7 @@ export default function TabsLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        tabBarHideOnKeyboard: true,
         tabBarActiveTintColor: colors.forest,
         tabBarInactiveTintColor: colors.stone,
         // Парящий стеклянный таб-бар — как в клиентском приложении
@@ -19,7 +20,7 @@ export default function TabsLayout() {
           position: 'absolute',
           left: 16,
           right: 16,
-          bottom: Math.max(insets.bottom, 12),
+          bottom: Math.max(insets.bottom - 18, 10),
           height: 68,
           borderRadius: radii.xl,
           borderTopWidth: 0,

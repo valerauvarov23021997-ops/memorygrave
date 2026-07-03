@@ -1,7 +1,7 @@
-import { Button, Card, useColors, useThemedStyles, type ThemeColors, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, useColors, useThemedStyles, type ThemeColors, spacing, Text, TopBar } from '@pamyat/ui'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { StyleSheet, View } from 'react-native'
+import { Share, StyleSheet, View } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -13,12 +13,19 @@ export default function QrScreen() {
   const insets = useSafeAreaInsets()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
-  const showToast = useToast()
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: grave } = useGrave(graveId ?? '')
 
   // Deep link открывает страницу памяти прямо в приложении (схема pamyat://).
   const url = `pamyat://grave/${graveId}`
+
+  const onShare = async () => {
+    try {
+      await Share.share({ message: t('qr.shareMessage', { name: grave?.fullName ?? '', url }) })
+    } catch {
+      // пользователь мог закрыть окно шэринга — не ошибка
+    }
+  }
 
   return (
     <View style={styles.root}>
@@ -39,7 +46,7 @@ export default function QrScreen() {
           {t('qr.hint')}
         </Text>
 
-        <Button label={t('qr.save')} variant="secondary" onPress={() => showToast(t('qr.saved'), 'success')} fullWidth />
+        <Button label={t('qr.share')} variant="secondary" onPress={() => void onShare()} fullWidth />
       </View>
     </View>
   )
