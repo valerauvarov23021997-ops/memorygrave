@@ -16,6 +16,7 @@ const config: ExpoConfig = {
     backgroundColor: '#FAF7F2',
   },
   assetBundlePatterns: ['**/*'],
+  web: { output: 'single', bundler: 'metro' },
   ios: {
     bundleIdentifier: 'app.pamyat.client',
     buildNumber: '1',

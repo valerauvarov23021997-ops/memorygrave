@@ -1,5 +1,6 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from 'axios'
 import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
 
 import { config } from './config'
 import type { ApiResponse } from './types'
@@ -7,18 +8,42 @@ import type { ApiResponse } from './types'
 const ACCESS_KEY = 'accessToken'
 const REFRESH_KEY = 'refreshToken'
 
+// SecureStore недоступен в вебе — для web-отладки используем localStorage.
+const isWeb = Platform.OS === 'web'
+const webStorage = {
+  get: (k: string) => (typeof localStorage === 'undefined' ? null : localStorage.getItem(k)),
+  set: (k: string, v: string) => {
+    if (typeof localStorage !== 'undefined') localStorage.setItem(k, v)
+  },
+  del: (k: string) => {
+    if (typeof localStorage !== 'undefined') localStorage.removeItem(k)
+  },
+}
+
 export const tokenStorage = {
   async getAccess() {
+    if (isWeb) return webStorage.get(ACCESS_KEY)
     return SecureStore.getItemAsync(ACCESS_KEY)
   },
   async getRefresh() {
+    if (isWeb) return webStorage.get(REFRESH_KEY)
     return SecureStore.getItemAsync(REFRESH_KEY)
   },
   async setTokens(access: string, refresh: string) {
+    if (isWeb) {
+      webStorage.set(ACCESS_KEY, access)
+      webStorage.set(REFRESH_KEY, refresh)
+      return
+    }
     await SecureStore.setItemAsync(ACCESS_KEY, access)
     await SecureStore.setItemAsync(REFRESH_KEY, refresh)
   },
   async clear() {
+    if (isWeb) {
+      webStorage.del(ACCESS_KEY)
+      webStorage.del(REFRESH_KEY)
+      return
+    }
     await SecureStore.deleteItemAsync(ACCESS_KEY)
     await SecureStore.deleteItemAsync(REFRESH_KEY)
   },

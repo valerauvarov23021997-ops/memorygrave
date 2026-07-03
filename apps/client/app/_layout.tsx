@@ -11,6 +11,7 @@ import { router, Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
+import { Platform } from 'react-native'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AnimatedSplash } from '../src/components/AnimatedSplash'
@@ -36,6 +37,7 @@ export default function RootLayout() {
 
   // Нажатие на уведомление о памятной дате открывает страницу человека.
   useEffect(() => {
+    if (Platform.OS === 'web') return // в вебе нативных уведомлений нет
     const openFromResponse = (response: Notifications.NotificationResponse | null) => {
       const graveId = response?.notification.request.content.data?.graveId
       if (typeof graveId === 'string') {
