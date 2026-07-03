@@ -1,12 +1,10 @@
 import { Image } from 'expo-image'
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { StyleSheet, Text as RNText, View } from 'react-native'
 
 import { initials } from '@pamyat/utils'
 
-import { typography } from '../tokens/typography'
 import { useColors } from '../theme/ThemeProvider'
-import { Text } from './Text'
 
 interface AvatarProps {
   name: string
@@ -26,14 +24,30 @@ export function Avatar({ name, size = 40, imageUri }: AvatarProps) {
       />
     )
   }
+  // Метрики масштабируются от размера аватара: фиксированный lineHeight
+  // из токенов обрезал крупные инициалы (герой 96px, редактор 72px).
+  const fontSize = Math.round(size * 0.34)
   return (
     <View style={[styles.placeholder, { width: size, height: size, borderRadius: radius, backgroundColor: c.sageXL }]}>
-      <Text style={[styles.initials, { fontSize: size * 0.35, color: c.forest }]}>{initials(name)}</Text>
+      <RNText
+        allowFontScaling={false}
+        style={[
+          styles.initials,
+          { fontSize, lineHeight: Math.round(fontSize * 1.4), color: c.forest },
+        ]}
+      >
+        {initials(name)}
+      </RNText>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
-  placeholder: { alignItems: 'center', justifyContent: 'center' },
-  initials: { ...typography.label },
+  placeholder: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
+  initials: {
+    fontFamily: 'DMSans_500Medium',
+    textAlign: 'center',
+    includeFontPadding: false,
+    textAlignVertical: 'center',
+  },
 })
