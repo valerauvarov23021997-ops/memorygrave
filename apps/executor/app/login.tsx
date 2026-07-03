@@ -1,5 +1,5 @@
 import { authApi, tokenStorage } from '@pamyat/api'
-import { Button, colors, Input, spacing, Text, TopBar, useToast } from '@pamyat/ui'
+import { Button, colors, FlameLogo, Input, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { formatPhoneMask, isPhoneComplete, normalizePhoneDigits, toE164 } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -33,10 +33,13 @@ export default function LoginScreen() {
     <View style={styles.root}>
       <TopBar />
       <View style={styles.content}>
-        <Text variant="displayMd" color="forest">
+        <View style={styles.brand}>
+          <FlameLogo size={84} />
+        </View>
+        <Text variant="displayMd" color="forest" center>
           {t('auth.title')}
         </Text>
-        <Text variant="bodyMd" color="muted" style={styles.subtitle}>
+        <Text variant="bodyMd" color="muted" center style={styles.subtitle}>
           {t('auth.subtitle')}
         </Text>
         <View style={styles.field}>
@@ -58,6 +61,7 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   root: { flex: 1, backgroundColor: colors.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
+  brand: { alignItems: 'center', marginBottom: spacing.lg },
   subtitle: { marginTop: spacing.sm },
   field: { marginTop: spacing.xl, marginBottom: spacing.lg },
   flag: { fontSize: 18, marginRight: spacing.sm },

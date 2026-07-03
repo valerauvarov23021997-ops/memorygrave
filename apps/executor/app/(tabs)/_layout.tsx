@@ -18,21 +18,21 @@ export default function TabsLayout() {
         name="index"
         options={{
           title: t('tabs.active'),
-          tabBarIcon: ({ color }) => <Icon name="orders" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="orders" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="history"
         options={{
           title: t('tabs.history'),
-          tabBarIcon: ({ color }) => <Icon name="checkCircle" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="checkCircle" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
       <Tabs.Screen
         name="profile"
         options={{
           title: t('tabs.profile'),
-          tabBarIcon: ({ color }) => <Icon name="profile" size={22} color={color} />,
+          tabBarIcon: ({ color, focused }) => <Icon name="profile" size={22} color={color} weight={focused ? 'fill' : 'regular'} />,
         }}
       />
     </Tabs>

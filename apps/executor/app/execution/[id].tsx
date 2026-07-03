@@ -1,5 +1,5 @@
 import { executorApi } from '@pamyat/api'
-import { Button, Card, colors, Icon, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar, useToast } from '@pamyat/ui'
+import { Button, Card, colors, Icon, radii, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar, useToast } from '@pamyat/ui'
 import * as ImagePicker from 'expo-image-picker'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -141,6 +141,7 @@ export default function ExecutionScreen() {
           <PhotoStep
             photos={before}
             onAdd={() => pickPhoto('before')}
+            onRemove={i => setBefore(prev => prev.filter((_, idx) => idx !== i))}
             onSubmit={submitBefore}
             busy={busy}
             hint={t('execution.photoHint')}
@@ -168,6 +169,7 @@ export default function ExecutionScreen() {
           <PhotoStep
             photos={after}
             onAdd={() => pickPhoto('after')}
+            onRemove={i => setAfter(prev => prev.filter((_, idx) => idx !== i))}
             onSubmit={submitAfter}
             busy={busy}
             hint={t('execution.photoHint')}
@@ -199,6 +201,7 @@ export default function ExecutionScreen() {
 function PhotoStep({
   photos,
   onAdd,
+  onRemove,
   onSubmit,
   busy,
   hint,
@@ -207,6 +210,7 @@ function PhotoStep({
 }: {
   photos: string[]
   onAdd: () => void
+  onRemove: (index: number) => void
   onSubmit: () => void
   busy: boolean
   hint: string
@@ -220,7 +224,12 @@ function PhotoStep({
       </Text>
       <View style={styles.grid}>
         {photos.map((uri, i) => (
-          <Image key={i} source={{ uri }} style={styles.photo} contentFit="cover" />
+          <View key={uri} style={styles.photoWrap}>
+            <Image source={{ uri }} style={styles.photo} contentFit="cover" />
+            <Pressable style={styles.removePhoto} onPress={() => onRemove(i)} hitSlop={6}>
+              <Icon name="close" size={12} color={colors.white} />
+            </Pressable>
+          </View>
         ))}
         <Pressable style={styles.addPhoto} onPress={onAdd}>
           <Icon name="camera" size={24} color={colors.sage} />
@@ -269,11 +278,23 @@ const styles = StyleSheet.create({
   section: { gap: spacing.md },
   address: { marginTop: spacing.xs },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm },
-  photo: { width: 100, height: 100, borderRadius: 8 },
+  photoWrap: { position: 'relative' },
+  photo: { width: 100, height: 100, borderRadius: radii.md },
+  removePhoto: {
+    position: 'absolute',
+    top: 4,
+    right: 4,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: 'rgba(26,26,20,0.55)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   addPhoto: {
     width: 100,
     height: 100,
-    borderRadius: 8,
+    borderRadius: radii.md,
     borderWidth: 1,
     borderStyle: 'dashed',
     borderColor: colors.stone,
