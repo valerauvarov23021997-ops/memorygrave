@@ -4,7 +4,7 @@ import { plural } from '@pamyat/utils'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, View } from 'react-native'
+import { Platform, Pressable, StyleSheet, View } from 'react-native'
 import Svg, { Circle, Defs, LinearGradient as SvgGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
 import Animated, {
   Easing,
@@ -82,7 +82,7 @@ export function MemoryCandle({ graveId }: { graveId: string }) {
       </View>
 
       {lit ? (
-        <Animated.View entering={FadeIn.duration(600)}>
+        <Animated.View entering={Platform.OS === 'web' ? undefined : FadeIn.duration(600)}>
           <Text style={styles.litText} center>
             {t('candle.lit')}
           </Text>

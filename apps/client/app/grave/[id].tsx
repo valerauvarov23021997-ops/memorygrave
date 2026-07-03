@@ -26,7 +26,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, type NativeScrollEvent, type NativeSyntheticEvent, Pressable, Share, StyleSheet, View } from 'react-native'
+import { Linking, type NativeScrollEvent, type NativeSyntheticEvent, Platform, Pressable, Share, StyleSheet, View } from 'react-native'
 import Animated, {
   FadeIn,
   interpolate,
@@ -140,7 +140,7 @@ export default function GraveScreen() {
           end={{ x: 0.9, y: 1 }}
           style={[styles.hero, { paddingTop: insets.top + 52 }]}
         >
-          <Animated.View entering={FadeIn.duration(500)} style={styles.heroContent}>
+          <Animated.View entering={Platform.OS === 'web' ? undefined : FadeIn.duration(500)} style={styles.heroContent}>
             <View style={styles.portraitRing}>
               <Avatar name={grave.fullName} size={96} imageUri={grave.photos[0]} />
             </View>
