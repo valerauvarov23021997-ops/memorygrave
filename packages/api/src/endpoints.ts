@@ -334,7 +334,8 @@ export const remindersApi = {
     if (USE_MOCKS) {
       const reminder = remindersMock.find(r => r.id === id)
       if (!reminder) return Promise.reject(new Error('Напоминание не найдено'))
-      return mockDelay({ ...reminder, ...patch })
+      Object.assign(reminder, patch)
+      return mockDelay({ ...reminder })
     }
     return unwrap<Reminder>(client.put(`/reminders/${id}`, patch))
   },

@@ -81,9 +81,24 @@ export default function RemindersScreen() {
       }
       return updated
     },
+    // Оптимистично двигаем ползунок сразу, откатываем при ошибке
+    onMutate: async ({ reminder, next }) => {
+      await qc.cancelQueries({ queryKey: queryKeys.reminders(graveId) })
+      const previous = qc.getQueryData<Reminder[]>(queryKeys.reminders(graveId))
+      qc.setQueryData<Reminder[]>(queryKeys.reminders(graveId), old =>
+        (old ?? []).map(r => (r.id === reminder.id ? { ...r, isEnabled: next } : r))
+      )
+      return { previous }
+    },
+    onError: (_err, _vars, context) => {
+      if (context?.previous) qc.setQueryData(queryKeys.reminders(graveId), context.previous)
+      showToast(t('common.error'), 'error')
+    },
     onSuccess: (_res, { next }) => {
-      void qc.invalidateQueries({ queryKey: queryKeys.reminders(graveId) })
       showToast(next ? t('reminders.enabled') : t('reminders.disabled'), 'success')
+    },
+    onSettled: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.reminders(graveId) })
     },
   })
 
