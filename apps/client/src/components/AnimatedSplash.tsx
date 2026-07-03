@@ -28,6 +28,8 @@ const AnimatedRect = Animated.createAnimatedComponent(Rect)
 
 // Контур пламени (viewBox 0 0 100 140, кончик сверху, низ ≈124)
 const FLAME = 'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
+// Светлое ядро пламени — как в иконке приложения
+const CORE = 'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
 
 const GOLD = '#C2A05A'
 
@@ -125,20 +127,29 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
             </Svg>
           </Animated.View>
 
-          {/* Пламя наливается снизу вверх */}
+          {/* Пламя-логотип наливается снизу вверх: внешний золотой слой + светлое ядро */}
           <Svg width={116} height={162} viewBox="0 0 100 140">
             <Defs>
-              <SvgGradient id="fire" x1="0" y1="1" x2="0" y2="0">
-                <Stop offset="0" stopColor="#B8935A" />
-                <Stop offset="0.55" stopColor="#D9B36B" />
-                <Stop offset="1" stopColor="#F6E6BE" />
+              {/* Градиенты в точности как в иконке приложения */}
+              <SvgGradient id="fire" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#D9B36B" />
+                <Stop offset="0.55" stopColor="#B8935A" />
+                <Stop offset="1" stopColor="#9A6E2E" />
+              </SvgGradient>
+              <SvgGradient id="fireCore" x1="0" y1="0" x2="0" y2="1">
+                <Stop offset="0" stopColor="#FFF7E4" />
+                <Stop offset="1" stopColor="#FCEAC0" />
               </SvgGradient>
               <ClipPath id="flameClip">
                 <Path d={FLAME} />
               </ClipPath>
+              <ClipPath id="coreClip">
+                <Path d={CORE} />
+              </ClipPath>
             </Defs>
             <Path d={FLAME} fill="#F4ECDB" stroke="#E0D2B4" strokeWidth={0.9} />
             <AnimatedRect x={0} width={100} fill="url(#fire)" clipPath="url(#flameClip)" animatedProps={fillProps} />
+            <AnimatedRect x={0} width={100} fill="url(#fireCore)" clipPath="url(#coreClip)" animatedProps={fillProps} />
           </Svg>
         </View>
 
