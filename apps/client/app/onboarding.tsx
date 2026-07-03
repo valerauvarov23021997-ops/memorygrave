@@ -47,8 +47,15 @@ export default function OnboardingScreen() {
   }
 
   const onNext = () => {
-    if (isLast) void finish()
-    else listRef.current?.scrollToIndex({ index: index + 1, animated: true })
+    if (isLast) {
+      void finish()
+      return
+    }
+    // Индекс двигаем сразу: onMomentumScrollEnd после программного скролла
+    // не срабатывает на web и не всегда срабатывает на Android
+    const next = index + 1
+    setIndex(next)
+    listRef.current?.scrollToIndex({ index: next, animated: true })
   }
 
   const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
