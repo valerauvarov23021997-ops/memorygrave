@@ -83,14 +83,14 @@ export default function ProfileScreen() {
   }
 
   return (
+    <View style={styles.root}>
     <ScrollView
-      style={styles.root}
       contentContainerStyle={[styles.content, { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + spacing.xl }]}
     >
       {isLoading || !data ? (
         <Skeleton width="100%" height={64} radius={10} />
       ) : (
-        <View style={styles.userRow}>
+        <Pressable style={styles.userRow} onPress={openEdit}>
           <Avatar name={data.name} size={40} imageUri={data.avatarUrl} />
           <View style={styles.userInfo}>
             <Text variant="headingLg" color="forest">
@@ -100,10 +100,10 @@ export default function ProfileScreen() {
               {data.phone}
             </Text>
           </View>
-          <Pressable hitSlop={8} onPress={openEdit}>
+          <View style={styles.editIcon}>
             <Icon name="edit" size={20} color={c.sage} />
-          </Pressable>
-        </View>
+          </View>
+        </Pressable>
       )}
 
       {data ? (
@@ -123,7 +123,7 @@ export default function ProfileScreen() {
             </Text>
           ) : null}
           <View style={styles.manageBtn}>
-            <Button label={t('profile.manage')} variant="secondary" onPress={() => router.push('/subscription')} />
+            <Button label={t('profile.manage')} variant="light" onPress={() => router.push('/subscription')} />
           </View>
         </LinearGradient>
       ) : null}
@@ -141,6 +141,7 @@ export default function ProfileScreen() {
       <ProfileRow icon="lock" label={t('profile.privacy')} onPress={() => openLink(links.privacy)} />
 
       <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
+    </ScrollView>
 
       <BottomSheet visible={editing} onClose={() => setEditing(false)}>
         <Text variant="headingLg" color="forest" style={styles.editTitle}>
@@ -167,7 +168,7 @@ export default function ProfileScreen() {
           fullWidth
         />
       </BottomSheet>
-    </ScrollView>
+    </View>
   )
 }
 
@@ -189,8 +190,9 @@ const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
     root: { flex: 1, backgroundColor: c.cream },
     content: { paddingHorizontal: spacing.lg },
-    userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 },
     userInfo: { flex: 1 },
+    editIcon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
     subscription: { borderRadius: radii.lg, padding: spacing.md, marginVertical: spacing.lg, gap: 2 },
     subLabel: { ...typography.sectionLabel, color: c.sageL },
     subValid: { ...typography.bodySm, color: 'rgba(250,247,242,0.7)' },

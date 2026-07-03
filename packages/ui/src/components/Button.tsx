@@ -8,7 +8,7 @@ import { typography } from '../tokens/typography'
 import { useColors } from '../theme/ThemeProvider'
 import { Text } from './Text'
 
-type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'light'
 
 interface ButtonProps {
   label: string
@@ -29,6 +29,9 @@ function containerFor(variant: Variant, c: ThemeColors): ViewStyle {
       return { backgroundColor: 'transparent', borderWidth: 1, borderColor: c.error }
     case 'ghost':
       return { backgroundColor: 'transparent' }
+    // Для тёмных/градиентных поверхностей: кремовая заливка, тёмный текст
+    case 'light':
+      return { backgroundColor: c.cream }
     case 'primary':
     default:
       return { backgroundColor: c.forest }
@@ -38,6 +41,7 @@ function containerFor(variant: Variant, c: ThemeColors): ViewStyle {
 function labelColor(variant: Variant, c: ThemeColors): string {
   switch (variant) {
     case 'secondary':
+    case 'light':
       return c.forest
     case 'destructive':
       return c.error
