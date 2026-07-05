@@ -33,13 +33,19 @@
 
 ### 4. Подключи приложение
 
-**Project Settings → API** → скопируй два значения в `apps/client/.env`:
+Создай файл `apps/client/.env` (он не коммитится) с ключами проекта.
+Для проекта `pamyat` (ajctgzzvoxrakbjvcpbt) готовый вариант:
 
 ```
 EXPO_PUBLIC_USE_MOCKS=false
-EXPO_PUBLIC_SUPABASE_URL=https://xxxx.supabase.co
-EXPO_PUBLIC_SUPABASE_ANON_KEY=eyJ...
+EXPO_PUBLIC_SUPABASE_URL=https://ajctgzzvoxrakbjvcpbt.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7Wxfk7HaAI6osyPE69amA_riboCd9V
+EXPO_PUBLIC_API_BASE_URL=https://api.pamyat.app/v1
 ```
+
+Публичный (`sb_publishable_`) ключ безопасно хранить в приложении и доках —
+данные защищает RLS. Секретный (`sb_secret_`) — никогда и никуда, кроме
+серверных настроек Supabase.
 
 `anon`-ключ публичный по дизайну — данные защищает Row Level Security
 (каждый пользователь видит только своё; справочники и страницы памяти
