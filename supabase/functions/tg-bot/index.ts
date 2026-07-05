@@ -49,7 +49,7 @@ Deno.serve(async req => {
     )
     const { data } = await admin
       .from('auth_codes')
-      .select('code, used, created_at')
+      .select('code, phone, used, created_at')
       .eq('token', token)
       .maybeSingle()
 
@@ -62,6 +62,8 @@ Deno.serve(async req => {
     }
 
     await admin.from('auth_codes').update({ sent: true, chat_id: chatId }).eq('token', token)
+    // запоминаем чат: следующие коды придут сюда автоматически, без Start
+    await admin.from('tg_links').upsert({ phone: data.phone, chat_id: chatId, linked_at: new Date().toISOString() })
     await send(
       chatId,
       `Ваш код входа в «Память»:\n\n<b>${data.code}</b>\n\nКод действует 10 минут. Никому его не сообщайте.`

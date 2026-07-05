@@ -68,6 +68,17 @@ $$;
 grant execute on function start_tg_auth(text) to anon, authenticated;
 grant execute on function verify_tg_code(text, text) to anon, authenticated;
 
+-- Связка «телефон ↔ Telegram-чат»: после первого входа коды
+-- отправляются автоматически, без нажатия Start
+create table if not exists tg_links (
+  phone text primary key,
+  chat_id bigint not null,
+  linked_at timestamptz not null default now()
+);
+
+-- Доступ только у service role (edge functions); RLS без политик
+alter table tg_links enable row level security;
+
 -- Чистка старых кодов (можно запускать вручную или по расписанию)
 create or replace function cleanup_auth_codes()
 returns void

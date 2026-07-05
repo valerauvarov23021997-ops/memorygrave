@@ -19,11 +19,13 @@ export default function SmsScreen() {
   const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { verifyCode, sendCode } = useAuthActions()
-  const { phone, tg } = useLocalSearchParams<{ phone: string; tg?: string }>()
+  const { phone, tg, tgs } = useLocalSearchParams<{ phone: string; tg?: string; tgs?: string }>()
 
-  // вход через Telegram-бота: токен deep-link обновляется при повторной отправке
+  // Вход через Telegram-бота. Токен — нужен первый Start;
+  // sent — чат уже связан и код улетел автоматически.
   const [tgToken, setTgToken] = useState(tg ?? '')
-  const viaTelegram = Boolean(config.tgBot && tgToken)
+  const [tgSent, setTgSent] = useState(tgs === '1')
+  const viaTelegram = Boolean(config.tgBot && (tgToken || tgSent))
 
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
@@ -63,12 +65,15 @@ export default function SmsScreen() {
   const resend = async () => {
     if (!phone || seconds > 0) return
     const res = await sendCode(phone)
-    if (res.tgToken) setTgToken(res.tgToken)
+    setTgToken(res.tgToken ?? '')
+    setTgSent(Boolean(res.tgSent))
     setSeconds(RESEND_SECONDS)
   }
 
   const openTelegram = () => {
-    void Linking.openURL(`https://t.me/${config.tgBot}?start=${tgToken}`)
+    // связанный чат — просто открываем Telegram; первый раз — Start-ссылка бота
+    const url = tgSent ? 'https://t.me' : `https://t.me/${config.tgBot}?start=${tgToken}`
+    void Linking.openURL(url)
   }
 
   const timeStr = `0:${String(seconds).padStart(2, '0')}`
@@ -81,15 +86,17 @@ export default function SmsScreen() {
           {t('auth.smsTitle')}
         </Text>
         <Text variant="bodyMd" color="muted" style={styles.subtitle}>
-          {viaTelegram
-            ? t('auth.tgSubtitle', { phone: formatPhoneMask(phone ?? '') })
-            : t('auth.smsSubtitle', { phone: formatPhoneMask(phone ?? '') })}
+          {tgSent
+            ? t('auth.tgSentSubtitle')
+            : viaTelegram
+              ? t('auth.tgSubtitle', { phone: formatPhoneMask(phone ?? '') })
+              : t('auth.smsSubtitle', { phone: formatPhoneMask(phone ?? '') })}
         </Text>
 
         {viaTelegram ? (
           <Pressable style={styles.tgButton} onPress={openTelegram}>
             <Text style={styles.tgIcon}>✈️</Text>
-            <Text style={styles.tgLabel}>{t('auth.tgButton')}</Text>
+            <Text style={styles.tgLabel}>{tgSent ? t('auth.tgOpen') : t('auth.tgButton')}</Text>
           </Pressable>
         ) : null}
 
@@ -136,7 +143,7 @@ export default function SmsScreen() {
 
         <Card variant="success" padding="md" style={styles.hint}>
           <Text variant="bodySm" color="success">
-            {viaTelegram ? t('auth.tgHint') : t('auth.autofillHint')}
+            {tgSent ? t('auth.tgSentHint') : viaTelegram ? t('auth.tgHint') : t('auth.autofillHint')}
           </Text>
         </Card>
       </View>

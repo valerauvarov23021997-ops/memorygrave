@@ -123,12 +123,17 @@ function fail(error: { message: string } | null): never {
 // ─── Авторизация ──────────────────────────────────────────────
 
 export const authApi = {
-  async sendCode(phone: string): Promise<{ success: boolean; expiresIn: number; tgToken?: string }> {
-    // Бот настроен — создаём код и отдаём токен для deep-link в Telegram
+  async sendCode(
+    phone: string
+  ): Promise<{ success: boolean; expiresIn: number; tgToken?: string; tgSent?: boolean }> {
+    // Бот настроен: если телефон уже связан с чатом — код улетает сразу
+    // (tgSent), иначе получаем токен для кнопки со Start-ссылкой (tgToken)
     if (config.tgBot) {
-      const { data, error } = await getSupabase().rpc('start_tg_auth', { p_phone: phone })
+      const { data, error } = await getSupabase().functions.invoke('send-code', { body: { phone } })
       if (error) fail(error)
-      return { success: true, expiresIn: 600, tgToken: (data as { token: string }).token }
+      const d = data as { sent?: boolean; token?: string; error?: string }
+      if (d.error) throw new Error(d.error)
+      return { success: true, expiresIn: 600, tgToken: d.token, tgSent: d.sent }
     }
     // бот не настроен — код принимается любой (режим разработки)
     return { success: true, expiresIn: 60 }

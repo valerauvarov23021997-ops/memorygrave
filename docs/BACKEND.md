@@ -77,13 +77,16 @@ eas update --branch preview --message "реальный бэкенд"   # тес
    BotFather выдаст **токен** — храни его у себя, никому не отправляй.
 2. **Разверни SQL**: Supabase → SQL Editor → вставь целиком
    [`supabase/telegram-auth.sql`](../supabase/telegram-auth.sql) → Run.
-3. **Создай Edge Function**: Supabase → Edge Functions → Create function →
-   имя `tg-bot` → вставь код из
-   [`supabase/functions/tg-bot/index.ts`](../supabase/functions/tg-bot/index.ts) →
-   Deploy. В настройках функции **выключи** «Verify JWT» (вебхук Telegram
-   приходит без токена).
+3. **Создай две Edge Functions**: Supabase → Edge Functions → Create function.
+   У обеих в настройках **выключи** «Verify JWT».
+   - `tg-bot` — код из
+     [`supabase/functions/tg-bot/index.ts`](../supabase/functions/tg-bot/index.ts)
+     (вебхук бота: выдаёт код по Start, запоминает чат)
+   - `send-code` — код из
+     [`supabase/functions/send-code/index.ts`](../supabase/functions/send-code/index.ts)
+     (создаёт код; если чат уже знаком — шлёт сразу, без Start)
 4. **Добавь секрет**: Edge Functions → Secrets → `TELEGRAM_BOT_TOKEN` =
-   токен от BotFather.
+   токен от BotFather (общий для обеих функций).
 5. **Привяжи вебхук** — открой в браузере (подставь своё):
    ```
    https://api.telegram.org/bot<ТОКЕН>/setWebhook?url=https://ajctgzzvoxrakbjvcpbt.supabase.co/functions/v1/tg-bot
@@ -96,11 +99,14 @@ eas update --branch preview --message "реальный бэкенд"   # тес
    ```
    и опубликуй: `eas update --branch preview`.
 
-Как это выглядит: телефон → экран кода с кнопкой
-**«Получить код в Telegram»** → бот присылает 6-значный код (живёт
-10 минут, одноразовый, не больше 5 запросов на номер в час) →
-пользователь вводит его в приложении. Если `EXPO_PUBLIC_TG_BOT` пуст —
-код принимается любой (режим разработки).
+Как это выглядит. **Первый вход**: телефон → кнопка «Получить код
+в Telegram» → Start у бота → код в чате. Бот запоминает связку
+«телефон ↔ чат», поэтому **все следующие входы** — без нажатий:
+ввёл номер → код мгновенно прилетает пушем из Telegram. Код живёт
+10 минут, одноразовый, не больше 5 запросов на номер в час. Если
+пользователь заблокировал бота, связка сбрасывается и снова
+предлагается Start. Если `EXPO_PUBLIC_TG_BOT` пуст — код принимается
+любой (режим разработки).
 
 ## Что осталось на моках (фаза 2)
 

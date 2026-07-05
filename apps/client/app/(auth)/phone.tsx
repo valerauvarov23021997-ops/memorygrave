@@ -27,7 +27,10 @@ export default function PhoneScreen() {
     setLoading(true)
     try {
       const res = await sendCode(digits)
-      router.push({ pathname: '/(auth)/sms', params: { phone: digits, tg: res.tgToken ?? '' } })
+      router.push({
+        pathname: '/(auth)/sms',
+        params: { phone: digits, tg: res.tgToken ?? '', tgs: res.tgSent ? '1' : '' },
+      })
     } catch {
       showToast(t('auth.codeSendError'), 'error')
     } finally {
