@@ -40,6 +40,7 @@
 EXPO_PUBLIC_USE_MOCKS=false
 EXPO_PUBLIC_SUPABASE_URL=https://ajctgzzvoxrakbjvcpbt.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_l7Wxfk7HaAI6osyPE69amA_riboCd9V
+EXPO_PUBLIC_TG_BOT=pamyatcodebot
 EXPO_PUBLIC_API_BASE_URL=https://api.pamyat.app/v1
 ```
 
@@ -95,9 +96,13 @@ eas update --branch preview --message "реальный бэкенд"   # тес
 6. **Включи в приложении** — в `apps/client/.env` добавь строку
    (username бота без @):
    ```
-   EXPO_PUBLIC_TG_BOT=PamyatCodeBot
+   EXPO_PUBLIC_TG_BOT=pamyatcodebot
    ```
    и опубликуй: `eas update --branch preview`.
+
+> Для проекта `pamyat` шаги 1–5 выполнены 05.07.2026: бот
+> [@pamyatcodebot](https://t.me/pamyatcodebot), вебхук привязан,
+> функции задеплоены, SQL применён.
 
 Как это выглядит. **Первый вход**: телефон → кнопка «Получить код
 в Telegram» → Start у бота → код в чате. Бот запоминает связку
