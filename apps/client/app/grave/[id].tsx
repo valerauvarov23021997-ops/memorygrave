@@ -3,7 +3,6 @@ import {
   Badge,
   Button,
   Card,
-  FlameLoader,
   FullscreenGallery,
   GroupedRow,
   GroupedSection,
@@ -26,16 +25,11 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, type NativeScrollEvent, type NativeSyntheticEvent, Platform, Pressable, Share, StyleSheet, View } from 'react-native'
-import Animated, {
-  FadeIn,
-  interpolate,
-  useAnimatedScrollHandler,
-  useAnimatedStyle,
-  useSharedValue,
-} from 'react-native-reanimated'
+import { Linking, Platform, Pressable, Share, StyleSheet, View } from 'react-native'
+import Animated, { FadeIn } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useFlameRefresh } from '../../src/components/FlameRefresh'
 import { MapPreview } from '../../src/components/MapPreview'
 import { MemoryBook } from '../../src/components/MemoryBook'
 import { MemoryCandle } from '../../src/components/MemoryCandle'
@@ -58,21 +52,13 @@ export default function GraveScreen() {
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
 
-  // Оттягивание страницы вниз: огонёк проявляется по мере жеста
-  const pullY = useSharedValue(0)
-  const onScroll = useAnimatedScrollHandler(e => {
-    pullY.value = e.contentOffset.y
+  // Оттягивание страницы вниз: огонёк проявляется по мере жеста,
+  // при отпускании растворяется на месте (общий хук)
+  const flame = useFlameRefresh({
+    refreshing: isRefetching,
+    onRefresh: () => void refetch(),
+    top: insets.top + 52,
   })
-  const pullFlameStyle = useAnimatedStyle(() => ({
-    opacity: interpolate(pullY.value, [-24, -64], [0, 1], 'clamp'),
-    transform: [{ scale: interpolate(pullY.value, [-24, -80], [0.5, 1], 'clamp') }],
-  }))
-  const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    if (e.nativeEvent.contentOffset.y < -70 && !isRefetching) {
-      haptics.light()
-      void refetch()
-    }
-  }
 
   if (isLoading || !grave) {
     return (
@@ -127,17 +113,11 @@ export default function GraveScreen() {
       <Animated.ScrollView
         contentContainerStyle={styles.scroll}
         showsVerticalScrollIndicator={false}
-        onScroll={onScroll}
-        scrollEventThrottle={16}
-        onScrollEndDrag={onScrollEndDrag}
+        refreshControl={flame.refreshControl}
+        {...flame.scrollProps}
       >
         {/* Зелёный «хвост» — при оттягивании вниз сверху остаётся фирменный фон */}
         <View style={styles.bleed} pointerEvents="none" />
-        {/* Огонёк живёт внутри контента над его верхом: уезжает вместе
-            с оттянутой областью и не наплывает на шапку после отпускания */}
-        <Animated.View style={[styles.pullFlame, pullFlameStyle]} pointerEvents="none">
-          <FlameLoader size={26} />
-        </Animated.View>
         {/* Шапка-герой с градиентом и портретом */}
         {/* Градиент строго вертикальный: верхняя кромка ровно forest — сливается
             с «хвостом» при оттягивании вниз в единое полотно */}
@@ -237,6 +217,8 @@ export default function GraveScreen() {
         </View>
       </Animated.ScrollView>
 
+      {flame.indicator}
+
       <View style={[styles.sticky, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button label={t('grave.orderCare')} onPress={onOrder} fullWidth />
       </View>
@@ -285,7 +267,6 @@ const makeStyles = (c: ThemeColors) =>
   root: { flex: 1, backgroundColor: c.cream },
   scroll: { paddingBottom: 0 },
   bleed: { position: 'absolute', top: -600, left: 0, right: 0, height: 600, backgroundColor: c.forest },
-  pullFlame: { position: 'absolute', top: -72, alignSelf: 'center', zIndex: 5 },
   hero: {
     paddingBottom: spacing.xl + 30,
     borderBottomLeftRadius: 28,

@@ -23,7 +23,11 @@ export default function OrdersScreen() {
   const styles = useThemedStyles(makeStyles)
   const [filter, setFilter] = useState<Filter>('all')
   const { data, isLoading, refetch, isRefetching } = useOrders(filter === 'all' ? undefined : filter)
-  const flame = useFlameRefresh({ refreshing: isRefetching, onRefresh: () => void refetch() })
+  const flame = useFlameRefresh({
+    refreshing: isRefetching,
+    onRefresh: () => void refetch(),
+    top: insets.top + 100,
+  })
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('orders.all') },
@@ -75,7 +79,6 @@ export default function OrdersScreen() {
           keyExtractor={o => o.id}
           contentContainerStyle={styles.list}
           refreshControl={flame.refreshControl}
-          ListHeaderComponent={flame.listHeader}
           {...flame.scrollProps}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
@@ -84,6 +87,7 @@ export default function OrdersScreen() {
           )}
         />
       )}
+      {flame.indicator}
     </View>
   )
 }
