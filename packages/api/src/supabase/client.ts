@@ -31,6 +31,22 @@ const authStorage = {
   },
 }
 
+// В российских сетях соединения к Cloudflare (за ним Supabase) иногда
+// «замерзают» без ошибки. Жёсткий таймаут превращает зависание в ошибку,
+// которую react-query тут же ретраит — вместо вечного скелетона.
+const REQUEST_TIMEOUT_MS = 8000
+
+const timeoutFetch: typeof fetch = (input, init) => {
+  const controller = new AbortController()
+  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  // если снаружи передали свой signal — пробрасываем его отмену в наш контроллер
+  if (init?.signal) {
+    if (init.signal.aborted) controller.abort()
+    else init.signal.addEventListener('abort', () => controller.abort(), { once: true })
+  }
+  return fetch(input, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer))
+}
+
 let instance: SupabaseClient | null = null
 
 /** Ленивая инициализация: клиент создаётся при первом обращении. */
@@ -46,6 +62,7 @@ export function getSupabase(): SupabaseClient {
         persistSession: true,
         detectSessionInUrl: false,
       },
+      global: { fetch: timeoutFetch },
     })
   }
   return instance

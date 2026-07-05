@@ -172,7 +172,9 @@ export const authApi = {
   },
 
   async logout(): Promise<{ success: boolean }> {
-    await getSupabase().auth.signOut()
+    // scope: local — чистим сессию на устройстве без похода на сервер,
+    // выход мгновенный даже при плохой сети
+    await getSupabase().auth.signOut({ scope: 'local' })
     await tokenStorage.clear()
     return { success: true }
   },
