@@ -1,8 +1,8 @@
 import { tokenStorage } from '@pamyat/api'
-import { colors } from '@pamyat/ui'
+import { colors, FlameLoader } from '@pamyat/ui'
 import { Redirect } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
 /** Гейт: есть токен → приложение, иначе вход. */
 export default function Index() {
@@ -15,7 +15,7 @@ export default function Index() {
   if (!target) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={colors.forest} />
+        <FlameLoader size={34} />
       </View>
     )
   }

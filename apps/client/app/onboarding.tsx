@@ -133,7 +133,8 @@ const makeStyles = (c: ThemeColors) =>
     justifyContent: 'center',
     ...shadows.md,
   },
-  emoji: { fontSize: 50 },
+  // lineHeight обязан вмещать эмодзи: базовый стиль текста задаёт 22 и режет верх
+  emoji: { fontSize: 50, lineHeight: 62, includeFontPadding: false },
   title: { marginTop: spacing.xl },
   desc: { marginTop: spacing.md, maxWidth: 300, lineHeight: 24 },
   progress: { flexDirection: 'row', gap: spacing.xs, paddingHorizontal: spacing.xl, marginBottom: spacing.lg },

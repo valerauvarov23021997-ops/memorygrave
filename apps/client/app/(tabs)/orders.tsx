@@ -4,9 +4,11 @@ import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { FlatList, Pressable, RefreshControl, StyleSheet, View } from 'react-native'
+import { Pressable, StyleSheet, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useFlameRefresh } from '../../src/components/FlameRefresh'
 import { OrderCardSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useOrders } from '../../src/hooks/queries'
 import { orderStatusBadge } from '../../src/lib/statusMaps'
@@ -21,6 +23,11 @@ export default function OrdersScreen() {
   const styles = useThemedStyles(makeStyles)
   const [filter, setFilter] = useState<Filter>('all')
   const { data, isLoading, refetch, isRefetching } = useOrders(filter === 'all' ? undefined : filter)
+  const flame = useFlameRefresh({
+    refreshing: isRefetching,
+    onRefresh: () => void refetch(),
+    top: insets.top + 100,
+  })
 
   const filters: { key: Filter; label: string }[] = [
     { key: 'all', label: t('orders.all') },
@@ -67,13 +74,12 @@ export default function OrdersScreen() {
           onAction={() => router.push('/(tabs)')}
         />
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={data ?? []}
           keyExtractor={o => o.id}
           contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={c.gold} colors={[c.gold]} />
-          }
+          refreshControl={flame.refreshControl}
+          {...flame.scrollProps}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
               <OrderCard order={item} onPress={() => router.push(`/order/${item.id}`)} />
@@ -81,6 +87,7 @@ export default function OrdersScreen() {
           )}
         />
       )}
+      {flame.indicator}
     </View>
   )
 }

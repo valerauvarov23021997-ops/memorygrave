@@ -1,9 +1,11 @@
-import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { FlatList, RefreshControl, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useFlameRefresh } from '../../src/components/FlameRefresh'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { useSavedGraves } from '../../src/hooks/queries'
 import { graveMeta, groupedPosition } from '../../src/lib/graveMeta'
@@ -13,8 +15,12 @@ export default function SavedScreen() {
   const router = useRouter()
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
-  const c = useColors()
   const { data, isLoading, refetch, isRefetching } = useSavedGraves()
+  const flame = useFlameRefresh({
+    refreshing: isRefetching,
+    onRefresh: () => void refetch(),
+    top: insets.top + 58,
+  })
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -38,13 +44,12 @@ export default function SavedScreen() {
           onAction={() => router.push('/(tabs)')}
         />
       ) : (
-        <FlatList
+        <Animated.FlatList
           data={data ?? []}
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
-          refreshControl={
-            <RefreshControl refreshing={isRefetching} onRefresh={refetch} tintColor={c.gold} colors={[c.gold]} />
-          }
+          refreshControl={flame.refreshControl}
+          {...flame.scrollProps}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
               <GroupedRow
@@ -60,6 +65,7 @@ export default function SavedScreen() {
           )}
         />
       )}
+      {flame.indicator}
     </View>
   )
 }

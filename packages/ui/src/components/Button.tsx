@@ -1,11 +1,12 @@
 import React from 'react'
-import { ActivityIndicator, Pressable, StyleSheet, type TextStyle, type ViewStyle } from 'react-native'
+import { Pressable, StyleSheet, type TextStyle, type ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
 import { type ThemeColors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
 import { useColors } from '../theme/ThemeProvider'
+import { FlameLoader } from './FlameLoader'
 import { Text } from './Text'
 
 type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'light'
@@ -96,7 +97,7 @@ export function Button({
       style={[containerStyle, animatedStyle]}
     >
       {loading ? (
-        <ActivityIndicator color={variant === 'primary' ? c.cream : c.forest} />
+        <FlameLoader size={24} glow={false} />
       ) : (
         <Text style={labelStyle}>{label}</Text>
       )}

@@ -1,9 +1,9 @@
 import { tokenStorage } from '@pamyat/api'
 import { useAuthStore } from '@pamyat/store'
-import { colors } from '@pamyat/ui'
+import { colors, FlameLoader } from '@pamyat/ui'
 import { Redirect } from 'expo-router'
 import { useEffect, useState } from 'react'
-import { ActivityIndicator, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
 import { appStorage } from '../src/lib/storage'
 
@@ -36,7 +36,7 @@ export default function Index() {
   if (!target) {
     return (
       <View style={styles.center}>
-        <ActivityIndicator color={colors.forest} />
+        <FlameLoader size={34} />
       </View>
     )
   }

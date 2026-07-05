@@ -134,10 +134,12 @@ export default function GraveScreen() {
         {/* Зелёный «хвост» — при оттягивании вниз сверху остаётся фирменный фон */}
         <View style={styles.bleed} pointerEvents="none" />
         {/* Шапка-герой с градиентом и портретом */}
+        {/* Градиент строго вертикальный: верхняя кромка ровно forest — сливается
+            с «хвостом» при оттягивании вниз в единое полотно */}
         <LinearGradient
           colors={[c.forest, c.moss]}
-          start={{ x: 0.1, y: 0 }}
-          end={{ x: 0.9, y: 1 }}
+          start={{ x: 0.5, y: 0 }}
+          end={{ x: 0.5, y: 1 }}
           style={[styles.hero, { paddingTop: insets.top + 52 }]}
         >
           <Animated.View entering={Platform.OS === 'web' ? undefined : FadeIn.duration(500)} style={styles.heroContent}>

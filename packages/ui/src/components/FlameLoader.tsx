@@ -54,9 +54,11 @@ export function FlameLoader({ size = 28, glow = true }: FlameLoaderProps) {
 
   const w = size * (100 / 140)
   const glowSize = size * 2.2
+  // без свечения не раздуваем контейнер — важно внутри кнопок
+  const box = glow ? glowSize : size
 
   return (
-    <View style={[styles.box, { width: glowSize, height: glowSize }]}>
+    <View style={[styles.box, { width: box, height: box }]}>
       {glow ? (
         <Animated.View style={[StyleSheet.absoluteFill, glowStyle]} pointerEvents="none">
           <Svg width={glowSize} height={glowSize}>
