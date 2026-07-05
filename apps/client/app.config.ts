@@ -8,8 +8,13 @@ const config: ExpoConfig = {
   orientation: 'portrait',
   userInterfaceStyle: 'light',
   primaryColor: '#1C3318',
-  // projectId подставляется автоматически после `eas init` (см. docs/RELEASE.md)
   icon: './assets/icon.png',
+  extra: {
+    eas: { projectId: 'da299e03-e3b6-4661-842e-5edb0e8ffdbf' },
+  },
+  updates: {
+    url: 'https://u.expo.dev/da299e03-e3b6-4661-842e-5edb0e8ffdbf',
+  },
   splash: {
     image: './assets/splash.png',
     resizeMode: 'contain',
