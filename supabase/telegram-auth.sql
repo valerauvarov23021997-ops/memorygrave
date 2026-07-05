@@ -79,6 +79,68 @@ create table if not exists tg_links (
 -- Доступ только у service role (edge functions); RLS без политик
 alter table tg_links enable row level security;
 
+-- ─── Отправка кода прямо из базы (без edge function в пути входа) ───
+-- Функции Supabase живут на инфраструктуре, которую некоторые российские
+-- операторы душат. REST до базы при этом работает стабильно, поэтому код
+-- создаёт RPC, а сообщение в Telegram уходит асинхронно через pg_net.
+
+create extension if not exists pg_net;
+
+-- Секреты приложения (бот-токен). RLS без политик: доступ только
+-- у security definer функций и service role.
+create table if not exists app_secrets (
+  key text primary key,
+  value text not null
+);
+alter table app_secrets enable row level security;
+
+create or replace function send_login_code(p_phone text)
+returns json
+language plpgsql
+security definer set search_path = public
+as $$
+declare
+  v_recent int;
+  v_token uuid;
+  v_code text;
+  v_chat bigint;
+  v_bot text;
+begin
+  select count(*) into v_recent
+  from auth_codes
+  where phone = p_phone and created_at > now() - interval '1 hour';
+  if v_recent >= 5 then
+    raise exception 'Слишком много запросов кода. Попробуйте через час.';
+  end if;
+
+  v_code := lpad(floor(random() * 1000000)::int::text, 6, '0');
+  insert into auth_codes (phone, code) values (p_phone, v_code)
+  returning token into v_token;
+
+  select chat_id into v_chat from tg_links where phone = p_phone;
+  select value into v_bot from app_secrets where key = 'telegram_bot_token';
+
+  -- чат не связан или токен не настроен — первый вход через Start-ссылку
+  if v_chat is null or v_bot is null then
+    return json_build_object('token', v_token);
+  end if;
+
+  update auth_codes set sent = true, chat_id = v_chat where token = v_token;
+  -- асинхронная отправка: RPC отвечает мгновенно, сообщение шлёт база
+  perform net.http_post(
+    url := 'https://api.telegram.org/bot' || v_bot || '/sendMessage',
+    body := jsonb_build_object(
+      'chat_id', v_chat,
+      'text', 'Ваш код входа в «Память»: ' || v_code || E'\n\nКод действует 10 минут. Никому его не сообщайте.'
+    ),
+    headers := '{"Content-Type": "application/json"}'::jsonb
+  );
+  return json_build_object('sent', true);
+end;
+$$;
+
+grant execute on function send_login_code(text) to anon, authenticated;
+
 -- Чистка старых кодов (можно запускать вручную или по расписанию)
 create or replace function cleanup_auth_codes()
 returns void

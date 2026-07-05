@@ -133,12 +133,12 @@ export const authApi = {
     phone: string
   ): Promise<{ success: boolean; expiresIn: number; tgToken?: string; tgSent?: boolean }> {
     // Бот настроен: если телефон уже связан с чатом — код улетает сразу
-    // (tgSent), иначе получаем токен для кнопки со Start-ссылкой (tgToken)
+    // (tgSent), иначе получаем токен для кнопки со Start-ссылкой (tgToken).
+    // Через RPC, а не edge function: REST-путь стабильнее в мобильных сетях
     if (config.tgBot) {
-      const { data, error } = await getSupabase().functions.invoke('send-code', { body: { phone } })
+      const { data, error } = await getSupabase().rpc('send_login_code', { p_phone: phone })
       if (error) fail(error)
-      const d = data as { sent?: boolean; token?: string; error?: string }
-      if (d.error) throw new Error(d.error)
+      const d = data as { sent?: boolean; token?: string }
       return { success: true, expiresIn: 600, tgToken: d.token, tgSent: d.sent }
     }
     // бот не настроен — код принимается любой (режим разработки)
