@@ -18,3 +18,4 @@ google-play-key.json
 **/google-play-key.json
 *.p8
 *.mobileprovision
+e2e/out/
