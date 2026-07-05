@@ -101,24 +101,39 @@ security definer set search_path = public
 as $$
 declare
   v_recent int;
+  v_fresh record;
   v_token uuid;
   v_code text;
   v_chat bigint;
   v_bot text;
 begin
+  select chat_id into v_chat from tg_links where phone = p_phone;
+  select value into v_bot from app_secrets where key = 'telegram_bot_token';
+
+  -- свежий неиспользованный код уже есть — переиспользуем, а не плодим:
+  -- повторные нажатия кнопки не тратят лимит и не спамят чат
+  select token, sent into v_fresh
+  from auth_codes
+  where phone = p_phone and not used and created_at > now() - interval '45 seconds'
+  order by created_at desc
+  limit 1;
+  if found then
+    if v_fresh.sent then
+      return json_build_object('sent', true);
+    end if;
+    return json_build_object('token', v_fresh.token);
+  end if;
+
   select count(*) into v_recent
   from auth_codes
   where phone = p_phone and created_at > now() - interval '1 hour';
-  if v_recent >= 5 then
+  if v_recent >= 10 then
     raise exception 'Слишком много запросов кода. Попробуйте через час.';
   end if;
 
   v_code := lpad(floor(random() * 1000000)::int::text, 6, '0');
   insert into auth_codes (phone, code) values (p_phone, v_code)
   returning token into v_token;
-
-  select chat_id into v_chat from tg_links where phone = p_phone;
-  select value into v_bot from app_secrets where key = 'telegram_bot_token';
 
   -- чат не связан или токен не настроен — первый вход через Start-ссылку
   if v_chat is null or v_bot is null then

@@ -31,8 +31,10 @@ export default function PhoneScreen() {
         pathname: '/(auth)/sms',
         params: { phone: digits, tg: res.tgToken ?? '', tgs: res.tgSent ? '1' : '' },
       })
-    } catch {
-      showToast(t('auth.codeSendError'), 'error')
+    } catch (e) {
+      // осмысленные ошибки сервера (лимит кодов и т.п.) показываем как есть
+      const msg = e instanceof Error && /[а-яё]/i.test(e.message) ? e.message : t('auth.codeSendError')
+      showToast(msg, 'error')
     } finally {
       setLoading(false)
     }
