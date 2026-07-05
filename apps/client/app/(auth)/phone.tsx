@@ -58,12 +58,12 @@ export default function PhoneScreen() {
         </Text>
 
         <View style={styles.field}>
+          {/* без autoFocus: клавиатура выскакивала поверх стартовой заставки */}
           <Input
             value={formatPhoneMask(digits)}
             onChangeText={text => setDigits(normalizePhoneDigits(text))}
             placeholder="+7 (___) ___-__-__"
             keyboardType="phone-pad"
-            autoFocus
             leftElement={<Text style={styles.flag}>🇷🇺</Text>}
           />
         </View>
