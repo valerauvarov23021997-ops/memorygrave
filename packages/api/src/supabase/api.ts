@@ -49,6 +49,12 @@ interface GraveRow {
 
 const GRAVE_SELECT = 'id, full_name, birth_date, death_date, cemetery_id, plot, biography, photos, lat, lng, status, cemetery:cemeteries(name, city:cities(name))'
 
+// Заглушки placehold.co в мобильных сетях грузятся вечно и «подвешивают»
+// портреты — такие адреса отбрасываем, аватар покажет инициалы мгновенно
+function realPhotos(photos: string[] | null): string[] {
+  return (photos ?? []).filter(u => !u.includes('placehold.co'))
+}
+
 function mapGrave(row: GraveRow, savedIds: Set<string>): Grave {
   return {
     id: row.id,
@@ -60,7 +66,7 @@ function mapGrave(row: GraveRow, savedIds: Set<string>): Grave {
     city: row.cemetery?.city?.name ?? '',
     plot: row.plot,
     biography: row.biography,
-    photos: row.photos ?? [],
+    photos: realPhotos(row.photos),
     coordinates: row.lat != null && row.lng != null ? { latitude: row.lat, longitude: row.lng } : null,
     status: row.status,
     isSaved: savedIds.has(row.id),
@@ -209,21 +215,21 @@ export const gravesApi = {
 
   async getById(id: string): Promise<Grave> {
     const sb = getSupabase()
-    const [{ data, error }, saved] = await Promise.all([
+    // все три запроса — параллельно, а не цепочкой: экономим 1-2 RTT
+    const [{ data, error }, saved, { data: last }] = await Promise.all([
       sb.from('graves').select(GRAVE_SELECT).eq('id', id).single(),
       savedIdSet(),
+      sb
+        .from('orders')
+        .select('id, date, rating, service:services(name)')
+        .eq('grave_id', id)
+        .eq('status', 'completed')
+        .order('date', { ascending: false })
+        .limit(1)
+        .maybeSingle(),
     ])
     if (error || !data) fail(error)
     const grave = mapGrave(data as unknown as GraveRow, saved)
-    // последний завершённый заказ текущего пользователя по этой могиле
-    const { data: last } = await sb
-      .from('orders')
-      .select('id, date, rating, service:services(name)')
-      .eq('grave_id', id)
-      .eq('status', 'completed')
-      .order('date', { ascending: false })
-      .limit(1)
-      .maybeSingle()
     if (last) {
       const svc = last.service as unknown as { name: string } | null
       grave.lastOrder = { id: last.id, serviceName: svc?.name ?? '', date: last.date, rating: last.rating }
@@ -345,10 +351,18 @@ export const servicesApi = {
   },
 
   async getById(id: string): Promise<Service> {
-    const list = await servicesApi.list()
-    const svc = list.find(s => s.id === id)
-    if (!svc) throw new Error('Услуга не найдена')
-    return svc
+    const { data, error } = await getSupabase().from('services').select('*').eq('id', id).single()
+    if (error || !data) fail(error)
+    return {
+      id: data.id as string,
+      name: data.name as string,
+      description: data.description as string,
+      icon: data.icon as string,
+      category: data.category as ServiceCategory,
+      priceFrom: data.price_from as number,
+      fixedPrice: data.fixed_price as boolean,
+      photos: [],
+    }
   },
 }
 

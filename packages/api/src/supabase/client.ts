@@ -51,9 +51,13 @@ export function getSupabase(): SupabaseClient {
   return instance
 }
 
-/** id текущего пользователя; бросает, если сессии нет. */
+/**
+ * id текущего пользователя; бросает, если сессии нет.
+ * getSession читает локально (без сетевого запроса) — важно для скорости.
+ */
 export async function requireUserId(): Promise<string> {
-  const { data, error } = await getSupabase().auth.getUser()
-  if (error || !data.user) throw new Error('Требуется вход в аккаунт')
-  return data.user.id
+  const { data } = await getSupabase().auth.getSession()
+  const uid = data.session?.user.id
+  if (!uid) throw new Error('Требуется вход в аккаунт')
+  return uid
 }

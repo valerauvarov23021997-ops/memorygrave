@@ -95,7 +95,6 @@ export default function SmsScreen() {
 
         {viaTelegram ? (
           <Pressable style={styles.tgButton} onPress={openTelegram}>
-            <Text style={styles.tgIcon}>✈️</Text>
             <Text style={styles.tgLabel}>{tgSent ? t('auth.tgOpen') : t('auth.tgButton')}</Text>
           </Pressable>
         ) : null}
@@ -164,12 +163,9 @@ const makeStyles = (c: ThemeColors) =>
     height: 52,
     borderRadius: radii.full,
     backgroundColor: '#2AABEE',
-    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: spacing.sm,
   },
-  tgIcon: { fontSize: 20, lineHeight: 26 },
   tgLabel: { ...typography.headingMd, color: c.white },
   cells: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xl },
   cell: {
