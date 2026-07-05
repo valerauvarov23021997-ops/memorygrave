@@ -133,6 +133,11 @@ export default function GraveScreen() {
       >
         {/* Зелёный «хвост» — при оттягивании вниз сверху остаётся фирменный фон */}
         <View style={styles.bleed} pointerEvents="none" />
+        {/* Огонёк живёт внутри контента над его верхом: уезжает вместе
+            с оттянутой областью и не наплывает на шапку после отпускания */}
+        <Animated.View style={[styles.pullFlame, pullFlameStyle]} pointerEvents="none">
+          <FlameLoader size={26} />
+        </Animated.View>
         {/* Шапка-герой с градиентом и портретом */}
         {/* Градиент строго вертикальный: верхняя кромка ровно forest — сливается
             с «хвостом» при оттягивании вниз в единое полотно */}
@@ -232,17 +237,6 @@ export default function GraveScreen() {
         </View>
       </Animated.ScrollView>
 
-      {/* Огонёк обновления: растёт при оттягивании, горит пока обновляемся */}
-      {isRefetching ? (
-        <View style={[styles.pullFlame, { top: insets.top + 52 }]} pointerEvents="none">
-          <FlameLoader size={26} />
-        </View>
-      ) : (
-        <Animated.View style={[styles.pullFlame, { top: insets.top + 52 }, pullFlameStyle]} pointerEvents="none">
-          <FlameLoader size={26} />
-        </Animated.View>
-      )}
-
       <View style={[styles.sticky, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button label={t('grave.orderCare')} onPress={onOrder} fullWidth />
       </View>
@@ -291,7 +285,7 @@ const makeStyles = (c: ThemeColors) =>
   root: { flex: 1, backgroundColor: c.cream },
   scroll: { paddingBottom: 0 },
   bleed: { position: 'absolute', top: -600, left: 0, right: 0, height: 600, backgroundColor: c.forest },
-  pullFlame: { position: 'absolute', alignSelf: 'center', zIndex: 5 },
+  pullFlame: { position: 'absolute', top: -72, alignSelf: 'center', zIndex: 5 },
   hero: {
     paddingBottom: spacing.xl + 30,
     borderBottomLeftRadius: 28,

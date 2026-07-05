@@ -6,6 +6,7 @@ import {
   Platform,
   RefreshControl,
   StyleSheet,
+  View,
 } from 'react-native'
 import Animated, {
   interpolate,
@@ -17,16 +18,16 @@ import Animated, {
 interface Options {
   refreshing: boolean
   onRefresh: () => void
-  /** Отступ огонька от верха экрана (обычно insets.top + высота шапки). */
-  top?: number
 }
 
 /**
- * Фирменный pull-to-refresh: на iOS огонёк проявляется по мере оттягивания
- * списка (как на странице памяти). На Android список не тянется «в минус»,
- * поэтому остаётся системный жест с золотым индикатором.
+ * Фирменный pull-to-refresh: на iOS огонёк живёт над верхом контента
+ * и проявляется в «щели» по мере оттягивания списка — а при отпускании
+ * уезжает вместе с ней, не наплывая на контент. На Android список
+ * не тянется «в минус», поэтому остаётся системный жест с золотым
+ * индикатором.
  */
-export function useFlameRefresh({ refreshing, onRefresh, top = 8 }: Options) {
+export function useFlameRefresh({ refreshing, onRefresh }: Options) {
   const c = useColors()
   const pullY = useSharedValue(0)
 
@@ -34,13 +35,10 @@ export function useFlameRefresh({ refreshing, onRefresh, top = 8 }: Options) {
     pullY.value = e.contentOffset.y
   })
 
-  const flameStyle = useAnimatedStyle(
-    () => ({
-      opacity: refreshing ? 1 : interpolate(pullY.value, [-16, -56], [0, 1], 'clamp'),
-      transform: [{ scale: interpolate(pullY.value, [-16, -72], [0.55, 1], 'clamp') }],
-    }),
-    [refreshing]
-  )
+  const flameStyle = useAnimatedStyle(() => ({
+    opacity: interpolate(pullY.value, [-16, -56], [0, 1], 'clamp'),
+    transform: [{ scale: interpolate(pullY.value, [-16, -72], [0.55, 1], 'clamp') }],
+  }))
 
   const onScrollEndDrag = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (e.nativeEvent.contentOffset.y < -64 && !refreshing) {
@@ -63,15 +61,19 @@ export function useFlameRefresh({ refreshing, onRefresh, top = 8 }: Options) {
         progressBackgroundColor={c.white}
       />
     ),
-    /** Огонёк — рендерить последним элементом экрана (поверх списка). */
-    indicator: ios ? (
-      <Animated.View pointerEvents="none" style={[styles.flame, { top }, flameStyle]}>
-        <FlameLoader size={26} />
-      </Animated.View>
+    /** Передать в ListHeaderComponent списка: огонёк едет вместе с контентом. */
+    listHeader: ios ? (
+      <View style={styles.anchor} pointerEvents="none">
+        <Animated.View style={[styles.flame, flameStyle]}>
+          <FlameLoader size={26} />
+        </Animated.View>
+      </View>
     ) : null,
   }
 }
 
 const styles = StyleSheet.create({
-  flame: { position: 'absolute', alignSelf: 'center', zIndex: 10 },
+  // нулевая высота: якорь не влияет на раскладку, огонёк висит над контентом
+  anchor: { height: 0 },
+  flame: { position: 'absolute', top: -68, alignSelf: 'center' },
 })

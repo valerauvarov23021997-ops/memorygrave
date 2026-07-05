@@ -16,11 +16,7 @@ export default function SavedScreen() {
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
   const { data, isLoading, refetch, isRefetching } = useSavedGraves()
-  const flame = useFlameRefresh({
-    refreshing: isRefetching,
-    onRefresh: () => void refetch(),
-    top: insets.top + 58,
-  })
+  const flame = useFlameRefresh({ refreshing: isRefetching, onRefresh: () => void refetch() })
 
   return (
     <View style={[styles.root, { paddingTop: insets.top }]}>
@@ -49,6 +45,7 @@ export default function SavedScreen() {
           keyExtractor={g => g.id}
           contentContainerStyle={styles.list}
           refreshControl={flame.refreshControl}
+          ListHeaderComponent={flame.listHeader}
           {...flame.scrollProps}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
@@ -65,7 +62,6 @@ export default function SavedScreen() {
           )}
         />
       )}
-      {flame.indicator}
     </View>
   )
 }
