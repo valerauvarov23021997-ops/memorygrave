@@ -1,9 +1,10 @@
+import { config } from '@pamyat/api'
 import { Button, Card, radii, useThemedStyles, type ThemeColors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
 import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { Linking, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useAuthActions } from '../../src/hooks/useAuthActions'
@@ -18,7 +19,11 @@ export default function SmsScreen() {
   const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
   const { verifyCode, sendCode } = useAuthActions()
-  const { phone } = useLocalSearchParams<{ phone: string }>()
+  const { phone, tg } = useLocalSearchParams<{ phone: string; tg?: string }>()
+
+  // вход через Telegram-бота: токен deep-link обновляется при повторной отправке
+  const [tgToken, setTgToken] = useState(tg ?? '')
+  const viaTelegram = Boolean(config.tgBot && tgToken)
 
   const [code, setCode] = useState('')
   const [loading, setLoading] = useState(false)
@@ -57,8 +62,13 @@ export default function SmsScreen() {
 
   const resend = async () => {
     if (!phone || seconds > 0) return
-    await sendCode(phone)
+    const res = await sendCode(phone)
+    if (res.tgToken) setTgToken(res.tgToken)
     setSeconds(RESEND_SECONDS)
+  }
+
+  const openTelegram = () => {
+    void Linking.openURL(`https://t.me/${config.tgBot}?start=${tgToken}`)
   }
 
   const timeStr = `0:${String(seconds).padStart(2, '0')}`
@@ -71,8 +81,17 @@ export default function SmsScreen() {
           {t('auth.smsTitle')}
         </Text>
         <Text variant="bodyMd" color="muted" style={styles.subtitle}>
-          {t('auth.smsSubtitle', { phone: formatPhoneMask(phone ?? '') })}
+          {viaTelegram
+            ? t('auth.tgSubtitle', { phone: formatPhoneMask(phone ?? '') })
+            : t('auth.smsSubtitle', { phone: formatPhoneMask(phone ?? '') })}
         </Text>
+
+        {viaTelegram ? (
+          <Pressable style={styles.tgButton} onPress={openTelegram}>
+            <Text style={styles.tgIcon}>✈️</Text>
+            <Text style={styles.tgLabel}>{t('auth.tgButton')}</Text>
+          </Pressable>
+        ) : null}
 
         <Pressable style={styles.cells} onPress={() => inputRef.current?.focus()}>
           {Array.from({ length: CODE_LENGTH }).map((_, i) => {
@@ -117,7 +136,7 @@ export default function SmsScreen() {
 
         <Card variant="success" padding="md" style={styles.hint}>
           <Text variant="bodySm" color="success">
-            {t('auth.autofillHint')}
+            {viaTelegram ? t('auth.tgHint') : t('auth.autofillHint')}
           </Text>
         </Card>
       </View>
@@ -132,6 +151,19 @@ const makeStyles = (c: ThemeColors) =>
   root: { flex: 1, backgroundColor: c.cream },
   content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
   subtitle: { marginTop: spacing.sm },
+  // фирменная кнопка Telegram: цвет мессенджера, высота как у Button
+  tgButton: {
+    marginTop: spacing.lg,
+    height: 52,
+    borderRadius: radii.full,
+    backgroundColor: '#2AABEE',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.sm,
+  },
+  tgIcon: { fontSize: 20, lineHeight: 26 },
+  tgLabel: { ...typography.headingMd, color: c.white },
   cells: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xl },
   cell: {
     flex: 1,

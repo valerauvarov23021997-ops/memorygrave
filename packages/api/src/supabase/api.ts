@@ -7,6 +7,7 @@
  * подключается позже, интерфейс не изменится.
  */
 import { tokenStorage } from '../client'
+import { config } from '../config'
 import { plansMock } from '../mocks'
 import type {
   AppNotification,
@@ -122,13 +123,24 @@ function fail(error: { message: string } | null): never {
 // ─── Авторизация ──────────────────────────────────────────────
 
 export const authApi = {
-  async sendCode(_phone: string): Promise<{ success: boolean; expiresIn: number }> {
-    // SMS-провайдер подключается позже: код пока принимается любой
+  async sendCode(phone: string): Promise<{ success: boolean; expiresIn: number; tgToken?: string }> {
+    // Бот настроен — создаём код и отдаём токен для deep-link в Telegram
+    if (config.tgBot) {
+      const { data, error } = await getSupabase().rpc('start_tg_auth', { p_phone: phone })
+      if (error) fail(error)
+      return { success: true, expiresIn: 600, tgToken: (data as { token: string }).token }
+    }
+    // бот не настроен — код принимается любой (режим разработки)
     return { success: true, expiresIn: 60 }
   },
 
-  async verifyCode(phone: string, _code: string): Promise<AuthTokens> {
+  async verifyCode(phone: string, code: string): Promise<AuthTokens> {
     const sb = getSupabase()
+    if (config.tgBot) {
+      const { data: ok, error } = await sb.rpc('verify_tg_code', { p_phone: phone, p_code: code })
+      if (error) fail(error)
+      if (!ok) throw new Error('Неверный код')
+    }
     // уже есть сессия (повторный вход) — используем её
     const existing = await sb.auth.getSession()
     let session = existing.data.session

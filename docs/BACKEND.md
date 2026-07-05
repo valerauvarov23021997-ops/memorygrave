@@ -68,11 +68,46 @@ eas update --branch preview --message "реальный бэкенд"   # тес
 свечи памяти (общий счётчик, 1 свеча/день на человека), книга воспоминаний,
 напоминания, профиль и тариф, уведомления.
 
+## Коды входа через Telegram (бесплатно, вместо SMS)
+
+Приложение умеет присылать код входа через Telegram-бота. Настройка:
+
+1. **Создай бота**: в Telegram открой [@BotFather](https://t.me/BotFather) →
+   `/newbot` → имя «Память» → username вида `PamyatCodeBot`.
+   BotFather выдаст **токен** — храни его у себя, никому не отправляй.
+2. **Разверни SQL**: Supabase → SQL Editor → вставь целиком
+   [`supabase/telegram-auth.sql`](../supabase/telegram-auth.sql) → Run.
+3. **Создай Edge Function**: Supabase → Edge Functions → Create function →
+   имя `tg-bot` → вставь код из
+   [`supabase/functions/tg-bot/index.ts`](../supabase/functions/tg-bot/index.ts) →
+   Deploy. В настройках функции **выключи** «Verify JWT» (вебхук Telegram
+   приходит без токена).
+4. **Добавь секрет**: Edge Functions → Secrets → `TELEGRAM_BOT_TOKEN` =
+   токен от BotFather.
+5. **Привяжи вебхук** — открой в браузере (подставь своё):
+   ```
+   https://api.telegram.org/bot<ТОКЕН>/setWebhook?url=https://ajctgzzvoxrakbjvcpbt.supabase.co/functions/v1/tg-bot
+   ```
+   Должно ответить `{"ok":true,...}`.
+6. **Включи в приложении** — в `apps/client/.env` добавь строку
+   (username бота без @):
+   ```
+   EXPO_PUBLIC_TG_BOT=PamyatCodeBot
+   ```
+   и опубликуй: `eas update --branch preview`.
+
+Как это выглядит: телефон → экран кода с кнопкой
+**«Получить код в Telegram»** → бот присылает 6-значный код (живёт
+10 минут, одноразовый, не больше 5 запросов на номер в час) →
+пользователь вводит его в приложении. Если `EXPO_PUBLIC_TG_BOT` пуст —
+код принимается любой (режим разработки).
+
 ## Что осталось на моках (фаза 2)
 
 - **Оплата** — ждёт ИП/ООО и договор с ЮКассой
 - **Приложение исполнителя** — нужна логика назначения заказов (edge functions)
-- **SMS-код** — нужен договор с SMS-провайдером (SMS Aero / SMSC)
+- **SMS-код** — как запасной путь для тех, у кого нет Telegram
+  (нужен договор с SMS-провайдером)
 - **Загрузка фото** — Supabase Storage, подключим следующим шагом
 
 ## Замечания по безопасности

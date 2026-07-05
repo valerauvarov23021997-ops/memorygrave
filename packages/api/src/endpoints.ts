@@ -58,6 +58,8 @@ const SUPA = config.backend === 'supabase'
 export interface SendCodeResult {
   success: boolean
   expiresIn: number
+  /** Токен deep-link в Telegram-бота (когда вход через Telegram включён). */
+  tgToken?: string
 }
 
 export const authApi = {

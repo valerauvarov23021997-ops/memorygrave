@@ -23,6 +23,8 @@ export const config = {
   backend,
   supabaseUrl,
   supabaseAnonKey,
+  /** Username Telegram-бота кодов входа (без @). Пусто — коды отключены. */
+  tgBot: process.env.EXPO_PUBLIC_TG_BOT ?? '',
   timeout: 10_000,
 } as const
 
