@@ -1,5 +1,5 @@
 # Прокси «Память» → Supabase через Yandex API Gateway.
-# Вставить целиком в поле «Спецификация» при создании шлюза.
+# Вставить целиком в поле «Спецификация» шлюза.
 openapi: 3.0.0
 info:
   title: pamyat-proxy
@@ -7,17 +7,51 @@ info:
 
 paths:
   /{url+}:
-    x-yc-apigateway-any-method:
-      summary: Проксирование всех запросов в Supabase
-      parameters:
-        - name: url
-          in: path
-          required: true
-          schema:
-            type: string
+    parameters:
+      - name: url
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
       x-yc-apigateway-integration:
         type: http
+        method: GET
         url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
-        timeouts:
-          connect: 5
-          read: 30
+        timeouts: { connect: 5, read: 30 }
+    post:
+      x-yc-apigateway-integration:
+        type: http
+        method: POST
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
+    put:
+      x-yc-apigateway-integration:
+        type: http
+        method: PUT
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
+    patch:
+      x-yc-apigateway-integration:
+        type: http
+        method: PATCH
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
+    delete:
+      x-yc-apigateway-integration:
+        type: http
+        method: DELETE
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
+    head:
+      x-yc-apigateway-integration:
+        type: http
+        method: HEAD
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
+    options:
+      x-yc-apigateway-integration:
+        type: http
+        method: OPTIONS
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts: { connect: 5, read: 30 }
