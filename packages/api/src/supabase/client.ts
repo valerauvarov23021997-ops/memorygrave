@@ -78,7 +78,7 @@ const timeoutFetch: typeof fetch = (input, init) => {
     else init.signal.addEventListener('abort', () => controller.abort(), { once: true })
   }
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-  const path = url.replace(config.supabaseUrl, '').split('?')[0]
+  const path = url.replace(config.supabaseUrl, '').split('?')[0] ?? ''
   const skipDiag = path.includes('diag_events')
   const started = Date.now()
   return fetch(input, { ...init, signal: controller.signal })
