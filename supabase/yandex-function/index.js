@@ -11,8 +11,44 @@ const SKIP_REQ = new Set(['host', 'content-length', 'connection', 'x-forwarded-f
 // который режут мобильные операторы — запросы замерзают намертво
 const SKIP_RES = new Set(['content-length', 'transfer-encoding', 'connection', 'content-encoding', 'alt-svc', 'set-cookie'])
 
+// Тестовая страница /nettest: делает те же запросы, что приложение,
+// прямо из Safari — показывает время и статус каждого
+const NETTEST_HTML = `<!doctype html><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Тест сети</title>
+<body style="font-family:-apple-system;padding:16px">
+<h3>Тест сети «Память»</h3><div id="log">запускаю...</div>
+<script>
+const KEY='sb_publishable_l7Wxfk7HaAI6osyPE69amA_riboCd9V'
+const log=document.getElementById('log')
+async function one(n,method,path,body){
+  const t=Date.now()
+  try{
+    const r=await fetch(path,{method,headers:{apikey:KEY,'Content-Type':'application/json'},body})
+    log.innerHTML+='<div>'+n+': <b>'+r.status+'</b> за '+(Date.now()-t)+' мс</div>'
+  }catch(e){
+    log.innerHTML+='<div>'+n+': <b style="color:red">ОШИБКА</b> за '+(Date.now()-t)+' мс</div>'
+  }
+}
+;(async()=>{
+  log.innerHTML=''
+  for(let i=1;i<=3;i++) await one('GET города #'+i,'GET','/rest/v1/cities?select=id')
+  for(let i=1;i<=3;i++) await one('GET захоронения #'+i,'GET','/rest/v1/graves?select=id&limit=5')
+  for(let i=1;i<=2;i++) await one('POST rpc #'+i,'POST','/rest/v1/rpc/candle_status',JSON.stringify({p_grave:'grave-1'}))
+  log.innerHTML+='<div><b>ГОТОВО</b></div>'
+})()
+</script>`
+
 module.exports.handler = async function (event) {
   const path = (event.params && event.params.url) || ''
+
+  if (path === 'nettest') {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' },
+      body: NETTEST_HTML,
+    }
+  }
   const query = event.multiValueQueryStringParameters || {}
   const qs = Object.entries(query)
     .flatMap(([k, vals]) => vals.map(v => `${encodeURIComponent(k)}=${encodeURIComponent(v)}`))
