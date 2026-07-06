@@ -20,5 +20,5 @@ paths:
         method: ANY
         url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
         timeouts:
-          connect: 5s
-          read: 30s
+          connect: 5
+          read: 30
