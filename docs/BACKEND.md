@@ -152,6 +152,16 @@ on conflict (key) do update set value = excluded.value;
    ```
    и опубликовать `eas update`. Ключ и остальные строки не меняются.
 
+> Важно: http-интеграция шлюза не пропускает заголовки и query,
+> поэтому шлюз работает в связке с функцией-прокси
+> [`supabase/yandex-function/index.js`](../supabase/yandex-function/index.js)
+> (Cloud Functions → публичная функция → её id в спецификации шлюза,
+> интеграция `cloud_functions`).
+>
+> Для проекта `pamyat` настроено 06.07.2026, шлюз:
+> `https://d5du3nsn7n7117io58ng.y3q8o1jq.apigw.yandexcloud.net`
+> (полный e2e через прокси: 9/9).
+
 Шлюз молча пересылает все запросы (REST, auth, RPC) в Supabase.
 Ограничение: тело запроса до ~3.5 МБ — для загрузки фото в будущем
 понадобится либо лимит на размер, либо VPS-прокси (Caddy/nginx,
