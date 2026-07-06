@@ -1,7 +1,7 @@
 import { config, profileApi } from '@pamyat/api'
 
 // обновлять при каждой публикации, чтобы отличать версии на устройствах
-const BUILD_TAG = '07.07-диаг'
+const BUILD_TAG = '07.07-диаг2'
 import {
   Avatar,
   BottomSheet,

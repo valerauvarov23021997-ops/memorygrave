@@ -63,9 +63,12 @@ async function diagFlush(): Promise<void> {
   diagBuffer = []
   if (!batch.length || !instance) return
   try {
-    await instance.from('diag_events').insert(batch)
+    const { error } = await instance.from('diag_events').insert(batch)
+    if (error) throw error
   } catch {
-    // диагностика не должна мешать работе
+    // сеть недоступна — возвращаем в буфер, дошлём когда вернётся
+    diagBuffer = [...batch, ...diagBuffer].slice(-100)
+    if (!diagTimer) diagTimer = setTimeout(() => void diagFlush(), 20_000)
   }
 }
 
