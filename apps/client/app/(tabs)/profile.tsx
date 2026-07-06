@@ -1,4 +1,7 @@
-import { profileApi } from '@pamyat/api'
+import { config, profileApi } from '@pamyat/api'
+
+// обновлять при каждой публикации, чтобы отличать версии на устройствах
+const BUILD_TAG = '07.07-диаг'
 import {
   Avatar,
   BottomSheet,
@@ -144,6 +147,10 @@ export default function ProfileScreen() {
       </GroupedSection>
 
       <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
+      {/* метка сборки: по ней видно, какая версия реально стоит на устройстве */}
+      <Text variant="caption" color="light" center>
+        {`Сборка ${BUILD_TAG} · ${config.backend}`}
+      </Text>
     </ScrollView>
 
       <BottomSheet visible={editing} onClose={() => setEditing(false)}>
