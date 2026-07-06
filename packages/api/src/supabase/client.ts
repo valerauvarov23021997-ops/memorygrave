@@ -72,7 +72,31 @@ async function diagFlush(): Promise<void> {
   }
 }
 
-const timeoutFetch: typeof fetch = (input, init) => {
+// ─── Дисциплина трафика ───────────────────────────────────────
+// DPI мобильных операторов чернодырит хост при шторме параллельных
+// TLS-соединений. Поэтому: максимум 4 одновременных запроса и
+// «предохранитель» — после серии таймаутов пауза вместо лавины повторов.
+const MAX_PARALLEL = 4
+let inFlight = 0
+const queue: Array<() => void> = []
+
+async function acquireSlot(): Promise<void> {
+  if (inFlight >= MAX_PARALLEL) {
+    await new Promise<void>(resolve => queue.push(resolve))
+  }
+  inFlight++
+}
+
+function releaseSlot(): void {
+  inFlight--
+  const next = queue.shift()
+  if (next) next()
+}
+
+let consecutiveTimeouts = 0
+let cooldownUntil = 0
+
+const rawTimeoutFetch: typeof fetch = (input, init) => {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
   // если снаружи передали свой signal — пробрасываем его отмену в наш контроллер
@@ -97,6 +121,32 @@ const timeoutFetch: typeof fetch = (input, init) => {
       throw e
     })
     .finally(() => clearTimeout(timer))
+}
+
+const timeoutFetch: typeof fetch = async (input, init) => {
+  // предохранитель открыт — отдаём ошибку сразу, без похода в сеть
+  if (Date.now() < cooldownUntil) {
+    throw new Error('Сеть остывает после сбоев, повторите через несколько секунд')
+  }
+  await acquireSlot()
+  try {
+    const resp = await rawTimeoutFetch(input, init)
+    consecutiveTimeouts = 0
+    return resp
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      consecutiveTimeouts++
+      // серия таймаутов = мёртвые соединения или гнев DPI:
+      // прекращаем шторм, даём сети 7 секунд прийти в себя
+      if (consecutiveTimeouts >= 4) {
+        cooldownUntil = Date.now() + 7000
+        consecutiveTimeouts = 0
+      }
+    }
+    throw e
+  } finally {
+    releaseSlot()
+  }
 }
 
 let instance: SupabaseClient | null = null

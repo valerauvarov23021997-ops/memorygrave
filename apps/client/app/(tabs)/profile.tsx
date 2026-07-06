@@ -1,7 +1,7 @@
 import { config, profileApi, runNetProbe } from '@pamyat/api'
 
 // обновлять при каждой публикации, чтобы отличать версии на устройствах
-const BUILD_TAG = '07.07-диаг3'
+const BUILD_TAG = '07.07-диаг4'
 import {
   Avatar,
   BottomSheet,
