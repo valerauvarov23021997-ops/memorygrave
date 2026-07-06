@@ -1,7 +1,7 @@
-import { config, profileApi } from '@pamyat/api'
+import { config, profileApi, runNetProbe } from '@pamyat/api'
 
 // обновлять при каждой публикации, чтобы отличать версии на устройствах
-const BUILD_TAG = '07.07-диаг2'
+const BUILD_TAG = '07.07-диаг3'
 import {
   Avatar,
   BottomSheet,
@@ -147,10 +147,18 @@ export default function ProfileScreen() {
       </GroupedSection>
 
       <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
-      {/* метка сборки: по ней видно, какая версия реально стоит на устройстве */}
-      <Text variant="caption" color="light" center>
-        {`Сборка ${BUILD_TAG} · ${config.backend}`}
-      </Text>
+      {/* метка сборки; тап — проба сети (результат в тосте и в журнале) */}
+      <Pressable
+        onPress={() => {
+          showToast('Проба сети: ~20 секунд…', 'info')
+          void runNetProbe().then(r => showToast(r, 'info'))
+        }}
+        hitSlop={12}
+      >
+        <Text variant="caption" color="light" center>
+          {`Сборка ${BUILD_TAG} · ${config.backend}`}
+        </Text>
+      </Pressable>
     </ScrollView>
 
       <BottomSheet visible={editing} onClose={() => setEditing(false)}>

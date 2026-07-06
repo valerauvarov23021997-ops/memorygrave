@@ -121,6 +121,35 @@ export function getSupabase(): SupabaseClient {
 }
 
 /**
+ * Проба сети из приложения: контрольные запросы к шлюзу, Яндексу
+ * и прямому Supabase. Результаты пишутся в diag_events (путь /probe/*)
+ * и возвращаются строкой для показа пользователю.
+ */
+export async function runNetProbe(): Promise<string> {
+  const results: string[] = []
+  const probe = async (name: string, url: string): Promise<void> => {
+    const started = Date.now()
+    const controller = new AbortController()
+    const timer = setTimeout(() => controller.abort(), 8000)
+    try {
+      const r = await fetch(url, { signal: controller.signal, headers: { apikey: config.supabaseAnonKey } })
+      diagLog({ path: `/probe/${name}`, method: 'GET', ms: Date.now() - started, status: String(r.status) })
+      results.push(`${name}: ${r.status} за ${Date.now() - started}мс`)
+    } catch {
+      diagLog({ path: `/probe/${name}`, method: 'GET', ms: Date.now() - started, status: 'timeout' })
+      results.push(`${name}: ✗ (${Date.now() - started}мс)`)
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  for (let i = 1; i <= 3; i++) await probe(`шлюз${i}`, `${config.supabaseUrl}/auth/v1/health`)
+  await probe('яндекс', 'https://ya.ru/robots.txt')
+  await probe('supabase-напрямую', 'https://ajctgzzvoxrakbjvcpbt.supabase.co/auth/v1/health')
+  void diagFlush()
+  return results.join('\n')
+}
+
+/**
  * id текущего пользователя; бросает, если сессии нет.
  * getSession читает локально (без сетевого запроса) — важно для скорости.
  */
