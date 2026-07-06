@@ -36,6 +36,39 @@ const authStorage = {
 // которую react-query тут же ретраит — вместо вечного скелетона.
 const REQUEST_TIMEOUT_MS = 8000
 
+// ─── Диагностика: журнал скорости запросов пишется в базу ───
+// Каждый запрос (кроме самого журнала) логируется: путь, мс, статус.
+// Смотреть: select * from diag_events order by created_at desc
+interface DiagEvent {
+  path: string
+  method: string
+  ms: number
+  status: string
+}
+let diagBuffer: DiagEvent[] = []
+let diagTimer: ReturnType<typeof setTimeout> | null = null
+
+function diagLog(event: DiagEvent): void {
+  diagBuffer.push(event)
+  if (diagBuffer.length >= 15) void diagFlush()
+  else if (!diagTimer) diagTimer = setTimeout(() => void diagFlush(), 12_000)
+}
+
+async function diagFlush(): Promise<void> {
+  if (diagTimer) {
+    clearTimeout(diagTimer)
+    diagTimer = null
+  }
+  const batch = diagBuffer
+  diagBuffer = []
+  if (!batch.length || !instance) return
+  try {
+    await instance.from('diag_events').insert(batch)
+  } catch {
+    // диагностика не должна мешать работе
+  }
+}
+
 const timeoutFetch: typeof fetch = (input, init) => {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
@@ -44,7 +77,23 @@ const timeoutFetch: typeof fetch = (input, init) => {
     if (init.signal.aborted) controller.abort()
     else init.signal.addEventListener('abort', () => controller.abort(), { once: true })
   }
-  return fetch(input, { ...init, signal: controller.signal }).finally(() => clearTimeout(timer))
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+  const path = url.replace(config.supabaseUrl, '').split('?')[0]
+  const skipDiag = path.includes('diag_events')
+  const started = Date.now()
+  return fetch(input, { ...init, signal: controller.signal })
+    .then(resp => {
+      if (!skipDiag) diagLog({ path, method: init?.method ?? 'GET', ms: Date.now() - started, status: String(resp.status) })
+      return resp
+    })
+    .catch((e: unknown) => {
+      if (!skipDiag) {
+        const status = e instanceof Error && e.name === 'AbortError' ? 'timeout' : 'error'
+        diagLog({ path, method: init?.method ?? 'GET', ms: Date.now() - started, status })
+      }
+      throw e
+    })
+    .finally(() => clearTimeout(timer))
 }
 
 let instance: SupabaseClient | null = null
