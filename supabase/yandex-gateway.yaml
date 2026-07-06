@@ -17,7 +17,6 @@ paths:
             type: string
       x-yc-apigateway-integration:
         type: http
-        method: ANY
         url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
         timeouts:
           connect: 5
