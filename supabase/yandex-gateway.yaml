@@ -1,0 +1,24 @@
+# Прокси «Память» → Supabase через Yandex API Gateway.
+# Вставить целиком в поле «Спецификация» при создании шлюза.
+openapi: 3.0.0
+info:
+  title: pamyat-proxy
+  version: 1.0.0
+
+paths:
+  /{url+}:
+    x-yc-apigateway-any-method:
+      summary: Проксирование всех запросов в Supabase
+      parameters:
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      x-yc-apigateway-integration:
+        type: http
+        method: ANY
+        url: https://ajctgzzvoxrakbjvcpbt.supabase.co/{url}
+        timeouts:
+          connect: 5s
+          read: 30s
