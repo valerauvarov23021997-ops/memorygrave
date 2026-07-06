@@ -7,7 +7,9 @@ const UPSTREAM = 'https://ajctgzzvoxrakbjvcpbt.supabase.co'
 
 // эти заголовки нельзя пробрасывать как есть
 const SKIP_REQ = new Set(['host', 'content-length', 'connection', 'x-forwarded-for', 'x-forwarded-proto', 'x-real-ip', 'x-trace-id', 'x-request-id'])
-const SKIP_RES = new Set(['content-length', 'transfer-encoding', 'connection', 'content-encoding'])
+// alt-svc вырезаем обязательно: реклама HTTP/3 переключает iOS на QUIC,
+// который режут мобильные операторы — запросы замерзают намертво
+const SKIP_RES = new Set(['content-length', 'transfer-encoding', 'connection', 'content-encoding', 'alt-svc', 'set-cookie'])
 
 module.exports.handler = async function (event) {
   const path = (event.params && event.params.url) || ''
