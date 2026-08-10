@@ -28,6 +28,8 @@ export interface Cemetery {
   name: string
   cityId: string
   cityName: string
+  /** План кладбища оцифрован — доступна карта с местами захоронений. */
+  hasMap: boolean
 }
 
 export interface Grave {

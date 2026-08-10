@@ -445,3 +445,9 @@ insert into cemetery_paths (cemetery_id, surface, polygon) values
 -- select count(*) from burial_places where cemetery_id = 'daymische';           -- 383
 -- select count(*) from burial_places where plot_polygon is not null;            -- 265
 -- select count(*) from cemetery_paths where cemetery_id = 'daymische';          -- 4
+
+-- ─── Отметка «план оцифрован» ───
+-- Приложение показывает вход на карту только для кладбищ с этим флагом,
+-- иначе пользователь упирается в пустой экран.
+alter table cemeteries add column if not exists has_map boolean not null default false;
+update cemeteries set has_map = true where id = 'daymische';

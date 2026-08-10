@@ -45,6 +45,7 @@ export default function SearchScreen() {
   const { data: cities } = useCities()
   const { data: cemeteries } = useCemeteries()
   const cemeteryName = cemeteries?.find(cm => cm.id === cemeteryId)?.name
+  const mapped = useMemo(() => (cemeteries ?? []).filter(cm => cm.hasMap), [cemeteries])
 
   const hasQuery = query.trim().length > 0
   const hasFilters = !!city || !!cemeteryId
@@ -118,6 +119,25 @@ export default function SearchScreen() {
       {!active ? (
         <View style={styles.idle}>
           <UpcomingDateCard />
+          {/* Оцифрованных кладбищ пока единицы — иначе до их планов не добраться,
+              не зная заранее, что искать */}
+          {mapped.length ? (
+            <View style={styles.maps}>
+              <Text variant="caption" color="muted" style={styles.mapsLabel}>
+                {t('search.mapsLabel')}
+              </Text>
+              {mapped.map((cm, i) => (
+                <GroupedRow
+                  key={cm.id}
+                  icon="mapPin"
+                  title={cm.name}
+                  subtitle={cm.cityName}
+                  onPress={() => router.push({ pathname: '/cemetery/[id]', params: { id: cm.id, name: cm.name } })}
+                  position={groupedPosition(i, mapped.length)}
+                />
+              ))}
+            </View>
+          ) : null}
           <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
         </View>
       ) : isLoading ? (
@@ -242,6 +262,8 @@ const makeStyles = (c: ThemeColors) =>
   searchInput: { flex: 1, ...typography.bodyMd, color: c.ink },
   chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
   idle: { flex: 1 },
+  maps: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+  mapsLabel: { marginBottom: spacing.xs, marginLeft: spacing.sm },
   empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
   emptyTitle: { marginTop: spacing.md },
   emptyHint: { maxWidth: 200 },

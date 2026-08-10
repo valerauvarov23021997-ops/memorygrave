@@ -33,7 +33,7 @@ import { useFlameRefresh } from '../../src/components/FlameRefresh'
 import { MapPreview } from '../../src/components/MapPreview'
 import { MemoryBook } from '../../src/components/MemoryBook'
 import { MemoryCandle } from '../../src/components/MemoryCandle'
-import { useGrave, useToggleSaved } from '../../src/hooks/queries'
+import { useCemeteries, useGrave, useToggleSaved } from '../../src/hooks/queries'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
 
 export default function GraveScreen() {
@@ -43,6 +43,8 @@ export default function GraveScreen() {
   const showToast = useToast()
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: grave, isLoading, refetch, isRefetching } = useGrave(id ?? '')
+  const { data: cemeteries } = useCemeteries()
+  const hasMap = (cemeteries ?? []).some(cm => cm.id === grave?.cemeteryId && cm.hasMap)
   const toggleSaved = useToggleSaved()
   const startOrder = useOrderDraftStore(s => s.startOrder)
 
@@ -200,7 +202,12 @@ export default function GraveScreen() {
           <SectionLabel>{t('grave.more')}</SectionLabel>
           <GroupedSection style={styles.moreCard}>
             <GroupedRow icon="saved" title={t('invite.title')} onPress={() => router.push(`/invite/${grave.id}`)} position="first" />
-            <GroupedRow icon="QrCode" title={t('qr.title')} onPress={() => router.push(`/qr/${grave.id}`)} position={grave.lastOrder ? 'middle' : 'last'} />
+            <GroupedRow
+              icon="QrCode"
+              title={t('qr.title')}
+              onPress={() => router.push(`/qr/${grave.id}`)}
+              position={grave.lastOrder || hasMap ? 'middle' : 'last'}
+            />
             {grave.lastOrder ? (
               <GroupedRow
                 icon="camera"
@@ -208,20 +215,25 @@ export default function GraveScreen() {
                 subtitle={formatDate(grave.lastOrder.date)}
                 right={grave.lastOrder.rating != null ? <StarRating value={grave.lastOrder.rating} size={16} /> : undefined}
                 onPress={() => router.push(`/report/${grave.lastOrder?.id}`)}
+                position={hasMap ? 'middle' : 'last'}
               />
             ) : null}
-            <GroupedRow
-              icon="mapPin"
-              title={t('grave.cemeteryMap')}
-              subtitle={grave.cemeteryName}
-              onPress={() =>
-                router.push({
-                  pathname: '/cemetery/[id]',
-                  params: { id: grave.cemeteryId, name: grave.cemeteryName },
-                })
-              }
-              position="last"
-            />
+            {/* Оцифровано пока одно кладбище: для остальных строка вела бы
+                на пустой экран, поэтому её просто нет */}
+            {hasMap ? (
+              <GroupedRow
+                icon="mapPin"
+                title={t('grave.cemeteryMap')}
+                subtitle={grave.cemeteryName}
+                onPress={() =>
+                  router.push({
+                    pathname: '/cemetery/[id]',
+                    params: { id: grave.cemeteryId, name: grave.cemeteryName },
+                  })
+                }
+                position="last"
+              />
+            ) : null}
           </GroupedSection>
 
           <View style={{ height: 96 }} />

@@ -288,15 +288,22 @@ export const gravesApi = {
   },
 
   async cemeteries(cityId?: string): Promise<Cemetery[]> {
-    let query = getSupabase().from('cemeteries').select('id, name, city_id, city:cities(name)').order('name')
-    if (cityId) query = query.eq('city_id', cityId)
-    const { data, error } = await query
+    const run = (cols: string) => {
+      const q = getSupabase().from('cemeteries').select(cols).order('name')
+      return cityId ? q.eq('city_id', cityId) : q
+    }
+    let { data, error } = await run('id, name, city_id, has_map, city:cities(name)')
+    // 42703 — колонки has_map ещё нет: база не обновлена импортом съёмки.
+    // Список кладбищ важнее карты, поэтому просто отдаём его без флага.
+    if (error?.code === '42703') ({ data, error } = await run('id, name, city_id, city:cities(name)'))
     if (error) fail(error)
-    return (data ?? []).map(r => ({
+    return ((data ?? []) as unknown as Record<string, unknown>[]).map(r => ({
       id: r.id as string,
       name: r.name as string,
       cityId: r.city_id as string,
       cityName: (r.city as unknown as { name: string } | null)?.name ?? '',
+      // колонка появляется вместе с импортом съёмки — на старой базе её ещё нет
+      hasMap: r.has_map === true,
     }))
   },
 

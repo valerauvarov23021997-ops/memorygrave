@@ -71,6 +71,7 @@ export const ru = {
     filterCemetery: 'Кладбище',
     emptyTitle: 'Найдите захоронение',
     emptyHint: 'Введите имя близкого человека, чтобы начать поиск',
+    mapsLabel: 'ПЛАНЫ КЛАДБИЩ',
     addGrave: '+ Добавить захоронение',
     found: 'Найдено: {{value}}',
     noResults: 'Ничего не найдено',
