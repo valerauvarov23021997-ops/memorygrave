@@ -11,6 +11,7 @@ import { config } from '../config'
 import { plansMock } from '../mocks'
 import type {
   AppNotification,
+  CemeteryMap,
   AuthTokens,
   Cemetery,
   City,
@@ -365,6 +366,32 @@ export const servicesApi = {
       priceFrom: data.price_from as number,
       fixedPrice: data.fixed_price as boolean,
       photos: [],
+    }
+  },
+}
+
+// ─── Карта кладбища ───────────────────────────────────────────
+
+export const cemeteryMapApi = {
+  async get(cemeteryId: string): Promise<CemeteryMap> {
+    const sb = getSupabase()
+    const [places, paths, plots] = await Promise.all([
+      sb.from('burial_places').select('id, number, lat, lng').eq('cemetery_id', cemeteryId).order('number'),
+      sb.from('cemetery_paths').select('surface, polygon').eq('cemetery_id', cemeteryId),
+      sb.from('burial_places').select('plot_polygon').eq('cemetery_id', cemeteryId).not('plot_polygon', 'is', null),
+    ])
+    if (places.error) fail(places.error)
+    return {
+      places: (places.data ?? []).map(r => ({
+        id: r.id as string,
+        number: r.number as number,
+        coordinates: { latitude: r.lat as number, longitude: r.lng as number },
+      })),
+      paths: (paths.data ?? []).map(r => ({
+        surface: r.surface as string,
+        polygon: r.polygon as [number, number][],
+      })),
+      plots: (plots.data ?? []).map(r => r.plot_polygon as [number, number][]),
     }
   },
 }

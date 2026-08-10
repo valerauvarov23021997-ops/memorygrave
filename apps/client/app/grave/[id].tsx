@@ -208,9 +208,20 @@ export default function GraveScreen() {
                 subtitle={formatDate(grave.lastOrder.date)}
                 right={grave.lastOrder.rating != null ? <StarRating value={grave.lastOrder.rating} size={16} /> : undefined}
                 onPress={() => router.push(`/report/${grave.lastOrder?.id}`)}
-                position="last"
               />
             ) : null}
+            <GroupedRow
+              icon="mapPin"
+              title={t('grave.cemeteryMap')}
+              subtitle={grave.cemeteryName}
+              onPress={() =>
+                router.push({
+                  pathname: '/cemetery/[id]',
+                  params: { id: grave.cemeteryId, name: grave.cemeteryName },
+                })
+              }
+              position="last"
+            />
           </GroupedSection>
 
           <View style={{ height: 96 }} />

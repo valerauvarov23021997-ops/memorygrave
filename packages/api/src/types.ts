@@ -232,6 +232,27 @@ export interface AppNotification {
   graveId?: string
 }
 
+/** Место захоронения на карте кладбища (физическая точка, без ФИО). */
+export interface BurialPlace {
+  id: string
+  number: number
+  coordinates: Coordinates
+}
+
+/** Контур дорожки или проезда на кладбище. */
+export interface CemeteryPath {
+  surface: string
+  /** Замкнутый контур в порядке [долгота, широта]. */
+  polygon: [number, number][]
+}
+
+/** Слой карты кладбища: места захоронений, дорожки, контуры участков. */
+export interface CemeteryMap {
+  places: BurialPlace[]
+  paths: CemeteryPath[]
+  plots: [number, number][][]
+}
+
 /** Профиль исполнителя со статистикой. */
 export interface ExecutorProfile {
   id: string

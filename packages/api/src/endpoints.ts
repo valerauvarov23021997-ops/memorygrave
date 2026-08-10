@@ -8,6 +8,7 @@ import * as sb from './supabase/api'
 import {
   authTokensMock,
   cemeteriesMock,
+  cemeteryMapMock,
   citiesMock,
   executorOrdersMock,
   executorProfileMock,
@@ -26,6 +27,7 @@ import {
 import type {
   ApiResponse,
   AppNotification,
+  CemeteryMap,
   AuthTokens,
   Cemetery,
   City,
@@ -193,6 +195,16 @@ export const gravesApi = {
     if (SUPA) return sb.gravesApi.unsave(graveId)
     if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.delete(`/user/saved-graves/${graveId}`))
+  },
+}
+
+// ─── Карта кладбища ───────────────────────────────────────────
+
+export const cemeteryMapApi = {
+  get(cemeteryId: string): Promise<CemeteryMap> {
+    if (SUPA) return sb.cemeteryMapApi.get(cemeteryId)
+    if (USE_MOCKS) return mockDelay(cemeteryMapMock)
+    return unwrap<CemeteryMap>(client.get(`/cemeteries/${cemeteryId}/map`))
   },
 }
 
