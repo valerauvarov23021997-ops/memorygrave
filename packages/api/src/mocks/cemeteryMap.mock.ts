@@ -8,7 +8,8 @@ interface RawMap {
   plots: [number, number][][]
 }
 
-/** Съёмка кладбища д. Даймище (Гатчинский р-н) — 383 места, 267 участков. */
+/** Съёмка кладбища д. Даймище (Гатчинский р-н) — 382 места, 266 участков.
+ *  Генерируется скриптом tools/cemetery/export_app.py из съёмки геодезиста. */
 export const cemeteryMapMock: CemeteryMap = {
   places: (raw as RawMap).places.map(p => ({
     id: `dm-${p.n}`,
