@@ -50,13 +50,22 @@
 
 Обновить приложение у тестировщиков:
 
+Обновление отправляет Claude, через Git Bash:
+
 ```
-cd C:\Users\Admin\memorygrave\apps\client
-eas update --branch preview --environment preview --message "что изменилось"
+cd /c/Users/Admin/memorygrave/apps/client
+set -a && . <(tr -d '\r' < .env) && set +a
+rm -rf dist && eas update --branch preview --environment preview --message "что изменилось" --non-interactive
+grep -c -a pamyatcodebot dist/_expo/static/js/ios/*.hbc   # должно быть 1
 ```
 
-`--environment` обязателен в новых EAS CLI. Серверных переменных в окружении
-`preview` нет, поэтому берётся локальный `apps/client/.env` (живая база).
+**Грабли (22.10.2026):** `--environment` обязателен в новых EAS CLI, и с ним
+EAS **не читает** локальный `.env`. Без строки `set -a …` обновление молча
+уходит на фикстуры: вход «по SMS», код не приходит, Telegram не предлагается.
+Поэтому переменные экспортируются в оболочку, а после сборки проверяется,
+что имя бота попало в бандл. Если не попало — не считать обновление рабочим.
+(Наличие адреса Supabase или ключа в бандле ничего не доказывает: они есть
+в коде запасными значениями.)
 
 ### SQL — что и в каком порядке
 
