@@ -19,3 +19,6 @@ google-play-key.json
 *.p8
 *.mobileprovision
 e2e/out/
+
+# Фото памятников с ФИО — исходники для оцифровки, в историю git не кладём
+photos/
