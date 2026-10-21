@@ -15,11 +15,6 @@ const config: ExpoConfig = {
   updates: {
     url: 'https://u.expo.dev/da299e03-e3b6-4661-842e-5edb0e8ffdbf',
   },
-  splash: {
-    image: './assets/splash.png',
-    resizeMode: 'contain',
-    backgroundColor: '#FAF7F2',
-  },
   assetBundlePatterns: ['**/*'],
   // sdkVersion-политика нужна для тестирования опубликованных обновлений в Expo Go
   runtimeVersion: { policy: 'sdkVersion' },
@@ -44,6 +39,10 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    // С SDK 58 заставка настраивается только через плагин
+    ['expo-splash-screen', { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#FAF7F2' }],
+    'expo-image',
+    'expo-status-bar',
     'expo-secure-store',
     'expo-font',
     ['expo-notifications', { icon: './assets/notification-icon.png' }],

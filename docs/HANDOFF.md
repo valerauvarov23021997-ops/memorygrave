@@ -84,6 +84,15 @@ eas update --branch preview --message "что изменилось"
 
 ## Грабли, на которые уже наступали
 
+- **Версия SDK = версия Expo Go в магазинах.** Expo Go открывает только свою
+  SDK. В октябре 2026 проект переведён с 54 на **57**: у владельца Expo Go 57,
+  а Expo Go для SDK 58 в магазинах ещё не было. Прежде чем поднимать SDK —
+  узнай версию Expo Go на телефоне владельца.
+- **TypeScript 6:** `baseUrl` в tsconfig запрещён, ts-jest требует `rootDir`.
+- **После смены SDK — чистая установка:** удалить все `node_modules` и
+  `package-lock.json`, затем `npm install`. Иначе в корне остаётся старая
+  копия React Native и типы конфликтуют («DimensionValue не подходит к DimensionValue»).
+
 - **МТС LTE душит параллельные TLS-соединения** к Cloudflare (за ним Supabase).
   Поэтому в `packages/api/src/supabase/client.ts` очередь на 4 соединения,
   таймаут 8 с и автомат-размыкатель после 4 таймаутов подряд. Не убирай.

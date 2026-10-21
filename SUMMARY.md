@@ -204,7 +204,7 @@ methods() → список карт из фикстур
 Период разработки   1 июля — 11 августа 2026
 ```
 
-**Стек:** React Native 0.81 + Expo SDK 54, TypeScript strict, Expo Router,
+**Стек:** React Native 0.86 + Expo SDK 57, TypeScript strict, Expo Router,
 Zustand, TanStack Query, Reanimated 3, react-native-maps, react-native-svg,
 i18next, Supabase (Postgres + Auth + Edge Functions), Yandex Cloud.
 

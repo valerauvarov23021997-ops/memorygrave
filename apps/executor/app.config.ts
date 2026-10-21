@@ -9,11 +9,6 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'light',
   primaryColor: '#1C3318',
   icon: './assets/icon.png',
-  splash: {
-    image: './assets/splash.png',
-    resizeMode: 'contain',
-    backgroundColor: '#F0EBE0',
-  },
   assetBundlePatterns: ['**/*'],
   ios: {
     bundleIdentifier: 'app.pamyat.executor',
@@ -36,6 +31,10 @@ const config: ExpoConfig = {
   },
   plugins: [
     'expo-router',
+    // С SDK 58 заставка настраивается только через плагин
+    ['expo-splash-screen', { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#F0EBE0' }],
+    'expo-image',
+    'expo-status-bar',
     'expo-secure-store',
     'expo-font',
     ['expo-notifications', { icon: './assets/notification-icon.png' }],

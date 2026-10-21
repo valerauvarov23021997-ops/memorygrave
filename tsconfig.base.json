@@ -18,16 +18,15 @@
     "allowJs": true,
     "isolatedModules": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
-      "@pamyat/ui": ["packages/ui/src"],
-      "@pamyat/ui/*": ["packages/ui/src/*"],
-      "@pamyat/api": ["packages/api/src"],
-      "@pamyat/api/*": ["packages/api/src/*"],
-      "@pamyat/store": ["packages/store/src"],
-      "@pamyat/store/*": ["packages/store/src/*"],
-      "@pamyat/utils": ["packages/utils/src"],
-      "@pamyat/utils/*": ["packages/utils/src/*"]
+      "@pamyat/ui": ["./packages/ui/src"],
+      "@pamyat/ui/*": ["./packages/ui/src/*"],
+      "@pamyat/api": ["./packages/api/src"],
+      "@pamyat/api/*": ["./packages/api/src/*"],
+      "@pamyat/store": ["./packages/store/src"],
+      "@pamyat/store/*": ["./packages/store/src/*"],
+      "@pamyat/utils": ["./packages/utils/src"],
+      "@pamyat/utils/*": ["./packages/utils/src/*"]
     }
   },
   "exclude": ["node_modules", "dist", ".expo", ".turbo"]

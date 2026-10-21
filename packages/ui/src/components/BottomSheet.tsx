@@ -69,7 +69,7 @@ const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
 const styles = StyleSheet.create({
   root: { flex: 1, justifyContent: 'flex-end' },
-  overlay: { ...StyleSheet.absoluteFillObject, backgroundColor: 'rgba(26,26,20,0.45)' },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(26,26,20,0.45)' },
   sheet: {
     borderTopLeftRadius: radii.xl,
     borderTopRightRadius: radii.xl,

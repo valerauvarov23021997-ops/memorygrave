@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useMemo } from 'react'
-import { StyleSheet } from 'react-native'
 
 import { lightColors, type ThemeColors } from '../tokens/colors'
 
@@ -52,7 +51,7 @@ export function useColors(): ThemeColors {
  * Использование: const styles = useThemedStyles(makeStyles), где
  * makeStyles(c) => StyleSheet.create({ ... c.forest ... }).
  */
-export function useThemedStyles<T extends StyleSheet.NamedStyles<T>>(
+export function useThemedStyles<T extends object>(
   factory: (colors: ThemeColors) => T
 ): T {
   const colors = useColors()

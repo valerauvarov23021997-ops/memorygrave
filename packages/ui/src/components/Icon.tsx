@@ -1,5 +1,6 @@
 import * as Phosphor from 'phosphor-react-native'
 import React from 'react'
+import type { ColorValue } from 'react-native'
 
 import { icons, type IconName, type PhosphorIconName } from '../tokens/icons'
 import { iconSizes } from '../tokens/spacing'
@@ -12,7 +13,8 @@ interface IconProps {
    */
   name: IconName | PhosphorIconName | (string & {})
   size?: number
-  color?: string
+  // Навигация передаёт ColorValue; Phosphor понимает только строку
+  color?: ColorValue
   weight?: 'thin' | 'light' | 'regular' | 'bold' | 'fill' | 'duotone'
 }
 
@@ -22,7 +24,7 @@ interface IconProps {
  */
 export function Icon({ name, size = iconSizes.inline, color, weight = 'regular' }: IconProps) {
   const c = useColors()
-  const resolved = color ?? c.sage
+  const resolved = typeof color === 'string' ? color : c.sage
   const phosphorName: string = name in icons ? icons[name as IconName] : name
   const registry = Phosphor as unknown as Record<string, React.ComponentType<Phosphor.IconProps>>
   const Component = registry[phosphorName]
