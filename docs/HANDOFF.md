@@ -98,7 +98,12 @@ eas update --branch preview --message "что изменилось"
 | `export_app.py` | GeoJSON → `supabase/import-daymische.sql` + мок для демо-режима |
 | `import_names.py` | Ведомость CSV → `supabase/import-daymische-names.sql` |
 
-Python-зависимости: `pip install pyproj ezdxf`. Для чтения DWG нужен
+Python-зависимости: `pip install pyproj ezdxf`.
+
+На компьютере владельца Python 3.12 стоит в
+`%LOCALAPPDATA%\Programs\Python\Python312\python.exe`. В PowerShell перед
+запуском скриптов задай `$env:PYTHONIOENCODING = "utf-8"` — иначе русский
+вывод скриптов падает на кодировке консоли. `winget` на этом компьютере нет. Для чтения DWG нужен
 LibreDWG (`dwg2dxf`) — на Windows проще попросить у геодезиста DXF.
 
 ---
