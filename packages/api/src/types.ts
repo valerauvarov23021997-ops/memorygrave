@@ -37,6 +37,9 @@ export interface Grave {
   fullName: string
   birthDate: string | null
   deathDate: string | null
+  /** Только год — когда на памятнике нет полной даты. Напоминания по нему не ставим. */
+  birthYear?: number | null
+  deathYear?: number | null
   cemeteryId: string
   cemeteryName: string
   city: string

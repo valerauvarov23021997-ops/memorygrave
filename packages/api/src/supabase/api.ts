@@ -38,6 +38,8 @@ interface GraveRow {
   full_name: string
   birth_date: string | null
   death_date: string | null
+  birth_year: number | null
+  death_year: number | null
   cemetery_id: string
   plot: string | null
   biography: string | null
@@ -48,7 +50,7 @@ interface GraveRow {
   cemetery: { name: string; city: { name: string } | null } | null
 }
 
-const GRAVE_SELECT = 'id, full_name, birth_date, death_date, cemetery_id, plot, biography, photos, lat, lng, status, cemetery:cemeteries(name, city:cities(name))'
+const GRAVE_SELECT = 'id, full_name, birth_date, death_date, birth_year, death_year, cemetery_id, plot, biography, photos, lat, lng, status, cemetery:cemeteries(name, city:cities(name))'
 
 // Заглушки placehold.co в мобильных сетях грузятся вечно и «подвешивают»
 // портреты — такие адреса отбрасываем, аватар покажет инициалы мгновенно
@@ -62,6 +64,8 @@ function mapGrave(row: GraveRow, savedIds: Set<string>): Grave {
     fullName: row.full_name,
     birthDate: row.birth_date,
     deathDate: row.death_date,
+    birthYear: row.birth_year,
+    deathYear: row.death_year,
     cemeteryId: row.cemetery_id,
     cemeteryName: row.cemetery?.name ?? '',
     city: row.cemetery?.city?.name ?? '',

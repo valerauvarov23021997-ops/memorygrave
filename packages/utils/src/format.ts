@@ -44,10 +44,20 @@ export function formatDayMonth(iso: string): string {
   return `${d.getDate()} ${MONTHS_RU[d.getMonth()]}`
 }
 
-/** Диапазон жизни: «02.05.1941 — 14.11.2003 · 62 года». */
-export function formatLifespan(birth?: string | null, death?: string | null): string {
-  const b = formatDate(birth)
-  const d = formatDate(death)
+/** Дата жизни: полная, а если на памятнике только год — год. */
+export function formatLifeDate(iso?: string | null, year?: number | null): string {
+  return formatDate(iso) || (year ? String(year) : '')
+}
+
+/** Диапазон жизни: «02.05.1941 — 14.11.2003 · 62 года». Возраст — только по полным датам. */
+export function formatLifespan(
+  birth?: string | null,
+  death?: string | null,
+  birthYear?: number | null,
+  deathYear?: number | null,
+): string {
+  const b = formatLifeDate(birth, birthYear)
+  const d = formatLifeDate(death, deathYear)
   const years = ageInYears(birth, death)
   const range = [b, d].filter(Boolean).join(' — ')
   if (years === null) return range

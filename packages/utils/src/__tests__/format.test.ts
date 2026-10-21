@@ -42,6 +42,10 @@ describe('formatLifespan', () => {
   it('собирает диапазон с возрастом', () => {
     expect(formatLifespan('1941-05-02', '2003-11-14')).toBe('02.05.1941 — 14.11.2003 · 62 года')
   })
+  it('показывает год, если полной даты нет, и не считает возраст', () => {
+    expect(formatLifespan(null, '2016-03-01', 1939, 2016)).toBe('1939 — 01.03.2016')
+    expect(formatLifespan(null, null, 1939, 2016)).toBe('1939 — 2016')
+  })
 })
 
 describe('plural', () => {

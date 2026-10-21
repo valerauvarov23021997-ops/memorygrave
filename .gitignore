@@ -22,3 +22,6 @@ e2e/out/
 
 # Фото памятников с ФИО — исходники для оцифровки, в историю git не кладём
 photos/
+# Ведомость ФИО и SQL из неё — тоже: репозиторий публичный
+docs/cemetery/daymische-names.csv
+supabase/import-daymische-names.sql

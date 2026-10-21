@@ -136,7 +136,7 @@ export default function GraveScreen() {
             <Text variant="displayMd" color="cream" center style={styles.heroName}>
               {grave.fullName}
             </Text>
-            <Text style={styles.heroDates}>{formatLifespan(grave.birthDate, grave.deathDate)}</Text>
+            <Text style={styles.heroDates}>{formatLifespan(grave.birthDate, grave.deathDate, grave.birthYear, grave.deathYear)}</Text>
             <View style={styles.heroBadge}>
               <Badge label={badge.label} variant={badge.variant} />
             </View>

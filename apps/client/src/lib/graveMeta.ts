@@ -1,9 +1,9 @@
 import type { Grave } from '@pamyat/api'
-import { formatDate } from '@pamyat/utils'
+import { formatLifeDate } from '@pamyat/utils'
 
 /** Подпись под именем в списках: годы жизни · кладбище · участок. */
 export function graveMeta(grave: Grave): string {
-  const years = [formatDate(grave.birthDate), formatDate(grave.deathDate)].filter(Boolean).join(' – ')
+  const years = [formatLifeDate(grave.birthDate, grave.birthYear), formatLifeDate(grave.deathDate, grave.deathYear)].filter(Boolean).join(' – ')
   return [years, grave.cemeteryName, grave.plot].filter(Boolean).join(' · ')
 }
 

@@ -15,7 +15,12 @@ burial_places, с координатами, подтянутыми с плана
 
 Обязательны только number и full_name. Пустая дата — так и запишется пустой:
 на памятниках даты часто затёрты, и придумывать их нельзя.
-Даты принимаются как ГГГГ-ММ-ДД и как ДД.ММ.ГГГГ.
+Даты принимаются как ГГГГ-ММ-ДД, ДД.ММ.ГГГГ и как один год ГГГГ — год пишется
+в birth_year/death_year, а в date остаётся пусто: «1 января» подставлять нельзя,
+по датам приложение ставит памятные напоминания.
+
+ФИО с «?» (буква не прочиталась) и из одного слова в базу не идут — их сначала
+уточняют на месте. Строки без номера (могилы, которых нет на плане) — тоже.
 """
 
 import csv
@@ -38,16 +43,18 @@ def load_places():
 
 
 def parse_date(raw):
-    """ГГГГ-ММ-ДД или ДД.ММ.ГГГГ → ГГГГ-ММ-ДД. Пусто — значит неизвестно."""
+    """→ (ГГГГ-ММ-ДД или None, год или None). Пусто — значит неизвестно."""
     raw = (raw or '').strip()
     if not raw:
-        return None
+        return None, None
+    if re.fullmatch(r'\d{4}', raw):
+        return None, int(raw)
     if re.fullmatch(r'\d{4}-\d{2}-\d{2}', raw):
-        return raw
+        return raw, int(raw[:4])
     m = re.fullmatch(r'(\d{1,2})\.(\d{1,2})\.(\d{4})', raw)
     if m:
         d, mo, y = m.groups()
-        return f'{y}-{int(mo):02d}-{int(d):02d}'
+        return f'{y}-{int(mo):02d}-{int(d):02d}', int(y)
     raise SystemExit(f'не разобрать дату: {raw!r} — нужен формат ГГГГ-ММ-ДД или ДД.ММ.ГГГГ')
 
 
@@ -70,6 +77,9 @@ def main():
             if not name or not num_raw:
                 skipped.append(f'строка {i}: пустой номер или ФИО')
                 continue
+            if '?' in name or len(name.split()) < 2:
+                skipped.append(f'строка {i}: ФИО прочитано не полностью — {name}')
+                continue
             num = int(num_raw)
             if num not in places:
                 skipped.append(f'строка {i}: места № {num} нет на плане')
@@ -79,13 +89,14 @@ def main():
             # на одном месте бывает несколько человек — родственные захоронения
             seen[num] = seen.get(num, 0) + 1
             gid = f'dg-{num}' if seen[num] == 1 else f'dg-{num}-{seen[num]}'
-            bd = parse_date(rec.get('birth_date'))
-            dd = parse_date(rec.get('death_date'))
+            bd, by = parse_date(rec.get('birth_date'))
+            dd, dy = parse_date(rec.get('death_date'))
             note = (rec.get('note') or '').strip()
 
             q = lambda v: f"'{esc(v)}'" if v else 'null'  # noqa: E731
+            n_ = lambda v: str(v) if v else 'null'  # noqa: E731
             rows.append(
-                f"  ('{gid}', '{esc(name)}', {q(bd)}, {q(dd)}, "
+                f"  ('{gid}', '{esc(name)}', {q(bd)}, {q(dd)}, {n_(by)}, {n_(dy)}, "
                 f"'{CEMETERY_ID}', 'место № {num}', {lat:.8f}, {lon:.8f}, "
                 f"'digitized', '{pid}', {q(note)})"
             )
@@ -107,15 +118,20 @@ def main():
 -- Заметка о том, что не читается на памятнике: пригодится тому,
 -- кто поедет уточнять на месте
 alter table graves add column if not exists survey_note text;
+-- Год без дня и месяца: на старых памятниках часто выбит только он
+alter table graves add column if not exists birth_year smallint;
+alter table graves add column if not exists death_year smallint;
 
 -- ─── Люди: {len(rows)} записей ───
-insert into graves (id, full_name, birth_date, death_date, cemetery_id, plot,
+insert into graves (id, full_name, birth_date, death_date, birth_year, death_year, cemetery_id, plot,
                     lat, lng, status, burial_place_id, survey_note) values
 {body}
 on conflict (id) do update set
   full_name = excluded.full_name,
   birth_date = excluded.birth_date,
   death_date = excluded.death_date,
+  birth_year = excluded.birth_year,
+  death_year = excluded.death_year,
   plot = excluded.plot,
   lat = excluded.lat,
   lng = excluded.lng,
