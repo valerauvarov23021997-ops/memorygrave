@@ -297,7 +297,7 @@ export const gravesApi = {
       const q = getSupabase().from('cemeteries').select(cols).order('name')
       return cityId ? q.eq('city_id', cityId) : q
     }
-    let { data, error } = await run('id, name, city_id, has_map, city:cities(name)')
+    let { data, error } = await run('id, name, city_id, has_map, city:cities(name), graves(count)')
     // 42703 — колонки has_map ещё нет: база не обновлена импортом съёмки.
     // Список кладбищ важнее карты, поэтому просто отдаём его без флага.
     if (error?.code === '42703') ({ data, error } = await run('id, name, city_id, city:cities(name)'))
@@ -309,6 +309,7 @@ export const gravesApi = {
       cityName: (r.city as unknown as { name: string } | null)?.name ?? '',
       // колонка появляется вместе с импортом съёмки — на старой базе её ещё нет
       hasMap: r.has_map === true,
+      peopleCount: (r.graves as { count: number }[] | undefined)?.[0]?.count,
     }))
   },
 

@@ -122,7 +122,7 @@ const makeStyles = (c: ThemeColors) =>
     iconUnread: { backgroundColor: c.successBg },
     body: { flex: 1 },
     titleRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-    titleUnread: { fontFamily: 'DMSans_500Medium' },
+    titleUnread: { fontFamily: 'Manrope_500Medium' },
     dot: { width: 7, height: 7, borderRadius: 4, backgroundColor: c.sage },
     time: { marginTop: 2 },
   })

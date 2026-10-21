@@ -382,7 +382,7 @@ const makeStyles = (c: ThemeColors) =>
       borderBottomWidth: 1,
       borderBottomColor: c.linen,
     },
-    resultName: { fontFamily: typography.headingMd.fontFamily },
+    resultName: { fontFamily: typography.headingLg.fontFamily },
     more: { padding: spacing.sm, textAlign: 'center' },
     pressed: { backgroundColor: c.parchment },
     noName: { marginTop: spacing.xs },

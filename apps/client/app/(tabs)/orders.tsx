@@ -52,7 +52,7 @@ export default function OrdersScreen() {
           >
             <Text
               variant="bodySm"
-              style={{ color: filter === f.key ? c.cream : c.muted, fontFamily: 'DMSans_500Medium' }}
+              style={{ color: filter === f.key ? c.cream : c.muted, fontFamily: 'Manrope_500Medium' }}
             >
               {f.label}
             </Text>

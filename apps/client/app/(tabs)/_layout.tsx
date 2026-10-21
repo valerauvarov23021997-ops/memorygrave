@@ -22,7 +22,8 @@ export default function TabsLayout() {
           left: 0,
           right: 0,
           bottom: 0,
-          height: 58 + insets.bottom,
+          // 66: иконка + подпись в одну строку не обрезаются (при 58 подписи срезало)
+          height: 66 + insets.bottom,
           paddingBottom: insets.bottom > 0 ? insets.bottom - 6 : 8,
           borderTopWidth: 0,
           backgroundColor: 'transparent',
@@ -50,7 +51,7 @@ export default function TabsLayout() {
             ]}
           />
         ),
-        tabBarLabelStyle: { fontFamily: 'DMSans_500Medium', fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: 'Manrope_500Medium', fontSize: 11 },
       }}
     >
       <Tabs.Screen

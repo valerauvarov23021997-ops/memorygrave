@@ -136,6 +136,6 @@ const makeStyles = (c: ThemeColors) =>
       justifyContent: 'center',
     },
     body: { flex: 1, minWidth: 0 },
-    titleSans: { fontFamily: 'DMSans_500Medium' },
+    titleSans: { fontFamily: 'Manrope_500Medium' },
     subtitle: { marginTop: 1 },
   })

@@ -140,7 +140,7 @@ const makeStyles = (c: ThemeColors) =>
     paddingHorizontal: spacing.md,
     paddingVertical: 4,
   },
-  badgeText: { ...typography.caption, color: c.white, fontFamily: 'DMSans_500Medium' },
+  badgeText: { ...typography.caption, color: c.white, fontFamily: 'Manrope_500Medium' },
   planHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   priceRow: { marginTop: spacing.sm },
   price: { ...typography.priceDisplay },

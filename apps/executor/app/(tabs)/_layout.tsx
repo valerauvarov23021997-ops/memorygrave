@@ -49,7 +49,7 @@ export default function TabsLayout() {
             ]}
           />
         ),
-        tabBarLabelStyle: { fontFamily: 'DMSans_500Medium', fontSize: 11 },
+        tabBarLabelStyle: { fontFamily: 'Manrope_500Medium', fontSize: 11 },
       }}
     >
       <Tabs.Screen

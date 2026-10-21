@@ -112,5 +112,5 @@ const makeStyles = (c: ThemeColors) =>
       justifyContent: 'center',
     },
     body: { flex: 1 },
-    kicker: { color: c.gold, letterSpacing: 1, marginBottom: 2, fontFamily: 'DMSans_500Medium' },
+    kicker: { color: c.gold, letterSpacing: 1, marginBottom: 2, fontFamily: 'Manrope_500Medium' },
   })

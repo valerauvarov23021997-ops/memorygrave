@@ -1,4 +1,4 @@
-import { DMSans_400Regular, DMSans_500Medium } from '@expo-google-fonts/dm-sans'
+import { Manrope_400Regular, Manrope_500Medium } from '@expo-google-fonts/manrope'
 import {
   PlayfairDisplay_400Regular,
   PlayfairDisplay_500Medium,
@@ -24,8 +24,8 @@ export default function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     PlayfairDisplay_400Regular,
     PlayfairDisplay_500Medium,
-    DMSans_400Regular,
-    DMSans_500Medium,
+    Manrope_400Regular,
+    Manrope_500Medium,
   })
   // Пока анимированный сплэш не доиграл — держим его поверх приложения.
   const [splashDone, setSplashDone] = useState(false)

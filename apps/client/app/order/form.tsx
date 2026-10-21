@@ -123,7 +123,7 @@ export default function OrderFormScreen() {
                 style={[styles.period, active ? styles.periodActive : styles.periodInactive]}
                 onPress={() => draft.setRecurring(p.key)}
               >
-                <Text variant="bodySm" style={{ color: active ? c.cream : c.muted, fontFamily: 'DMSans_500Medium' }}>
+                <Text variant="bodySm" style={{ color: active ? c.cream : c.muted, fontFamily: 'Manrope_500Medium' }}>
                   {p.label}
                 </Text>
               </Pressable>

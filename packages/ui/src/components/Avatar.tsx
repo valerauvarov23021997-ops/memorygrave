@@ -45,7 +45,7 @@ export function Avatar({ name, size = 40, imageUri }: AvatarProps) {
 const styles = StyleSheet.create({
   placeholder: { alignItems: 'center', justifyContent: 'center', overflow: 'hidden' },
   initials: {
-    fontFamily: 'DMSans_500Medium',
+    fontFamily: 'Manrope_500Medium',
     textAlign: 'center',
     includeFontPadding: false,
     textAlignVertical: 'center',

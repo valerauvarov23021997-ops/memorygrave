@@ -221,7 +221,7 @@ const makeStyles = (c: ThemeColors) =>
   dotFuture: { borderWidth: 1, borderColor: c.stone },
   line: { width: 1, flex: 1, backgroundColor: c.linen, marginVertical: 2 },
   stepBody: { flex: 1, paddingBottom: spacing.lg },
-  currentLabel: { fontFamily: 'DMSans_500Medium' },
+  currentLabel: { fontFamily: 'Manrope_500Medium' },
   confirmTitle: { marginBottom: spacing.sm },
   confirmText: { marginBottom: spacing.lg },
   confirmButtons: { gap: spacing.sm },

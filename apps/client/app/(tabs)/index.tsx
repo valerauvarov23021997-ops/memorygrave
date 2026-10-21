@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next'
 import { FlatList, Keyboard, Pressable, StyleSheet, TextInput, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { FeaturedCemeteryCard } from '../../src/components/FeaturedCemeteryCard'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { UpcomingDateCard } from '../../src/components/UpcomingDateCard'
 import { graveMeta, groupedPosition } from '../../src/lib/graveMeta'
@@ -126,19 +127,13 @@ export default function SearchScreen() {
               <Text variant="caption" color="muted" style={styles.mapsLabel}>
                 {t('search.mapsLabel')}
               </Text>
-              {mapped.map((cm, i) => (
-                <GroupedRow
-                  key={cm.id}
-                  icon="mapPin"
-                  title={cm.name}
-                  subtitle={cm.cityName}
-                  onPress={() => router.push({ pathname: '/cemetery/[id]', params: { id: cm.id, name: cm.name } })}
-                  position={groupedPosition(i, mapped.length)}
-                />
+              {mapped.map(cm => (
+                <FeaturedCemeteryCard key={cm.id} cemetery={cm} />
               ))}
             </View>
-          ) : null}
-          <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
+          ) : (
+            <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
+          )}
         </View>
       ) : isLoading ? (
         <View style={styles.list}>
@@ -282,7 +277,7 @@ const makeStyles = (c: ThemeColors) =>
     borderColor: c.stone,
     marginTop: spacing.sm,
   },
-  addLabel: { fontFamily: 'DMSans_500Medium' },
+  addLabel: { fontFamily: 'Manrope_500Medium' },
   pickerTitle: { marginBottom: spacing.md },
   pickerRow: {
     paddingVertical: spacing.md,

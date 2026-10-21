@@ -30,6 +30,8 @@ export interface Cemetery {
   cityName: string
   /** План кладбища оцифрован — доступна карта с местами захоронений. */
   hasMap: boolean
+  /** Сколько людей с известными именами можно найти на кладбище. */
+  peopleCount?: number
 }
 
 export interface Grave {

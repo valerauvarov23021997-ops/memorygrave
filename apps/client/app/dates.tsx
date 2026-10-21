@@ -144,5 +144,5 @@ const makeStyles = (c: ThemeColors) =>
     },
     nationalBody: { flex: 1 },
     nationalWhen: { alignItems: 'flex-end' },
-    nationalDate: { fontFamily: 'DMSans_500Medium' },
+    nationalDate: { fontFamily: 'Manrope_500Medium' },
   })

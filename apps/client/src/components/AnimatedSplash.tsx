@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
   },
   rule: { height: 1, backgroundColor: GOLD, marginTop: 20, borderRadius: 1 },
   tag: {
-    fontFamily: 'DMSans_500Medium',
+    fontFamily: 'Manrope_500Medium',
     fontSize: 11,
     color: '#A39A86',
     marginTop: 18,

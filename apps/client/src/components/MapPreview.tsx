@@ -73,7 +73,7 @@ const makeStyles = (c: ThemeColors) =>
       backgroundColor: c.parchment,
     },
     placeholder: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.sm },
-    openLabel: { fontFamily: 'DMSans_500Medium' },
+    openLabel: { fontFamily: 'Manrope_500Medium' },
     badge: {
       position: 'absolute',
       bottom: spacing.sm,

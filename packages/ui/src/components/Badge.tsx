@@ -47,5 +47,5 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     paddingVertical: 2,
   } as ViewStyle,
-  text: { ...typography.caption, fontFamily: 'DMSans_500Medium' },
+  text: { ...typography.caption, fontFamily: 'Manrope_500Medium' },
 })

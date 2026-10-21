@@ -61,7 +61,7 @@ export type ColorToken = keyof typeof colors
 
 ```ts
 // packages/ui/src/tokens/typography.ts
-// Шрифты: Playfair Display + DM Sans
+// Шрифты: Playfair Display + Manrope
 // Установка: @expo-google-fonts/playfair-display + @expo-google-fonts/dm-sans
 
 export const typography = {
@@ -71,15 +71,15 @@ export const typography = {
   headingLg:   { fontFamily: 'PlayfairDisplay_500Medium',  fontSize: 18, lineHeight: 24 },
   priceDisplay:{ fontFamily: 'PlayfairDisplay_300Light',   fontSize: 28, lineHeight: 34 },
 
-  // DM Sans — весь остальной текст
-  headingMd:   { fontFamily: 'DMSans_500Medium',  fontSize: 15, lineHeight: 22 },
-  bodyLg:      { fontFamily: 'DMSans_400Regular', fontSize: 16, lineHeight: 26 },
-  bodyMd:      { fontFamily: 'DMSans_400Regular', fontSize: 14, lineHeight: 22 },
+  // Manrope — весь остальной текст (Manrope не умеет кириллицу, см. ADR-009)
+  headingMd:   { fontFamily: 'Manrope_500Medium',  fontSize: 15, lineHeight: 22 },
+  bodyLg:      { fontFamily: 'Manrope_400Regular', fontSize: 16, lineHeight: 26 },
+  bodyMd:      { fontFamily: 'Manrope_400Regular', fontSize: 14, lineHeight: 22 },
   bodySm:      { fontFamily: 'DMSans_300Light',   fontSize: 13, lineHeight: 20 },
-  caption:     { fontFamily: 'DMSans_400Regular', fontSize: 11, lineHeight: 16 },
+  caption:     { fontFamily: 'Manrope_400Regular', fontSize: 11, lineHeight: 16 },
   micro:       { fontFamily: 'DMSans_300Light',   fontSize: 10, lineHeight: 14 },
   // Для кнопок и лейблов
-  buttonLabel: { fontFamily: 'DMSans_500Medium',  fontSize: 13, lineHeight: 18,
+  buttonLabel: { fontFamily: 'Manrope_500Medium',  fontSize: 13, lineHeight: 18,
                  letterSpacing: 1.0, textTransform: 'uppercase' as const },
   sectionLabel:{ fontFamily: 'DMSans_300Light',   fontSize: 11, lineHeight: 16,
                  letterSpacing: 1.6, textTransform: 'uppercase' as const },
@@ -88,7 +88,7 @@ export const typography = {
 
 **Правила применения:**
 - `displayLg/displayMd/headingLg` — Playfair. Для имён, заголовков экранов, цен.
-- Имена людей (ФИО усопших) — **всегда** Playfair, никогда DM Sans.
+- Имена людей (ФИО усопших) — **всегда** Playfair, никогда Manrope.
 - `sectionLabel` — для всех SECTION LABEL (ФОТО ДО, БЫСТРЫЕ УСЛУГИ и т.д.).
 - Никаких `fontWeight: '700'` или выше — выглядит грубо для этой ниши.
 - `lineHeight: 1.6` для биографий. `lineHeight: 1` для кнопок и чипов.
@@ -243,9 +243,9 @@ interface InputProps {
 // Error:   bg white, border 1.5px error → + errorText под полем (11sp error)
 // Multiline: minHeight 80, высота авто
 //
-// Label: DM Sans 13sp 500, color forest, marginBottom 4
-// Placeholder: DM Sans 14sp 300, color light
-// Value: DM Sans 14sp 400, color ink
+// Label: Manrope 13sp 500, color forest, marginBottom 4
+// Placeholder: Manrope 14sp 300, color light
+// Value: Manrope 14sp 400, color ink
 ```
 
 ### 5.3 Card
@@ -299,14 +299,14 @@ type BadgeVariant = 'success'|'warning'|'info'|'neutral'|'error'
 // neutral: bg parchment, text light
 // error:   bg errorBg,   text error
 //
-// Font: DM Sans 11sp 500 (БЕЗ uppercase)
+// Font: Manrope 11sp 500 (БЕЗ uppercase)
 // radius: 10, padding: 2px 8px
 ```
 
 ### 5.6 SectionLabel
 
 ```tsx
-// DM Sans 11sp 300, uppercase, letterSpacing 1.6, color light
+// Manrope 11sp 300, uppercase, letterSpacing 1.6, color light
 // marginBottom 8
 // Пример использования: <SectionLabel>Фото до</SectionLabel>
 ```
@@ -321,7 +321,7 @@ type BadgeVariant = 'success'|'warning'|'info'|'neutral'|'error'
 
 ```tsx
 interface AvatarProps { name: string; size?: number; imageUri?: string }
-// Без imageUri: инициалы (2 буквы), bg sageXL, color forest, DM Sans 14sp 500
+// Без imageUri: инициалы (2 буквы), bg sageXL, color forest, Manrope 14sp 500
 // С imageUri: expo-image с объектным fit
 // border-radius: size/2 (круг)
 // default size: 40
@@ -432,7 +432,7 @@ interface Slide {
   icon:    string   // emoji
   iconBg:  string   // цвет фона иллюстрации
   title:   string   // Playfair displayMd, forest, centered
-  desc:    string   // DM Sans bodyMd 300, muted, centered, lineHeight 1.5
+  desc:    string   // Manrope bodyMd 300, muted, centered, lineHeight 1.5
 }
 
 const slides: Slide[] = [
@@ -461,7 +461,7 @@ const slides: Slide[] = [
 
 ```tsx
 // Заголовок: «Вход в аккаунт» — Playfair displayMd
-// Подзаголовок: DM Sans bodyMd muted
+// Подзаголовок: Manrope bodyMd muted
 // Поле телефона: маска «+7 (___) ___-__-__»
 //   - leftElement: флаг 🇷🇺 + «+7»
 //   - rightElement: мигающий курсор (анимация opacity)
@@ -471,7 +471,7 @@ const slides: Slide[] = [
 // Кнопки соцсетей: border 1px linen, radius 8, высота 44pt
 //   - Apple: тёмный фон (требование Apple HIG)
 //   - Google: белый фон, «G» текст
-// Дисклеймер: DM Sans 11sp light, ссылки на Условия и Политику
+// Дисклеймер: Manrope 11sp light, ссылки на Условия и Политику
 
 // Состояния:
 // Default:  кнопка «Получить код» disabled (opacity 0.4)
@@ -486,7 +486,7 @@ const slides: Slide[] = [
 
 ```tsx
 // Заголовок: «Введите код» — Playfair displayMd
-// Подзаголовок: «Отправили SMS на [phone]» — DM Sans bodyMd muted
+// Подзаголовок: «Отправили SMS на [phone]» — Manrope bodyMd muted
 
 // 6 ячеек ввода (grid 6 колонок, gap 4):
 // Ячейка: width=(экран-32-gap*5)/6, height 48, radius 8
@@ -495,7 +495,7 @@ const slides: Slide[] = [
 // Filled:  bg successBg, border sage, text forest 18sp 700
 // Error:   bg errorBg, border error
 
-// Таймер: DM Sans bodyMd, «Повторить через 0:47»
+// Таймер: Manrope bodyMd, «Повторить через 0:47»
 // После 0: кнопка «Отправить повторно» (ghost)
 // Ссылка «← Изменить номер»
 
@@ -519,7 +519,7 @@ const slides: Slide[] = [
 // Empty State (вертикально по центру):
 //   Иконка 48pt, opacity 0.4
 //   «Найдите захоронение» — Playfair headingLg
-//   Подсказка — DM Sans bodySm muted, max-width 160
+//   Подсказка — Manrope bodySm muted, max-width 160
 
 // Карточка «+ Добавить захоронение» (всегда видна внизу):
 //   border 1px dashed stone, radius 8, text sage 13sp 500
@@ -534,11 +534,11 @@ const slides: Slide[] = [
 ```tsx
 // SearchBar: bg white, border 0.5px sage, кнопка × для очистки
 // Активный фильтр: chip bg forest + × для сброса
-// «Найдено: N результатов» — DM Sans caption muted
+// «Найдено: N результатов» — Manrope caption muted
 
 // SearchResultCard (на нажатие → GraveScreen):
 //   fullName: Playfair headingMd forest
-//   «[год]–[год] · [кладбище], уч. [уч.]» — DM Sans bodySm muted
+//   «[год]–[год] · [кладбище], уч. [уч.]» — Manrope bodySm muted
 //   Badge статуса (right-aligned):
 //     success  = «Оцифровано»
 //     warning  = «На модерации»
@@ -581,7 +581,7 @@ const slides: Slide[] = [
 
 // Контент (padding 16):
 //   fullName: Playfair displayMd forest (+ Badge статуса справа)
-//   даты: «02.05.1941 — 14.11.2003 · 62 года» — DM Sans bodySm muted
+//   даты: «02.05.1941 — 14.11.2003 · 62 года» — Manrope bodySm muted
 //   Биография: bodyMd ink, numberOfLines=3, «Читать полностью» раскрывает
 
 //   Фотогалерея (если есть):
@@ -613,7 +613,7 @@ const slides: Slide[] = [
 ### Экран 10: OrderScreen (каталог)
 
 ```tsx
-// Строка контекста: «[fullName] · [cemeteryName]» — DM Sans bodySm muted
+// Строка контекста: «[fullName] · [cemeteryName]» — Manrope bodySm muted
 
 // SectionLabel «Быстрые услуги»
 // FlatList — ServiceRow:

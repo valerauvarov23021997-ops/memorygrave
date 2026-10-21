@@ -11,7 +11,7 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
-    "@expo-google-fonts/dm-sans": "^0.2.3",
+    "@expo-google-fonts/manrope": "^0.4.2",
     "@expo-google-fonts/playfair-display": "^0.2.3",
     "@pamyat/api": "*",
     "@pamyat/store": "*",

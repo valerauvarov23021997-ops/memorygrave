@@ -41,5 +41,5 @@ const makeStyles = (c: ThemeColors) =>
     },
     active: { backgroundColor: c.forest },
     inactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
-    label: { ...typography.bodySm, fontFamily: 'DMSans_500Medium' },
+    label: { ...typography.bodySm, fontFamily: 'Manrope_500Medium' },
   })

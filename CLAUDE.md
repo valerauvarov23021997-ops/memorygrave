@@ -167,7 +167,7 @@ errorBg '#FCEBEB'  error '#9B1C1C'
 
 // Шрифты
 Playfair Display  — все заголовки и имена людей
-DM Sans           — весь остальной текст
+Manrope           — весь остальной текст (с кириллицей; DM Sans её не умел)
 ```
 
 Имена усопших — **всегда Playfair Display**. Фон экранов — `cream`. Отступ от края — 16pt.
