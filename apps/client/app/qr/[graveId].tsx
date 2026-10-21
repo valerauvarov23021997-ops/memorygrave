@@ -3,6 +3,7 @@ import {
   Card,
   useColors,
   useThemedStyles,
+  useToast,
   type ThemeColors,
   spacing,
   Text,
@@ -10,17 +11,19 @@ import {
 } from '@pamyat/ui'
 import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
-import { Share, StyleSheet, View } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useGrave } from '../../src/hooks/queries'
 import { goBack } from '../../src/lib/navigation'
+import { shareText } from '../../src/lib/share'
 
 export default function QrScreen() {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const c = useColors()
+  const showToast = useToast()
   const styles = useThemedStyles(makeStyles)
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const { data: grave } = useGrave(graveId ?? '')
@@ -29,11 +32,8 @@ export default function QrScreen() {
   const url = `pamyat://grave/${graveId}`
 
   const onShare = async () => {
-    try {
-      await Share.share({ message: t('qr.shareMessage', { name: grave?.fullName ?? '', url }) })
-    } catch {
-      // пользователь мог закрыть окно шэринга — не ошибка
-    }
+    const result = await shareText(t('qr.shareMessage', { name: grave?.fullName ?? '', url }))
+    if (result === 'copied') showToast(t('common.linkCopied'), 'success')
   }
 
   return (

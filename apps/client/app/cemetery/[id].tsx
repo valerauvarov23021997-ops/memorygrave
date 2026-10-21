@@ -325,7 +325,7 @@ export default function CemeteryMapScreen() {
                     <SvgText
                       x={p.x}
                       y={p.y + 2.1}
-                      fontSize={1.25}
+                      fontSize={1}
                       fill={c.forest}
                       textAnchor="middle"
                     >

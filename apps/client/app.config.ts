@@ -18,7 +18,7 @@ const config: ExpoConfig = {
   assetBundlePatterns: ['**/*'],
   // sdkVersion-политика нужна для тестирования опубликованных обновлений в Expo Go
   runtimeVersion: { policy: 'sdkVersion' },
-  web: { output: 'single', bundler: 'metro' },
+  web: { output: 'single', bundler: 'metro', favicon: './assets/icon.png' },
   ios: {
     bundleIdentifier: 'app.pamyat.client',
     buildNumber: '1',

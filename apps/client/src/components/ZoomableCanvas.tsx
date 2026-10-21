@@ -16,8 +16,8 @@ import Animated, {
 import { scheduleOnRN } from 'react-native-worklets'
 
 /** С какого масштаба план считается «приближенным» — пора показывать подписи. */
-const ZOOMED_AT = 2.2
-const FOCUS_SCALE = 3.2
+const ZOOMED_AT = 3.5
+const FOCUS_SCALE = 4
 
 export interface ZoomableHandle {
   /** Приблизить и поставить в центр точку (в пикселях холста до масштаба). */

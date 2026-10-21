@@ -6,6 +6,7 @@ import {
   Card,
   useColors,
   useThemedStyles,
+  useToast,
   type ThemeColors,
   Icon,
   SectionLabel,
@@ -18,14 +19,16 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { ScrollView, Share, StyleSheet, View } from 'react-native'
+import { ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { goBack } from '../../src/lib/navigation'
+import { shareText } from '../../src/lib/share'
 
 export default function InviteScreen() {
   const { t } = useTranslation()
   const insets = useSafeAreaInsets()
   const c = useColors()
+  const showToast = useToast()
   const styles = useThemedStyles(makeStyles)
   const { graveId } = useLocalSearchParams<{ graveId: string }>()
   const [inviting, setInviting] = useState(false)
@@ -39,12 +42,10 @@ export default function InviteScreen() {
     setInviting(true)
     try {
       const { url } = await membersApi.inviteLink(graveId ?? '')
-      await Share.share({
-        message: `Присоединяйтесь к странице памяти в приложении «Память»: ${url}`,
-        url,
-      })
+      const result = await shareText(t('invite.shareMessage', { url }), url)
+      if (result === 'copied') showToast(t('common.linkCopied'), 'success')
     } catch {
-      // пользователь мог закрыть окно шэринга — не ошибка
+      showToast(t('common.error'), 'error')
     } finally {
       setInviting(false)
     }

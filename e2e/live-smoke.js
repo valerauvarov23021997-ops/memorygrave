@@ -144,6 +144,21 @@ const pause = ms => page.waitForTimeout(ms)
     await text('Иванов Никита Владимирович').waitFor({ timeout: 10000 })
   }, { shotName: '06-map-search' })
 
+  await step('Карта: приближение кнопкой и фамилии на плане', async () => {
+    await page.getByPlaceholder('Фамилия или номер места').fill('')
+    // три нажатия по 1.6× = 4× — с 3.5× у меток появляются фамилии
+    for (let i = 0; i < 3; i++) {
+      await page.getByLabel('Приблизить').click()
+      await pause(500)
+    }
+    await pause(400)
+    const scaled = await page.evaluate(() =>
+      [...document.querySelectorAll('div')].some(d => /scale\(([2-9]|1\.[5-9])/.test(d.style.transform || ''))
+    )
+    if (!scaled) throw new Error('план не приблизился')
+    await text('Куликова').waitFor({ timeout: 5000 }) // подпись фамилии у метки
+  }, { shotName: '06b-map-zoom' })
+
   await step('Карта: из списка — на место и страницу памяти', async () => {
     await page.getByPlaceholder('Фамилия или номер места').fill('Куликова')
     await text('Страница памяти').waitFor({ timeout: 8000 })

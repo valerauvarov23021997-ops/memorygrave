@@ -96,7 +96,7 @@ export function Button({
       onPressOut={() => {
         scale.value = withSpring(1, { duration: 80 })
       }}
-      style={[StyleSheet.flatten(containerStyle), animatedStyle]}
+      style={[containerStyle, animatedStyle]}
     >
       {loading ? <FlameLoader size={24} glow={false} /> : <Text style={labelStyle}>{label}</Text>}
     </AnimatedPressable>

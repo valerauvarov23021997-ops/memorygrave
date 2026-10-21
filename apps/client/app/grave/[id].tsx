@@ -25,7 +25,7 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Pressable, Share, StyleSheet, View } from 'react-native'
+import { Linking, Pressable, StyleSheet, View } from 'react-native'
 import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -36,6 +36,7 @@ import { MemoryCandle } from '../../src/components/MemoryCandle'
 import { useCemeteries, useGrave, useToggleSaved } from '../../src/hooks/queries'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
 import { goBack } from '../../src/lib/navigation'
+import { shareText } from '../../src/lib/share'
 
 export default function GraveScreen() {
   const { t } = useTranslation()
@@ -104,16 +105,10 @@ export default function GraveScreen() {
   }
 
   const onShare = async () => {
-    try {
-      await Share.share({
-        message: t('grave.shareMessage', {
-          name: grave.fullName,
-          url: `pamyat://grave/${grave.id}`,
-        }),
-      })
-    } catch {
-      // пользователь мог закрыть окно шэринга — не ошибка
-    }
+    const result = await shareText(
+      t('grave.shareMessage', { name: grave.fullName, url: `pamyat://grave/${grave.id}` })
+    )
+    if (result === 'copied') showToast(t('common.linkCopied'), 'success')
   }
 
   return (
@@ -168,11 +163,12 @@ export default function GraveScreen() {
         <View style={[styles.topActions, { top: insets.top + spacing.xs }]}>
           <RoundButton
             icon="back"
+            label={t('common.back')}
             onPress={() => {
               goBack()
             }}
           />
-          <RoundButton icon="share" onPress={() => void onShare()} />
+          <RoundButton icon="share" label={t('common.share')} onPress={() => void onShare()} />
         </View>
 
         {/* Круглые действия поверх нижнего края героя — как в Apple Wallet */}
@@ -310,10 +306,24 @@ export default function GraveScreen() {
   )
 }
 
-function RoundButton({ icon, onPress }: { icon: string; onPress: () => void }) {
+function RoundButton({
+  icon,
+  label,
+  onPress,
+}: {
+  icon: string
+  label: string
+  onPress: () => void
+}) {
   const styles = useThemedStyles(makeStyles)
   return (
-    <Pressable style={styles.roundBtn} onPress={onPress} hitSlop={8}>
+    <Pressable
+      style={styles.roundBtn}
+      onPress={onPress}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+    >
       <Icon name={icon} size={20} color="#FFFFFF" />
     </Pressable>
   )

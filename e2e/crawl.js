@@ -16,6 +16,7 @@
  *   • вылезание за правый край экрана, кнопки меньше 44 pt.
  * Отчёт — out/crawl-report.md, скриншоты проблем — out/crawl-*.png.
  */
+const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 const { chromium } = require('playwright-core')
@@ -80,7 +81,9 @@ async function clickables() {
       .map(el => {
         const r = el.getBoundingClientRect()
         const label = (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || el.tagName).trim().replace(/\s+/g, ' ').slice(0, 50)
-        return { label, tag: el.tagName, w: Math.round(r.width), h: Math.round(r.height), input: /INPUT|TEXTAREA/.test(el.tagName) }
+        // неактивные (текущий тариф, уже поставленная оценка) и текущая вкладка — нажимать незачем
+        const disabled = el.getAttribute('aria-disabled') === 'true' || el.hasAttribute('disabled') || el.getAttribute('aria-selected') === 'true'
+        return { label, tag: el.tagName, w: Math.round(r.width), h: Math.round(r.height), input: /INPUT|TEXTAREA/.test(el.tagName), disabled }
       })
   })
 }
@@ -127,8 +130,13 @@ async function open(route) {
   await page.waitForTimeout(1200)
 }
 
-const fingerprint = () =>
-  page.evaluate(() => `${location.href}|${document.body.innerText.length}|${document.querySelectorAll('[role="dialog"],[aria-modal="true"]').length}|${document.body.innerText.slice(0, 400)}`)
+// Реакция — смена адреса, нового окна или КАРТИНКИ (масштаб карты, звёзды, переключатели
+// меняют пиксели, а не текст): сравниваем адрес + хэш скриншота
+let popups = 0
+const fingerprint = async () => {
+  const shot = await page.screenshot()
+  return `${page.url()}|${popups}|${crypto.createHash('md5').update(shot).digest('hex')}`
+}
 
 ;(async () => {
   fs.mkdirSync(out(''), { recursive: true })
@@ -143,7 +151,11 @@ const fingerprint = () =>
     if (r.status() >= 400 && !/favicon/.test(r.url())) liveErrors.push(`HTTP ${r.status()}: ${r.url().replace(BASE, '').slice(0, 100)}`)
   })
   page.on('dialog', d => void d.dismiss())
-  ctx.on('page', p => void p.close()) // внешние ссылки (Яндекс.Карты, Telegram) — не уходим
+  ctx.on('page', p => {
+    // внешние ссылки (Яндекс.Карты, Telegram) — реакция есть, но уходить не надо
+    popups++
+    void p.close()
+  })
 
   // Вход в демо-режиме — один раз, сессия в localStorage
   await open('/')
@@ -170,7 +182,7 @@ const fingerprint = () =>
     await page.screenshot({ path: out(`crawl-${slug(screen)}.png`) })
 
     const items = await clickables()
-    for (const it of items) if (!it.input && (it.w < 44 || it.h < 44)) add(screen, 'мелкая кнопка', `«${it.label}» ${it.w}×${it.h}`)
+    for (const it of items) if (!it.input && !it.disabled && (it.w < 44 || it.h < 44)) add(screen, 'мелкая кнопка', `«${it.label}» ${it.w}×${it.h}`)
     console.log(`   нажимаемых: ${items.length}`)
 
     for (let i = 0; i < Math.min(items.length, MAX_CLICKS); i++) {
@@ -178,7 +190,7 @@ const fingerprint = () =>
       const now = await clickables()
       const target = now[i]
       if (!target || target.label !== items[i].label) continue // экран перестроился — пропускаем
-      if (target.input) continue
+      if (target.input || target.disabled) continue
       liveErrors = []
       const before = await fingerprint()
       try {

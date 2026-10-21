@@ -20,11 +20,12 @@ import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
+import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder, useReport } from '../../src/hooks/queries'
 import { goBack } from '../../src/lib/navigation'
+import { shareText } from '../../src/lib/share'
 
 export default function ReportScreen() {
   const { t } = useTranslation()
@@ -70,16 +71,10 @@ export default function ReportScreen() {
 
   const onShare = async () => {
     if (!order) return
-    try {
-      await Share.share({
-        message: t('report.shareMessage', {
-          service: order.serviceName,
-          cemetery: order.cemeteryName,
-        }),
-      })
-    } catch {
-      // пользователь мог закрыть окно шэринга — не ошибка
-    }
+    const result = await shareText(
+      t('report.shareMessage', { service: order.serviceName, cemetery: order.cemeteryName })
+    )
+    if (result === 'copied') showToast(t('common.linkCopied'), 'success')
   }
 
   const before = report?.photosBefore ?? []

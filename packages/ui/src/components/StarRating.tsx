@@ -18,8 +18,6 @@ interface StarRatingProps {
   size?: number
 }
 
-const AnimatedStar = Animated.createAnimatedComponent(Phosphor.Star)
-
 export function StarRating({ value, onChange, size = 24 }: StarRatingProps) {
   const readonly = !onChange
   return (
@@ -70,12 +68,15 @@ function Star({
       hitSlop={8}
       style={styles.star}
     >
-      <AnimatedStar
-        size={size}
-        weight={filled ? 'fill' : 'regular'}
-        color={filled ? c.gold : c.stone}
-        style={animatedStyle}
-      />
+      {/* масштаб — на обёртке, не на самой SVG: на web анимированный стиль
+          у Svg ронял setNativeProps (CSSStyleDeclaration [0]) на каждом экране со звёздами */}
+      <Animated.View style={animatedStyle}>
+        <Phosphor.Star
+          size={size}
+          weight={filled ? 'fill' : 'regular'}
+          color={filled ? c.gold : c.stone}
+        />
+      </Animated.View>
     </Pressable>
   )
 }
