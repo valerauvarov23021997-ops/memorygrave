@@ -220,7 +220,11 @@ LibreDWG (`dwg2dxf`) — на Windows проще попросить у геод�
 Не проверено: доходят ли события с российских телефонов (из России
 Sentry может блокироваться). Запасной вариант — GlitchTip (тот же протокол).
 
-Дальше: предложить Sentry MCP — чтобы Claude сам читал ошибки, без скриншотов.
+Sentry MCP подключён (22.10.2026, `claude mcp add --transport http sentry https://mcp.sentry.dev/mcp`,
+локально для проекта; вход владелец сделал через `/mcp` → sentry → Authenticate).
+Claude читает ошибки сам: организация `memorygrave`, проект `pamyat-client`,
+regionUrl `https://us.sentry.io`. Новый сервер виден только после перезапуска
+Claude Code (`claude --continue`).
 
 Экран владельца Claude видит снимком через PowerShell (System.Drawing),
 окна выводит вперёд через user32 SetForegroundWindow; кликать за владельца не может.
