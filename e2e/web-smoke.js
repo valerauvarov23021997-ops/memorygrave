@@ -3,7 +3,8 @@
  * Проходит основные пользовательские сценарии и фиксирует ошибки консоли.
  */
 const { chromium } = require('playwright-core')
-const CHROME = '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
+// Путь к браузеру: на ноутбуке владельца — Edge, в облаке — Chromium Playwright
+const CHROME = process.env.E2E_BROWSER || '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'
 const URL = 'http://localhost:8099/'
 
 const results = []
@@ -226,6 +227,15 @@ const text = (t, exact = false) => page.getByText(t, { exact }).filter({ visible
     await text('Уведомления').waitFor({ timeout: 6000 })
     await text('Заказ выполнен').waitFor({ timeout: 4000 })
   }, { shotName: '19-notifications' })
+
+  await step('Карта кладбища: план и поиск по номеру', async () => {
+    await page.goto(URL, { waitUntil: 'networkidle', timeout: 60000 })
+    await text('Кладбище д. Даймище').click()
+    await page.getByPlaceholder('Фамилия или номер места').waitFor({ timeout: 8000 })
+    await page.getByPlaceholder('Фамилия или номер места').fill('100')
+    await text('Захоронение № 100').first().waitFor({ timeout: 5000 })
+    await text('Проложить маршрут').waitFor({ timeout: 3000 })
+  }, { shotName: '20-cemetery-map' })
 
   // ── Итог ──
   const passed = results.filter(r => r.ok).length

@@ -242,6 +242,18 @@ export interface BurialPlace {
   id: string
   number: number
   coordinates: Coordinates
+  /** Кто похоронен на месте — по надписям на памятниках. Пусто — имени нет. */
+  people: PlacePerson[]
+}
+
+/** Человек на месте захоронения — для подписей и поиска на карте кладбища. */
+export interface PlacePerson {
+  graveId: string
+  fullName: string
+  birthDate: string | null
+  deathDate: string | null
+  birthYear: number | null
+  deathYear: number | null
 }
 
 /** Контур дорожки или проезда на кладбище. */

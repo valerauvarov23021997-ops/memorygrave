@@ -1,4 +1,4 @@
-import { cemeteryMapApi, type BurialPlace, type CemeteryMap } from '@pamyat/api'
+import { cemeteryMapApi, type BurialPlace, type CemeteryMap, type PlacePerson } from '@pamyat/api'
 import {
   Button,
   FlameLoader,
@@ -18,7 +18,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Platform, Pressable, StyleSheet, View } from 'react-native'
+import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
@@ -50,6 +50,22 @@ function makeFrame(map: CemeteryMap): Frame | null {
   }
 }
 
+/** Регистр и «ё» не должны мешать поиску: на памятниках пишут по-разному. */
+function normalize(s: string): string {
+  return s.toLowerCase().replace(/ё/g, 'е').trim()
+}
+
+/** «1932–2019»: на карте хватает годов, полные даты — на странице памяти. */
+function lifeYears(p: PlacePerson): string {
+  const b = p.birthYear ?? (p.birthDate ? Number(p.birthDate.slice(0, 4)) : null)
+  const d = p.deathYear ?? (p.deathDate ? Number(p.deathDate.slice(0, 4)) : null)
+  if (!b && !d) return ''
+  return `${b ?? '?'}–${d ?? '?'}`
+}
+
+/** Сколько найденных людей показываем списком под поиском. */
+const MAX_RESULTS = 8
+
 const SURFACE_FILL: Record<string, string> = {
   'ДОРОГА АСФ': '#9C9C96',
   ЩЕБЕНЬ: '#D3C8B0',
@@ -78,20 +94,33 @@ export default function CemeteryMapScreen() {
 
   const frame = useMemo(() => (data ? makeFrame(data) : null), [data])
 
-  // Найденные по номеру места подсвечиваем на плане
-  const found = useMemo(() => {
-    const q = query.trim()
+  // Ищем по номеру места или по ФИО (все слова запроса должны встретиться)
+  const search = useMemo(() => {
+    const q = normalize(query)
     if (!q || !data) return null
-    const n = Number(q)
-    if (!Number.isFinite(n)) return null
-    return data.places.filter(p => p.number === n)
+    if (/^\d+$/.test(q)) {
+      const n = Number(q)
+      return { byName: false, places: data.places.filter(p => p.number === n), people: [] }
+    }
+    const words = q.split(/\s+/)
+    const people: { place: BurialPlace; person: PlacePerson }[] = []
+    for (const place of data.places) {
+      for (const person of place.people) {
+        const name = normalize(person.fullName)
+        if (words.every(w => name.includes(w))) people.push({ place, person })
+      }
+    }
+    const places = [...new Map(people.map(r => [r.place.id, r.place])).values()]
+    return { byName: true, places, people }
   }, [query, data])
 
-  // Единственный номер в поиске — сразу открываем карточку: попасть пальцем
+  const named = useMemo(() => data?.places.filter(p => p.people.length > 0).length ?? 0, [data])
+
+  // Единственный результат — сразу открываем карточку: попасть пальцем
   // в одну из 382 меток на экране телефона практически невозможно
   useEffect(() => {
-    if (found?.length === 1) setSelected(found[0] ?? null)
-  }, [found])
+    if (search?.places.length === 1) setSelected(search.places[0] ?? null)
+  }, [search])
 
   const onRoute = (place: BurialPlace) => {
     const { latitude: la, longitude: lo } = place.coordinates
@@ -135,7 +164,8 @@ export default function CemeteryMapScreen() {
     )
   }
 
-  const highlight = new Set((found ?? []).map(p => p.id))
+  const highlight = new Set((search?.places ?? []).map(p => p.id))
+  const showResults = !!search?.byName && search.people.length > 1 && !selected
 
   return (
     <View style={styles.root}>
@@ -146,15 +176,41 @@ export default function CemeteryMapScreen() {
           value={query}
           onChangeText={setQuery}
           placeholder={t('cemeteryMap.searchPlaceholder')}
-          keyboardType="number-pad"
         />
         <Text variant="caption" color="light" style={styles.counter}>
-          {found
-            ? found.length
-              ? t('cemeteryMap.foundOne', { n: query.trim() })
+          {search
+            ? search.places.length
+              ? search.byName
+                ? t('cemeteryMap.foundPeople', { count: search.people.length })
+                : t('cemeteryMap.foundOne', { n: query.trim() })
               : t('cemeteryMap.notFound')
-            : t('cemeteryMap.total', { count: data.places.length })}
+            : named
+              ? t('cemeteryMap.total', { count: data.places.length, named })
+              : t('cemeteryMap.totalPlain', { count: data.places.length })}
         </Text>
+        {showResults ? (
+          <View style={styles.results}>
+            {search.people.slice(0, MAX_RESULTS).map(({ place, person }) => (
+              <Pressable
+                key={person.graveId}
+                style={({ pressed }) => [styles.resultRow, pressed && styles.pressed]}
+                onPress={() => onPick(place)}
+              >
+                <Text variant="bodyMd" style={styles.resultName} numberOfLines={1}>
+                  {person.fullName}
+                </Text>
+                <Text variant="caption" color="muted">
+                  {[lifeYears(person), t('cemeteryMap.placeShort', { n: place.number })].filter(Boolean).join(' · ')}
+                </Text>
+              </Pressable>
+            ))}
+            {search.people.length > MAX_RESULTS ? (
+              <Text variant="caption" color="light" style={styles.more}>
+                {t('cemeteryMap.refine', { count: search.people.length - MAX_RESULTS })}
+              </Text>
+            ) : null}
+          </View>
+        ) : null}
       </View>
 
       {/* План: масштабируется по ширине экрана, север сверху */}
@@ -194,12 +250,13 @@ export default function CemeteryMapScreen() {
               <G key={place.id} onPress={() => onPick(place)}>
                 {/* прозрачный круг пошире — иначе в метку не попасть пальцем */}
                 <Circle cx={p.x} cy={p.y} r={2.6} fill="transparent" />
+                {/* места без имени — светлее: сразу видно, где надпись не прочитана */}
                 <Circle
                   cx={p.x}
                   cy={p.y}
                   r={sel ? 1.7 : on ? 1.5 : 0.85}
-                  fill={sel ? c.gold : on ? c.error : c.forest}
-                  fillOpacity={sel || on ? 1 : 0.75}
+                  fill={sel ? c.gold : on ? c.error : place.people.length ? c.forest : c.stone}
+                  fillOpacity={sel || on ? 1 : 0.8}
                 />
                 {(on || sel) && (
                   <SvgText
@@ -223,12 +280,14 @@ export default function CemeteryMapScreen() {
         <View style={[styles.sheet, { paddingBottom: insets.bottom + spacing.md }]}>
           <View style={styles.sheetRow}>
             <View style={styles.sheetInfo}>
-              <Text variant="headingLg" color="forest">
+              <Text variant="caption" color="muted">
                 {t('cemeteryMap.placeNumber', { n: selected.number })}
               </Text>
-              <Text variant="bodySm" color="muted">
-                {selected.coordinates.latitude.toFixed(6)}, {selected.coordinates.longitude.toFixed(6)}
-              </Text>
+              {selected.people.length === 0 ? (
+                <Text variant="bodyMd" color="muted" style={styles.noName}>
+                  {t('cemeteryMap.noName')}
+                </Text>
+              ) : null}
             </View>
             <Pressable style={styles.close} onPress={() => setSelected(null)} hitSlop={10}>
               <Text variant="bodyMd" color="muted">
@@ -236,6 +295,31 @@ export default function CemeteryMapScreen() {
               </Text>
             </Pressable>
           </View>
+          {selected.people.length ? (
+            <ScrollView style={styles.people} bounces={false}>
+              {selected.people.map(person => (
+                <Pressable
+                  key={person.graveId}
+                  style={({ pressed }) => [styles.person, pressed && styles.pressed]}
+                  onPress={() => router.push(`/grave/${person.graveId}`)}
+                >
+                  <View style={styles.sheetInfo}>
+                    <Text variant="headingMd" color="forest">
+                      {person.fullName}
+                    </Text>
+                    {lifeYears(person) ? (
+                      <Text variant="bodySm" color="muted">
+                        {lifeYears(person)}
+                      </Text>
+                    ) : null}
+                  </View>
+                  <Text variant="bodySm" color="sage">
+                    {t('cemeteryMap.openMemory')} ›
+                  </Text>
+                </Pressable>
+              ))}
+            </ScrollView>
+          ) : null}
           <Button label={t('cemeteryMap.route')} onPress={() => onRoute(selected)} fullWidth />
           <Button
             label={t('cemeteryMap.reportMissing')}
@@ -283,5 +367,34 @@ const makeStyles = (c: ThemeColors) =>
     sheetInfo: { flex: 1 },
     close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
     legend: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+    results: {
+      marginTop: spacing.sm,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderColor: c.linen,
+      backgroundColor: c.white,
+      overflow: 'hidden',
+    },
+    resultRow: {
+      minHeight: 44,
+      paddingHorizontal: spacing.md,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: c.linen,
+    },
+    resultName: { fontFamily: typography.headingMd.fontFamily },
+    more: { padding: spacing.sm, textAlign: 'center' },
+    pressed: { backgroundColor: c.parchment },
+    noName: { marginTop: spacing.xs },
+    people: { maxHeight: 220 },
+    person: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      minHeight: 52,
+      paddingVertical: spacing.sm,
+      borderBottomWidth: 1,
+      borderBottomColor: c.linen,
+    },
     label: { ...typography.caption },
   })

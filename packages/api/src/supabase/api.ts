@@ -12,6 +12,7 @@ import { plansMock } from '../mocks'
 import type {
   AppNotification,
   CemeteryMap,
+  PlacePerson,
   AuthTokens,
   Cemetery,
   City,
@@ -386,17 +387,36 @@ export const servicesApi = {
 export const cemeteryMapApi = {
   async get(cemeteryId: string): Promise<CemeteryMap> {
     const sb = getSupabase()
-    const [places, paths, plots] = await Promise.all([
+    const [places, paths, plots, people] = await Promise.all([
       sb.from('burial_places').select('id, number, lat, lng').eq('cemetery_id', cemeteryId).order('number'),
       sb.from('cemetery_paths').select('surface, polygon').eq('cemetery_id', cemeteryId),
       sb.from('burial_places').select('plot_polygon').eq('cemetery_id', cemeteryId).not('plot_polygon', 'is', null),
+      sb
+        .from('graves')
+        .select('id, full_name, birth_date, death_date, birth_year, death_year, burial_place_id')
+        .eq('cemetery_id', cemeteryId)
+        .not('burial_place_id', 'is', null),
     ])
     if (places.error) fail(places.error)
+    const byPlace = new Map<string, PlacePerson[]>()
+    for (const g of people.data ?? []) {
+      const list = byPlace.get(g.burial_place_id as string) ?? []
+      list.push({
+        graveId: g.id as string,
+        fullName: g.full_name as string,
+        birthDate: g.birth_date as string | null,
+        deathDate: g.death_date as string | null,
+        birthYear: g.birth_year as number | null,
+        deathYear: g.death_year as number | null,
+      })
+      byPlace.set(g.burial_place_id as string, list)
+    }
     return {
       places: (places.data ?? []).map(r => ({
         id: r.id as string,
         number: r.number as number,
         coordinates: { latitude: r.lat as number, longitude: r.lng as number },
+        people: byPlace.get(r.id as string) ?? [],
       })),
       paths: (paths.data ?? []).map(r => ({
         surface: r.surface as string,

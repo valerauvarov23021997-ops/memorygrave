@@ -15,6 +15,8 @@ export const cemeteryMapMock: CemeteryMap = {
     id: `dm-${p.n}`,
     number: p.n,
     coordinates: { latitude: p.la, longitude: p.lo },
+    // в демо-режиме имён нет: ведомость ФИО хранится только в боевой базе
+    people: [],
   })),
   paths: (raw as RawMap).paths.map(r => ({ surface: r.s, polygon: r.p })),
   plots: (raw as RawMap).plots,
