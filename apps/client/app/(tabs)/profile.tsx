@@ -34,7 +34,6 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { queryKeys, useProfile } from '../../src/hooks/queries'
 import { useAuthActions } from '../../src/hooks/useAuthActions'
 import { links } from '../../src/lib/links'
-import { reportError, Sentry } from '../../src/lib/sentry'
 
 // Метка версии считается сама: ручная метка однажды застыла на «07.07»
 // и месяцами выдавала свежие обновления за июльские
@@ -205,18 +204,11 @@ export default function ProfileScreen() {
 
         <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
         {/* метка сборки; тап — проба сети (результат в тосте и в журнале) */}
-        {/* ВРЕМЕННО: долгое нажатие — тестовая ошибка в Sentry, проверить доставку с телефона */}
         <Pressable
           onPress={() => {
             showToast('Проба сети: ~20 секунд…', 'info')
             void runNetProbe().then(r => {
               showToast(r, 'info')
-            })
-          }}
-          onLongPress={() => {
-            reportError(new Error('Проверка Sentry с телефона'), { check: 'manual' })
-            void Sentry.flush().then(sent => {
-              showToast(sent ? 'Sentry: отправлено' : 'Sentry: не удалось отправить', 'info')
             })
           }}
           hitSlop={12}
