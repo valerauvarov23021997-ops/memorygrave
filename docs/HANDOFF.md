@@ -206,25 +206,21 @@ LibreDWG (`dwg2dxf`) — на Windows проще попросить у геод�
 
 ---
 
-## Задача в работе: Sentry (22.10.2026)
+## Sentry — подключён 22.10.2026
 
-Код готов и закоммичен (`apps/client/src/lib/sentry.ts`, `Sentry.wrap` в
-`app/_layout.tsx`, ошибки react-query → Sentry). Sentry выключен, пока нет DSN.
+Организация **memorygrave.sentry.io**, проект **pamyat-client** (сервер в США,
+`ingest.us.sentry.io`). DSN — в `apps/client/.env` (`EXPO_PUBLIC_SENTRY_DSN`),
+он публичный. Auth Token в чате **не принимать** — это секрет.
 
-Владелец зарегистрировался: организация **memorygrave.sentry.io**. Остановились на
-создании проекта: Skip setup → Projects → Create Project → React Native →
-`pamyat-client` → скопировать DSN (`https://…@….ingest.….sentry.io/…`).
+Проверено 22.10.2026: тестовое событие с ПК владельца принято (HTTP 200);
+веб-сборка отправила необработанную ошибку (envelope → 200); обновление
+`eas update` с DSN выпущено на ветку preview. Ошибки различаются по
+`environment`: `supabase` — боевые, `mocks` — демо, `test` — проверка связи.
 
-Когда владелец пришлёт DSN:
-1. Дописать в `apps/client/.env`: `EXPO_PUBLIC_SENTRY_DSN=<DSN>` (DSN публичный).
-   Auth Token в чате **не принимать** — это секрет.
-2. Проверить: временно бросить тестовую ошибку в веб-сборке, убедиться, что
-   событие появилось в Sentry (владелец смотрит Issues или скриншот экрана).
-3. `eas update` по инструкции выше (с `set -a … .env`), проверить имя бота в бандле.
-4. Предложить Sentry MCP — чтобы Claude сам читал ошибки.
+Не проверено: доходят ли события с российских телефонов (из России
+Sentry может блокироваться). Запасной вариант — GlitchTip (тот же протокол).
 
-Не проверено: открывается ли Sentry из России и доходят ли события с
-российских телефонов. Запасной вариант — GlitchTip (тот же протокол).
+Дальше: предложить Sentry MCP — чтобы Claude сам читал ошибки, без скриншотов.
 
 Экран владельца Claude видит снимком через PowerShell (System.Drawing),
 окна выводит вперёд через user32 SetForegroundWindow; кликать за владельца не может.
