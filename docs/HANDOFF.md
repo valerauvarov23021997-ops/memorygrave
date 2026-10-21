@@ -52,8 +52,11 @@
 
 ```
 cd C:\Users\Admin\memorygrave\apps\client
-eas update --branch preview --message "что изменилось"
+eas update --branch preview --environment preview --message "что изменилось"
 ```
+
+`--environment` обязателен в новых EAS CLI. Серверных переменных в окружении
+`preview` нет, поэтому берётся локальный `apps/client/.env` (живая база).
 
 ### SQL — что и в каком порядке
 
