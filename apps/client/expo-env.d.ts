@@ -1,4 +1,3 @@
-// Типы окружения Expo подтягиваются через reference ниже при генерации
-// типов командой `expo start` (создаёт .expo/types). До генерации ссылка
-// закомментирована, чтобы статический tsc не падал.
-// / <reference types="expo/types" />
+/// <reference types="expo/types" />
+
+// NOTE: This file should not be edited and should be in your git ignore

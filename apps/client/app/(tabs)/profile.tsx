@@ -1,7 +1,4 @@
 import { config, profileApi, runNetProbe } from '@pamyat/api'
-
-// обновлять при каждой публикации, чтобы отличать версии на устройствах
-const BUILD_TAG = '07.07-диаг4'
 import {
   Avatar,
   BottomSheet,
@@ -23,10 +20,12 @@ import {
 } from '@pamyat/ui'
 import { formatDate } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import Constants from 'expo-constants'
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useRouter } from 'expo-router'
+import * as Updates from 'expo-updates'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
@@ -35,6 +34,14 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { queryKeys, useProfile } from '../../src/hooks/queries'
 import { useAuthActions } from '../../src/hooks/useAuthActions'
 import { links } from '../../src/lib/links'
+
+// Метка версии считается сама: ручная метка однажды застыла на «07.07»
+// и месяцами выдавала свежие обновления за июльские
+function buildTag(): string {
+  const sdk = Constants.expoConfig?.sdkVersion?.split('.')[0] ?? '?'
+  const published = Updates.createdAt ? formatDate(Updates.createdAt.toISOString()) : null
+  return published ? `SDK ${sdk} · обновление ${published}` : `SDK ${sdk}`
+}
 
 export default function ProfileScreen() {
   const { t } = useTranslation()
@@ -156,7 +163,7 @@ export default function ProfileScreen() {
         hitSlop={12}
       >
         <Text variant="caption" color="light" center>
-          {`Сборка ${BUILD_TAG} · ${config.backend}`}
+          {`${buildTag()} · ${config.backend}`}
         </Text>
       </Pressable>
     </ScrollView>
