@@ -16,12 +16,13 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AnimatedSplash } from '../src/components/AnimatedSplash'
+import { Sentry } from '../src/lib/sentry'
 import '../src/lib/i18n'
 import { queryClient } from '../src/lib/queryClient'
 
 void SplashScreen.preventAutoHideAsync()
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     PlayfairDisplay_400Regular,
     PlayfairDisplay_500Medium,
@@ -94,3 +95,6 @@ export default function RootLayout() {
 }
 
 const rootStyles = StyleSheet.create({ root: { flex: 1 } })
+
+// Sentry.wrap ловит падения рендера и время запуска приложения
+export default Sentry.wrap(RootLayout)

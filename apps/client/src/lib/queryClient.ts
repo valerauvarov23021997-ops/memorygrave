@@ -1,8 +1,21 @@
-import { onlineManager, QueryClient } from '@tanstack/react-query'
+import { MutationCache, onlineManager, QueryCache, QueryClient } from '@tanstack/react-query'
 import * as Network from 'expo-network'
 import { Platform } from 'react-native'
 
+import { reportError } from './sentry'
+
 export const queryClient = new QueryClient({
+  // Любая ошибка запроса к базе — в Sentry с ключом запроса: видно, какой экран падает
+  queryCache: new QueryCache({
+    onError: (error, query) => {
+      reportError(error, { query: JSON.stringify(query.queryKey).slice(0, 120) })
+    },
+  }),
+  mutationCache: new MutationCache({
+    onError: error => {
+      reportError(error, { kind: 'mutation' })
+    },
+  }),
   defaultOptions: {
     queries: {
       // сеть до бэкенда нестабильная: зависший запрос обрывается таймаутом
