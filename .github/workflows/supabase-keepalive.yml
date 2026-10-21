@@ -1,0 +1,31 @@
+# Бесплатный проект Supabase засыпает после 7 дней без запросов, и приложение
+# перестаёт работать у всех — так уже было в августе 2026. Раз в три дня
+# делаем один настоящий запрос к базе через REST API.
+#
+# Если запрос не прошёл, задача падает, и GitHub присылает владельцу письмо:
+# значит, база всё-таки уснула и её нужно разбудить в панели Supabase.
+
+name: Supabase keepalive
+
+on:
+  schedule:
+    - cron: '17 6 */3 * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Запрос к базе
+        env:
+          # Публичный ключ — тот же, что зашит в приложение; данные защищает RLS
+          SUPABASE_URL: https://ajctgzzvoxrakbjvcpbt.supabase.co
+          SUPABASE_KEY: sb_publishable_l7Wxfk7HaAI6osyPE69amA_riboCd9V
+        run: |
+          # --retry: база могла как раз просыпаться
+          curl --fail-with-body --silent --show-error --retry 3 --retry-delay 20 \
+            -H "apikey: $SUPABASE_KEY" \
+            "$SUPABASE_URL/rest/v1/cemeteries?select=id&limit=1"
+          echo
+          echo "База отвечает"
