@@ -3,6 +3,7 @@ import {
   Button,
   FlameLoader,
   haptics,
+  Icon,
   Input,
   radii,
   spacing,
@@ -16,13 +17,15 @@ import {
 } from '@pamyat/ui'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { Keyboard, Linking, Platform, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import Svg, { Circle, G, Path, Rect, Text as SvgText } from 'react-native-svg'
 
+import { ZoomableCanvas, type ZoomableHandle } from '../../src/components/ZoomableCanvas'
 import { lifeYears, searchPlaces } from '../../src/lib/cemeterySearch'
+import { goBack } from '../../src/lib/navigation'
 
 /** Экранная проекция: метры от юго-западного угла съёмки. */
 interface Frame {
@@ -82,6 +85,9 @@ export default function CemeteryMapScreen() {
 
   const [query, setQuery] = useState('')
   const [selected, setSelected] = useState<BurialPlace | null>(null)
+  const [zoomed, setZoomed] = useState(false)
+  const [canvas, setCanvas] = useState({ width: 0, height: 0 })
+  const zoom = useRef<ZoomableHandle>(null)
   const lastTap = useRef(0)
 
   const frame = useMemo(() => (data ? makeFrame(data) : null), [data])
@@ -93,9 +99,26 @@ export default function CemeteryMapScreen() {
 
   // Единственный результат — сразу открываем карточку: попасть пальцем
   // в одну из 382 меток на экране телефона практически невозможно
+  // Место на плане → пиксели холста: SVG вписан по центру (preserveAspectRatio meet)
+  const focusPlace = useCallback(
+    (place: BurialPlace) => {
+      if (!frame || !canvas.width) return
+      const k = Math.min(canvas.width / frame.width, canvas.height / frame.height)
+      const p = frame.toXY(place.coordinates.longitude, place.coordinates.latitude)
+      zoom.current?.focusOn(
+        (canvas.width - frame.width * k) / 2 + p.x * k,
+        (canvas.height - frame.height * k) / 2 + p.y * k
+      )
+    },
+    [frame, canvas]
+  )
+
   useEffect(() => {
-    if (search?.places.length === 1) setSelected(search.places[0] ?? null)
-  }, [search])
+    const only = search?.places.length === 1 ? search.places[0] : undefined
+    if (!only) return
+    setSelected(only)
+    focusPlace(only)
+  }, [search, focusPlace])
 
   const onRoute = (place: BurialPlace) => {
     const { latitude: la, longitude: lo } = place.coordinates
@@ -109,6 +132,7 @@ export default function CemeteryMapScreen() {
     if (now - lastTap.current < 250) return
     lastTap.current = now
     haptics.light()
+    Keyboard.dismiss()
     setSelected(place)
   }
 
@@ -118,7 +142,7 @@ export default function CemeteryMapScreen() {
         <TopBar
           title={name ?? t('cemeteryMap.title')}
           onBack={() => {
-            router.back()
+            goBack()
           }}
         />
         <View style={styles.center}>
@@ -137,7 +161,7 @@ export default function CemeteryMapScreen() {
         <TopBar
           title={name ?? t('cemeteryMap.title')}
           onBack={() => {
-            router.back()
+            goBack()
           }}
         />
         <View style={styles.center}>
@@ -157,7 +181,7 @@ export default function CemeteryMapScreen() {
       <TopBar
         title={name ?? t('cemeteryMap.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
 
@@ -186,6 +210,7 @@ export default function CemeteryMapScreen() {
                 style={({ pressed }) => [styles.resultRow, pressed && styles.pressed]}
                 onPress={() => {
                   onPick(place)
+                  focusPlace(place)
                 }}
               >
                 <Text variant="bodyMd" style={styles.resultName} numberOfLines={1}>
@@ -209,88 +234,133 @@ export default function CemeteryMapScreen() {
 
       {/* План: масштабируется по ширине экрана, север сверху */}
       <View style={styles.canvas}>
-        <Svg width="100%" height="100%" viewBox={`0 0 ${frame.width} ${frame.height}`}>
-          <Rect width={frame.width} height={frame.height} fill={c.successBg} />
-          {data.paths.map((road, i) => {
-            const d =
-              'M ' +
-              road.polygon
-                .map(([lon, lat]) => {
-                  const p = frame.toXY(lon, lat)
-                  return `${p.x.toFixed(1)},${p.y.toFixed(1)}`
-                })
-                .join(' ') +
-              ' Z'
-            const fill = SURFACE_FILL[road.surface] ?? c.stone
-            return (
-              <Path
-                key={`r${i}`}
-                d={d}
-                fill={fill}
-                fillOpacity={0.75}
-                stroke={fill}
-                strokeWidth={0.5}
-              />
-            )
-          })}
-          {data.plots.map((poly, i) => {
-            const d =
-              'M ' +
-              poly
-                .map(([lon, lat]) => {
-                  const p = frame.toXY(lon, lat)
-                  return `${p.x.toFixed(1)},${p.y.toFixed(1)}`
-                })
-                .join(' ') +
-              ' Z'
-            return (
-              <Path
-                key={`p${i}`}
-                d={d}
-                fill={c.parchment}
-                fillOpacity={0.85}
-                stroke={c.stone}
-                strokeWidth={0.18}
-              />
-            )
-          })}
-          {data.places.map(place => {
-            const p = frame.toXY(place.coordinates.longitude, place.coordinates.latitude)
-            const on = highlight.has(place.id)
-            const sel = selected?.id === place.id
-            return (
-              <G
-                key={place.id}
-                onPress={() => {
-                  onPick(place)
-                }}
-              >
-                {/* прозрачный круг пошире — иначе в метку не попасть пальцем */}
-                <Circle cx={p.x} cy={p.y} r={2.6} fill="transparent" />
-                {/* места без имени — светлее: сразу видно, где надпись не прочитана */}
-                <Circle
-                  cx={p.x}
-                  cy={p.y}
-                  r={sel ? 1.7 : on ? 1.5 : 0.85}
-                  fill={sel ? c.gold : on ? c.error : place.people.length ? c.forest : c.stone}
-                  fillOpacity={sel || on ? 1 : 0.8}
+        <ZoomableCanvas
+          ref={zoom}
+          style={styles.fill}
+          onZoomedChange={setZoomed}
+          onLayout={e => {
+            setCanvas({ width: e.nativeEvent.layout.width, height: e.nativeEvent.layout.height })
+          }}
+        >
+          <Svg width="100%" height="100%" viewBox={`0 0 ${frame.width} ${frame.height}`}>
+            <Rect width={frame.width} height={frame.height} fill={c.successBg} />
+            {data.paths.map((road, i) => {
+              const d =
+                'M ' +
+                road.polygon
+                  .map(([lon, lat]) => {
+                    const p = frame.toXY(lon, lat)
+                    return `${p.x.toFixed(1)},${p.y.toFixed(1)}`
+                  })
+                  .join(' ') +
+                ' Z'
+              const fill = SURFACE_FILL[road.surface] ?? c.stone
+              return (
+                <Path
+                  key={`r${i}`}
+                  d={d}
+                  fill={fill}
+                  fillOpacity={0.75}
+                  stroke={fill}
+                  strokeWidth={0.5}
                 />
-                {(on || sel) && (
-                  <SvgText
-                    x={p.x}
-                    y={p.y - 2.6}
-                    fontSize={3.4}
-                    fontWeight="700"
-                    fill={c.ink}
-                    textAnchor="middle"
-                  >
-                    {place.number}
-                  </SvgText>
-                )}
-              </G>
-            )
-          })}
-        </Svg>
+              )
+            })}
+            {data.plots.map((poly, i) => {
+              const d =
+                'M ' +
+                poly
+                  .map(([lon, lat]) => {
+                    const p = frame.toXY(lon, lat)
+                    return `${p.x.toFixed(1)},${p.y.toFixed(1)}`
+                  })
+                  .join(' ') +
+                ' Z'
+              return (
+                <Path
+                  key={`p${i}`}
+                  d={d}
+                  fill={c.parchment}
+                  fillOpacity={0.85}
+                  stroke={c.stone}
+                  strokeWidth={0.18}
+                />
+              )
+            })}
+            {data.places.map(place => {
+              const p = frame.toXY(place.coordinates.longitude, place.coordinates.latitude)
+              const on = highlight.has(place.id)
+              const sel = selected?.id === place.id
+              return (
+                <G
+                  key={place.id}
+                  onPress={() => {
+                    onPick(place)
+                  }}
+                >
+                  {/* прозрачный круг пошире — иначе в метку не попасть пальцем */}
+                  <Circle cx={p.x} cy={p.y} r={2.6} fill="transparent" />
+                  {/* места без имени — светлее: сразу видно, где надпись не прочитана */}
+                  <Circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={sel ? 1.7 : on ? 1.5 : 0.85}
+                    fill={sel ? c.gold : on ? c.error : place.people.length ? c.forest : c.stone}
+                    fillOpacity={sel || on ? 1 : 0.8}
+                  />
+                  {(on || sel) && (
+                    <SvgText
+                      x={p.x}
+                      y={p.y - 2.6}
+                      fontSize={3.4}
+                      fontWeight="700"
+                      fill={c.ink}
+                      textAnchor="middle"
+                    >
+                      {place.number}
+                    </SvgText>
+                  )}
+                  {/* при приближении — фамилия под меткой: ищут глазами по фамилии, не по номеру */}
+                  {zoomed && !on && !sel && place.people[0] ? (
+                    <SvgText
+                      x={p.x}
+                      y={p.y + 2.1}
+                      fontSize={1.25}
+                      fill={c.forest}
+                      textAnchor="middle"
+                    >
+                      {place.people[0].fullName.split(' ')[0]}
+                    </SvgText>
+                  ) : null}
+                </G>
+              )
+            })}
+          </Svg>
+        </ZoomableCanvas>
+        {/* масштаб кнопками — для тех, кому неудобно щипать экран, и для веба */}
+        <View style={styles.zoomControls}>
+          <Pressable
+            style={styles.zoomBtn}
+            onPress={() => zoom.current?.zoomBy(1.6)}
+            accessibilityLabel={t('cemeteryMap.zoomIn')}
+          >
+            <Icon name="plus" size={20} color={c.forest} />
+          </Pressable>
+          <Pressable
+            style={styles.zoomBtn}
+            onPress={() => zoom.current?.zoomBy(1 / 1.6)}
+            accessibilityLabel={t('cemeteryMap.zoomOut')}
+          >
+            <Icon name="Minus" size={20} color={c.forest} />
+          </Pressable>
+          <Pressable
+            style={styles.zoomBtn}
+            onPress={() => zoom.current?.reset()}
+            accessibilityLabel={t('cemeteryMap.zoomReset')}
+          >
+            <Icon name="CornersOut" size={20} color={c.forest} />
+          </Pressable>
+        </View>
       </View>
 
       {selected ? (
@@ -402,6 +472,18 @@ const makeStyles = (c: ThemeColors) =>
     sheetInfo: { flex: 1 },
     close: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
     legend: { paddingHorizontal: spacing.lg, paddingTop: spacing.sm },
+    fill: { flex: 1 },
+    zoomControls: { position: 'absolute', right: spacing.sm, top: spacing.sm, gap: spacing.xs },
+    zoomBtn: {
+      width: 44,
+      height: 44,
+      borderRadius: 22,
+      backgroundColor: c.white,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderWidth: 1,
+      borderColor: c.linen,
+    },
     results: {
       marginTop: spacing.sm,
       borderRadius: radii.md,

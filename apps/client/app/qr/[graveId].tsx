@@ -8,17 +8,17 @@ import {
   Text,
   TopBar,
 } from '@pamyat/ui'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { Share, StyleSheet, View } from 'react-native'
 import QRCode from 'react-native-qrcode-svg'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useGrave } from '../../src/hooks/queries'
+import { goBack } from '../../src/lib/navigation'
 
 export default function QrScreen() {
   const { t } = useTranslation()
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
@@ -41,7 +41,7 @@ export default function QrScreen() {
       <TopBar
         title={t('qr.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <View style={[styles.content, { paddingBottom: insets.bottom + spacing.lg }]}>

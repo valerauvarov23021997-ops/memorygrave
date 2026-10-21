@@ -40,7 +40,9 @@ import { links } from '../../src/lib/links'
 function buildTag(): string {
   const sdk = Constants.expoConfig?.sdkVersion?.split('.')[0] ?? '?'
   const published = Updates.createdAt ? formatDate(Updates.createdAt.toISOString()) : null
-  return published ? `SDK ${sdk} · обновление ${published}` : `SDK ${sdk}`
+  // короткий id обновления — сверить с `eas update`, какая версия открыта на телефоне
+  const id = Updates.updateId ? ` #${Updates.updateId.slice(-6)}` : ''
+  return published ? `SDK ${sdk} · обновление ${published}${id}` : `SDK ${sdk}`
 }
 
 export default function ProfileScreen() {

@@ -22,6 +22,7 @@ import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 
 import { useServices } from '../../src/hooks/queries'
+import { goBack } from '../../src/lib/navigation'
 
 export default function CatalogScreen() {
   const { t } = useTranslation()
@@ -52,7 +53,7 @@ export default function CatalogScreen() {
       <TopBar
         title={t('grave.orderCare')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>

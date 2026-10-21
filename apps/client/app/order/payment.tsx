@@ -26,6 +26,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { usePaymentMethods } from '../../src/hooks/queries'
+import { goBack } from '../../src/lib/navigation'
 
 export default function PaymentScreen() {
   const { t } = useTranslation()
@@ -77,7 +78,7 @@ export default function PaymentScreen() {
       <TopBar
         title={t('payment.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
@@ -162,7 +163,7 @@ export default function PaymentScreen() {
           label={t('common.cancel')}
           variant="ghost"
           onPress={() => {
-            router.back()
+            goBack()
           }}
         />
       </View>

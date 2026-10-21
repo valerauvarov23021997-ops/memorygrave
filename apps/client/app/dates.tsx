@@ -28,6 +28,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { goBack } from '../src/lib/navigation'
 
 /**
  * Сводный экран памятных дат: личные даты по всем захоронениям
@@ -62,7 +63,7 @@ export default function DatesScreen() {
       <TopBar
         title={t('dates.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>

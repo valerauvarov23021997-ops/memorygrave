@@ -40,6 +40,7 @@ import {
   scheduleReminder,
   syncReminders,
 } from '../../src/lib/localReminders'
+import { goBack } from '../../src/lib/navigation'
 
 export default function RemindersScreen() {
   const { t } = useTranslation()
@@ -135,7 +136,7 @@ export default function RemindersScreen() {
       <TopBar
         title={t('reminders.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
@@ -331,5 +332,5 @@ const makeStyles = (c: ThemeColors) =>
       gap: spacing.sm,
       paddingVertical: spacing.xs,
     },
-    configureRow: { marginTop: spacing.sm },
+    configureRow: { marginTop: spacing.sm, minHeight: 44, justifyContent: 'center' },
   })

@@ -25,6 +25,7 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { goBack } from '../../src/lib/navigation'
 
 const WEEKDAYS = ['вс', 'пн', 'вт', 'ср', 'чт', 'пт', 'сб']
 
@@ -92,7 +93,7 @@ export default function OrderFormScreen() {
       <TopBar
         title={t('orderForm.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView

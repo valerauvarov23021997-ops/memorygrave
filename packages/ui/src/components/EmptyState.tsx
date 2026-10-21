@@ -1,5 +1,5 @@
 import React from 'react'
-import { StyleSheet, View } from 'react-native'
+import { Platform, StyleSheet, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
 import { Button } from './Button'
@@ -25,7 +25,8 @@ export function EmptyState({ icon, title, subtitle, actionLabel, onAction }: Emp
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   return (
-    <Animated.View entering={FadeIn.duration(400)} style={styles.wrap}>
+    // entering-анимации reanimated падают на web (CSSStyleDeclaration) — там без неё
+    <Animated.View entering={Platform.OS === 'web' ? undefined : FadeIn.duration(400)} style={styles.wrap}>
       <View style={styles.badge}>
         <Icon name={icon} size={30} color={c.sage} />
       </View>

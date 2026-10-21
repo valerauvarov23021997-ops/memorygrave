@@ -88,7 +88,8 @@ export default function SearchScreen() {
           {t('search.appName')}
         </Text>
         <Pressable
-          hitSlop={8}
+          // иконка 22pt — зона касания 44pt
+          hitSlop={11}
           onPress={() => {
             router.push('/notifications')
           }}
@@ -121,6 +122,7 @@ export default function SearchScreen() {
             <Pressable
               onPress={() => {
                 setQuery('')
+                Keyboard.dismiss()
               }}
               hitSlop={8}
             >
@@ -199,6 +201,9 @@ export default function SearchScreen() {
                   subtitle={graveMeta(item)}
                   right={<Badge label={badge.label} variant={badge.variant} />}
                   onPress={() => {
+                    // вкладка поиска не закрывается — без этого клавиатура
+                    // оставалась висеть поверх страницы памяти
+                    Keyboard.dismiss()
                     router.push(`/grave/${item.id}`)
                   }}
                   position={groupedPosition(index, data?.length ?? 0)}

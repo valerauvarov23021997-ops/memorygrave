@@ -24,6 +24,7 @@ import { Pressable, ScrollView, Share, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder, useReport } from '../../src/hooks/queries'
+import { goBack } from '../../src/lib/navigation'
 
 export default function ReportScreen() {
   const { t } = useTranslation()
@@ -89,7 +90,7 @@ export default function ReportScreen() {
       <TopBar
         title={t('report.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>

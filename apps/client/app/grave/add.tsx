@@ -22,6 +22,7 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useCemeteries } from '../../src/hooks/queries'
+import { goBack } from '../../src/lib/navigation'
 
 export default function AddGraveScreen() {
   const { t } = useTranslation()
@@ -94,7 +95,7 @@ export default function AddGraveScreen() {
       <TopBar
         title={t('addGrave.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView

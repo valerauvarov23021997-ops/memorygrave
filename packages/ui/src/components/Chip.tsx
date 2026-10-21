@@ -22,6 +22,8 @@ export function Chip({ label, active = false, onPress }: ChipProps) {
       accessibilityRole="button"
       accessibilityState={{ selected: active }}
       onPress={onPress}
+      // чип 36pt по дизайну — палец ловим зоной 44pt
+      hitSlop={4}
       style={[styles.chip, active ? styles.active : styles.inactive]}
     >
       <Text style={[styles.label, { color: active ? c.cream : c.muted }]}>{label}</Text>

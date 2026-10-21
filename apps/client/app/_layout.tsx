@@ -11,7 +11,8 @@ import { router, Stack } from 'expo-router'
 import * as SplashScreen from 'expo-splash-screen'
 import { StatusBar } from 'expo-status-bar'
 import { useEffect, useState } from 'react'
-import { Platform } from 'react-native'
+import { Platform, StyleSheet } from 'react-native'
+import { GestureHandlerRootView } from 'react-native-gesture-handler'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
 
 import { AnimatedSplash } from '../src/components/AnimatedSplash'
@@ -28,7 +29,9 @@ export default function RootLayout() {
     Manrope_500Medium,
   })
   // Пока анимированный сплэш не доиграл — держим его поверх приложения.
-  const [splashDone, setSplashDone] = useState(false)
+  // В e2e-сборках (EXPO_PUBLIC_E2E=1) сплэш пропускаем: обходчик перезагружает
+  // экраны сотни раз, и 4 секунды заставки на каждый растягивали прогон на час.
+  const [splashDone, setSplashDone] = useState(process.env.EXPO_PUBLIC_E2E === '1')
 
   useEffect(() => {
     // Прячем нативный сплэш, как только готовы шрифты — дальше играет наш.
@@ -56,33 +59,38 @@ export default function RootLayout() {
   if (!fontsLoaded && !fontError) return null
 
   return (
-    <SafeAreaProvider>
-      <ThemeProvider>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <StatusBar style="dark" />
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                contentStyle: { backgroundColor: colors.cream },
-                animation: 'slide_from_right',
-              }}
-            >
-              <Stack.Screen name="index" />
-              <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
-              <Stack.Screen name="(auth)" />
-              <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
-            </Stack>
-            {!splashDone ? (
-              <AnimatedSplash
-                onFinish={() => {
-                  setSplashDone(true)
+    // корень для жестов (масштаб карты кладбища)
+    <GestureHandlerRootView style={rootStyles.root}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <StatusBar style="dark" />
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  contentStyle: { backgroundColor: colors.cream },
+                  animation: 'slide_from_right',
                 }}
-              />
-            ) : null}
-          </ToastProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+              >
+                <Stack.Screen name="index" />
+                <Stack.Screen name="onboarding" options={{ animation: 'fade' }} />
+                <Stack.Screen name="(auth)" />
+                <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
+              </Stack>
+              {!splashDone ? (
+                <AnimatedSplash
+                  onFinish={() => {
+                    setSplashDone(true)
+                  }}
+                />
+              ) : null}
+            </ToastProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   )
 }
+
+const rootStyles = StyleSheet.create({ root: { flex: 1 } })

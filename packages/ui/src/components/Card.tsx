@@ -73,6 +73,7 @@ export function Card({
   ].filter(Boolean) as ViewStyle[]
 
   if (onPress) {
+    // вложенный массив стилей в анимированном компоненте ронял web (CSSStyleDeclaration [0]) — сплющиваем
     return (
       <AnimatedPressable
         onPress={onPress}
@@ -82,7 +83,7 @@ export function Card({
         onPressOut={() => {
           scale.value = withSpring(1, { duration: 90 })
         }}
-        style={[composed, animatedStyle]}
+        style={[StyleSheet.flatten(composed), animatedStyle]}
       >
         {children}
       </AnimatedPressable>

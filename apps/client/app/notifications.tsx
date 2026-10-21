@@ -17,6 +17,7 @@ import { useRouter } from 'expo-router'
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FlatList, Pressable, StyleSheet, View } from 'react-native'
+import { goBack } from '../src/lib/navigation'
 
 /** Сколько времени прошло, по-человечески: «сегодня», «вчера», «5 дней назад». */
 function timeAgo(iso: string, t: (k: string, o?: Record<string, unknown>) => string): string {
@@ -62,7 +63,7 @@ export default function NotificationsScreen() {
       <TopBar
         title={t('notifications.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       {!isLoading && (data?.length ?? 0) === 0 ? (

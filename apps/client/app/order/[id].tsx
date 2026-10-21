@@ -32,6 +32,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder } from '../../src/hooks/queries'
 import { orderStatusBadge, timelineIndex } from '../../src/lib/statusMaps'
+import { goBack } from '../../src/lib/navigation'
 
 export default function OrderStatusScreen() {
   const { t } = useTranslation()
@@ -51,7 +52,7 @@ export default function OrderStatusScreen() {
       void qc.invalidateQueries({ queryKey: ['order', id] })
       setConfirmCancel(false)
       showToast(t('orderStatus.cancelled'), 'success')
-      router.back()
+      goBack()
     },
   })
 
@@ -61,7 +62,7 @@ export default function OrderStatusScreen() {
         <TopBar
           title={t('orderStatus.title')}
           onBack={() => {
-            router.back()
+            goBack()
           }}
         />
         <View style={styles.loading}>
@@ -89,7 +90,7 @@ export default function OrderStatusScreen() {
       <TopBar
         title={t('orderStatus.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>

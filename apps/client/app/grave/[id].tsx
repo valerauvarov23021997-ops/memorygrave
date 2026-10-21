@@ -25,8 +25,8 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Platform, Pressable, Share, StyleSheet, View } from 'react-native'
-import Animated, { FadeIn } from 'react-native-reanimated'
+import { Linking, Pressable, Share, StyleSheet, View } from 'react-native'
+import Animated from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useFlameRefresh } from '../../src/components/FlameRefresh'
@@ -35,6 +35,7 @@ import { MemoryBook } from '../../src/components/MemoryBook'
 import { MemoryCandle } from '../../src/components/MemoryCandle'
 import { useCemeteries, useGrave, useToggleSaved } from '../../src/hooks/queries'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
+import { goBack } from '../../src/lib/navigation'
 
 export default function GraveScreen() {
   const { t } = useTranslation()
@@ -134,15 +135,18 @@ export default function GraveScreen() {
           end={{ x: 0.5, y: 1 }}
           style={[styles.hero, { paddingTop: insets.top + 52 }]}
         >
-          <Animated.View
-            entering={Platform.OS === 'web' ? undefined : FadeIn.duration(500)}
-            style={styles.heroContent}
-          >
+          {/* Без entering-анимации: на iOS (новая архитектура) блок с ней
+              переставал принимать касания — портрет не открывал фото */}
+          <View style={styles.heroContent}>
             {/* портрет — самое заметное место: по нему тапают в первую очередь */}
             <Pressable
               style={styles.portraitRing}
-              onPress={() => setGalleryOpen(true)}
+              onPress={() => {
+                haptics.light()
+                setGalleryOpen(true)
+              }}
               disabled={!grave.photos.length}
+              hitSlop={12}
               accessibilityRole="imagebutton"
               accessibilityLabel={t('grave.actPhoto')}
             >
@@ -157,7 +161,7 @@ export default function GraveScreen() {
             <View style={styles.heroBadge}>
               <Badge label={badge.label} variant={badge.variant} />
             </View>
-          </Animated.View>
+          </View>
         </LinearGradient>
 
         {/* Плавающие кнопки поверх шапки */}
@@ -165,7 +169,7 @@ export default function GraveScreen() {
           <RoundButton
             icon="back"
             onPress={() => {
-              router.back()
+              goBack()
             }}
           />
           <RoundButton icon="share" onPress={() => void onShare()} />

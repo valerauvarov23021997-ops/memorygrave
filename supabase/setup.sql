@@ -299,7 +299,7 @@ insert into services (id, name, description, icon, category, price_from, fixed_p
   ('svc-candles', 'Свечи и лампадки', 'Установка и зажжение свечей, лампадок', 'Flame', 'quick', 300, true, 30),
   ('svc-headstone', 'Надгробная плита', 'Изготовление и установка памятника из гранита или мрамора', 'Square', 'major', 15000, false, 40),
   ('svc-bench', 'Скамейка и стол', 'Установка скамейки и столика на участке', 'Armchair', 'major', 8000, false, 50),
-  ('svc-fence', 'Ограда', 'Изготовление и монтаж металлической ограды', 'Fence', 'major', 6000, false, 60)
+  ('svc-fence', 'Ограда', 'Изготовление и монтаж металлической ограды', 'GridFour', 'major', 6000, false, 60)
 on conflict (id) do nothing;
 
 -- ─── Сиды: захоронения ───────────────────────────────────────

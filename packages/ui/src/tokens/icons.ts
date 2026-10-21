@@ -14,7 +14,8 @@ export const icons = {
   candles: 'Flame',
   headstone: 'Square',
   bench: 'Armchair',
-  fence: 'Fence',
+  // в Phosphor нет «Fence» — пустая иконка в каталоге; решётка ближе всего к оградке
+  fence: 'GridFour',
   // Действия
   mapPin: 'MapPin',
   camera: 'Camera',
@@ -26,12 +27,22 @@ export const icons = {
   support: 'ChatCircleText',
   settings: 'Gear',
   cake: 'Cake',
-  candle: 'Candle',
+  // в Phosphor нет «Candle» — был пустой круг в «Ближайшей дате»
+  candle: 'Flame',
   back: 'CaretLeft',
   close: 'X',
   plus: 'Plus',
   chevronRight: 'CaretRight',
 } as const
+
+/**
+ * Имена из базы (services.icon), которых нет в Phosphor, → существующие.
+ * Услуги приходят строкой с сервера, поэтому чиним и на стороне приложения.
+ */
+export const iconAliases: Record<string, string> = {
+  Fence: 'GridFour',
+  Candle: 'Flame',
+}
 
 export type IconName = keyof typeof icons
 /** Имена, которыми оперирует phosphor-react-native. */

@@ -55,7 +55,7 @@ export const servicesMock: Service[] = [
     id: 'svc-fence',
     name: 'Ограда',
     description: 'Изготовление и монтаж металлической ограды',
-    icon: 'Fence',
+    icon: 'GridFour',
     category: 'major',
     priceFrom: 6000,
     fixedPrice: false,

@@ -15,15 +15,15 @@ import {
   TopBar,
 } from '@pamyat/ui'
 import { useQuery } from '@tanstack/react-query'
-import { useLocalSearchParams, useRouter } from 'expo-router'
+import { useLocalSearchParams } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, Share, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
+import { goBack } from '../../src/lib/navigation'
 
 export default function InviteScreen() {
   const { t } = useTranslation()
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
@@ -55,7 +55,7 @@ export default function InviteScreen() {
       <TopBar
         title={t('invite.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>

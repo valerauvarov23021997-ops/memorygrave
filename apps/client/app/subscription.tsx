@@ -15,16 +15,15 @@ import {
   useToast,
 } from '@pamyat/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { queryKeys, useProfile } from '../src/hooks/queries'
+import { goBack } from '../src/lib/navigation'
 
 export default function SubscriptionScreen() {
   const { t } = useTranslation()
-  const router = useRouter()
   const insets = useSafeAreaInsets()
   const styles = useThemedStyles(makeStyles)
   const showToast = useToast()
@@ -55,7 +54,7 @@ export default function SubscriptionScreen() {
       <TopBar
         title={t('subscription.title')}
         onBack={() => {
-          router.back()
+          goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
