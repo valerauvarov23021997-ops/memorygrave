@@ -6,6 +6,8 @@
  * сессию Supabase и сохраняет телефон в профиле. Реальный SMS-провайдер
  * подключается позже, интерфейс не изменится.
  */
+import { queryWords, rankByName } from '@pamyat/utils'
+
 import { tokenStorage } from '../client'
 import { config } from '../config'
 import { plansMock } from '../mocks'
@@ -233,18 +235,27 @@ export const gravesApi = {
     limit?: number
   }): Promise<Grave[]> {
     const sb = getSupabase()
+    const limit = params.limit ?? 30
+    const words = queryWords(params.q ?? '')
+    // База отбирает кандидатов по началу слов ФИО, порядок «фамилия первой»
+    // ставит rankByName — поэтому берём с запасом, чтобы фамилии не отрезал limit.
+    // «_» в ilike — любой символ: на памятниках «ё» и «е» вперемешку.
     let query = sb
       .from('graves')
       .select(GRAVE_SELECT)
-      .limit(params.limit ?? 30)
-    if (params.q?.trim()) query = query.ilike('full_name', `%${params.q.trim()}%`)
+      .limit(words.length ? limit * 3 : limit)
+    for (const w of words) {
+      const p = w.replace(/е/g, '_')
+      query = query.or(`full_name.ilike."${p}%",full_name.ilike."% ${p}%"`)
+    }
     if (params.cemeteryId) query = query.eq('cemetery_id', params.cemeteryId)
     const [{ data, error }, saved] = await Promise.all([query, savedIdSet()])
     if (error) fail(error)
     let rows = (data ?? []) as unknown as GraveRow[]
     // фильтр по городу — по имени города из связки (объём данных мал)
     if (params.city) rows = rows.filter(r => r.cemetery?.city?.name === params.city)
-    return rows.map(r => mapGrave(r, saved))
+    if (words.length) rows = rankByName(rows, r => r.full_name, params.q ?? '')
+    return rows.slice(0, limit).map(r => mapGrave(r, saved))
   },
 
   async getById(id: string): Promise<Grave> {

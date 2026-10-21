@@ -9,6 +9,7 @@
     "test": "jest --passWithNoTests"
   },
   "dependencies": {
+    "@pamyat/utils": "*",
     "@supabase/supabase-js": "^2.110.0",
     "axios": "^1.7.0",
     "react-native-url-polyfill": "^3.0.0"

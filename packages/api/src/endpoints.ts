@@ -2,6 +2,8 @@
  * API-слой приложения. Каждый метод сам решает: мок или сеть.
  * UI и стор работают только с этими функциями, не с axios напрямую.
  */
+import { rankByName } from '@pamyat/utils'
+
 import client, { unwrap } from './client'
 import { config, mockDelay } from './config'
 import {
@@ -117,14 +119,14 @@ export const gravesApi = {
   search(params: GraveSearchParams): Promise<Grave[]> {
     if (SUPA) return sb.gravesApi.search(params)
     if (USE_MOCKS) {
-      const q = params.q?.toLowerCase().trim() ?? ''
-      const result = gravesMock.filter(g => {
+      const q = params.q?.trim() ?? ''
+      const filtered = gravesMock.filter(g => {
         if (params.cemeteryId && g.cemeteryId !== params.cemeteryId) return false
         if (params.city && g.city !== params.city) return false
-        if (q && !g.fullName.toLowerCase().includes(q)) return false
         return true
       })
-      return mockDelay(result)
+      // то же правило, что и на боевой базе: начало слов, фамилия — первой
+      return mockDelay(q ? rankByName(filtered, g => g.fullName, q) : filtered)
     }
     return unwrap<Grave[]>(client.get('/graves/search', { params }))
   },

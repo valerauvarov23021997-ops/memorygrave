@@ -81,7 +81,7 @@ export const ru = {
     emptyTitle: 'Найдите захоронение',
     emptyHint: 'Введите имя близкого человека, чтобы начать поиск',
     mapsLabel: 'ОЦИФРОВАННЫЕ КЛАДБИЩА',
-    addGrave: '+ Добавить захоронение',
+    addGrave: 'Добавить захоронение',
     found: 'Найдено: {{value}}',
     noResults: 'Ничего не найдено',
     statusDigitized: 'Оцифровано',

@@ -1,9 +1,8 @@
 import type { BurialPlace, PlacePerson } from '@pamyat/api'
+import { normalizeName, rankByName } from '@pamyat/utils'
 
-/** Регистр и «ё» не должны мешать поиску: на памятниках пишут по-разному. */
-export function normalize(s: string): string {
-  return s.toLowerCase().replace(/ё/g, 'е').trim()
-}
+/** Регистр и «ё» не должны мешать поиску (общее правило — @pamyat/utils). */
+export const normalize = normalizeName
 
 /** «1932–2019»: на карте хватает годов, полные даты — на странице памяти. */
 export function lifeYears(p: PlacePerson): string {
@@ -33,18 +32,11 @@ export function searchPlaces(places: BurialPlace[], query: string): PlaceSearchR
     const n = Number(q)
     return { byName: false, places: places.filter(p => p.number === n), people: [] }
   }
-  const words = q.split(/\s+/)
-  const bySurname: PlaceSearchResult['people'] = []
-  const byOther: PlaceSearchResult['people'] = []
-  for (const place of places) {
-    for (const person of place.people) {
-      const parts = normalize(person.fullName).split(/\s+/)
-      if (!words.every(w => parts.some(part => part.startsWith(w)))) continue
-      const surnameHit = words.some(w => parts[0]?.startsWith(w))
-      ;(surnameHit ? bySurname : byOther).push({ place, person })
-    }
-  }
-  const people = [...bySurname, ...byOther]
+  const people = rankByName(
+    places.flatMap(place => place.people.map(person => ({ place, person }))),
+    r => r.person.fullName,
+    query
+  )
   const found = [...new Map(people.map(r => [r.place.id, r.place])).values()]
   return { byName: true, places: found, people }
 }

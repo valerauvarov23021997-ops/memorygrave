@@ -99,6 +99,23 @@ const pause = ms => page.waitForTimeout(ms)
     await text('Куликова Тамара Николаевна').waitFor({ timeout: 15000 })
   }, { shotName: '03-search' })
 
+  await step('Общий поиск: фамилия первой, «е» находит «ё»', async () => {
+    const input = page.getByPlaceholder('Имя, кладбище или город')
+    await input.fill('иванов')
+    await text('Иванов Никита Владимирович').waitFor({ timeout: 15000 })
+    // первая строка списка — фамилия, а не отчество «…Иванович»
+    const first = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll('div')].filter(
+        d => d.childElementCount === 0 && /^[А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+ [А-ЯЁ][а-яё]+$/.test(d.innerText || '') && d.getBoundingClientRect().height > 0
+      )
+      return rows[0]?.innerText ?? ''
+    })
+    if (!/^Иванов/.test(first)) throw new Error(`первым идёт «${first}»`)
+    await input.fill('федоров')
+    await text('Фёдоров').waitFor({ timeout: 15000 })
+    await input.fill('Куликова')
+  }, { shotName: '03b-search-rank' })
+
   await step('Страница памяти: фото памятника в портрете', async () => {
     await text('Куликова Тамара Николаевна').click()
     await text('04.08.1932').waitFor({ timeout: 15000 })
