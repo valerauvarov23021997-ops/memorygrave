@@ -1,8 +1,31 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
-import { BottomSheet, Button, Card, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
-import { dateMaskToIso, daysUntilAnnual, formatDateMask, formatDayMonth, pluralDays } from '@pamyat/utils'
+import {
+  BottomSheet,
+  Button,
+  Card,
+  useColors,
+  useThemedStyles,
+  useToast,
+  type ThemeColors,
+  Divider,
+  Icon,
+  Input,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  Toggle,
+  TopBar,
+} from '@pamyat/ui'
+import {
+  dateMaskToIso,
+  daysUntilAnnual,
+  formatDateMask,
+  formatDayMonth,
+  pluralDays,
+} from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
@@ -10,8 +33,7 @@ import { useTranslation } from 'react-i18next'
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { useReminders, useServices } from '../../src/hooks/queries'
-import { queryKeys } from '../../src/hooks/queries'
+import { useReminders, useServices, queryKeys } from '../../src/hooks/queries'
 import {
   cancelReminder,
   ensureNotificationPermission,
@@ -65,7 +87,9 @@ export default function RemindersScreen() {
       setDateError(undefined)
       showToast(t('reminders.added'), 'success')
     },
-    onError: () => setDateError(t('reminders.dateInvalid')),
+    onError: () => {
+      setDateError(t('reminders.dateInvalid'))
+    },
   })
 
   const canCreate = newLabel.trim().length > 0 && newDate.length === 10
@@ -108,7 +132,12 @@ export default function RemindersScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('reminders.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('reminders.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         {first ? (
           <Card variant="surface" padding="md" style={styles.context}>
@@ -130,11 +159,22 @@ export default function RemindersScreen() {
           </Text>
         ) : (
           reminders?.map(r => (
-            <ReminderRow key={r.id} reminder={r} onToggle={next => toggle.mutate({ reminder: r, next })} />
+            <ReminderRow
+              key={r.id}
+              reminder={r}
+              onToggle={next => {
+                toggle.mutate({ reminder: r, next })
+              }}
+            />
           ))
         )}
 
-        <Pressable style={styles.addRow} onPress={() => setAdding(true)}>
+        <Pressable
+          style={styles.addRow}
+          onPress={() => {
+            setAdding(true)
+          }}
+        >
           <Icon name="plus" size={20} color={c.sage} />
           <Text variant="bodyMd" color="sage">
             {t('reminders.addDate')}
@@ -159,7 +199,12 @@ export default function RemindersScreen() {
           <Pressable
             style={styles.configureRow}
             onPress={() => {
-              if (first) startOrder({ id: first.graveId, name: first.graveName, cemetery: first.cemeteryName })
+              if (first)
+                startOrder({
+                  id: first.graveId,
+                  name: first.graveName,
+                  cemetery: first.cemeteryName,
+                })
               router.push('/order/catalog')
             }}
           >
@@ -171,7 +216,12 @@ export default function RemindersScreen() {
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
 
-      <BottomSheet visible={adding} onClose={() => setAdding(false)}>
+      <BottomSheet
+        visible={adding}
+        onClose={() => {
+          setAdding(false)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
           {t('reminders.addDate')}
         </Text>
@@ -198,7 +248,9 @@ export default function RemindersScreen() {
         </View>
         <Button
           label={t('common.save')}
-          onPress={() => create.mutate()}
+          onPress={() => {
+            create.mutate()
+          }}
           disabled={!canCreate}
           loading={create.isPending}
           fullWidth
@@ -208,7 +260,13 @@ export default function RemindersScreen() {
   )
 }
 
-function ReminderRow({ reminder, onToggle }: { reminder: Reminder; onToggle: (next: boolean) => void }) {
+function ReminderRow({
+  reminder,
+  onToggle,
+}: {
+  reminder: Reminder
+  onToggle: (next: boolean) => void
+}) {
   const { t } = useTranslation()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
@@ -217,7 +275,11 @@ function ReminderRow({ reminder, onToggle }: { reminder: Reminder; onToggle: (ne
   return (
     <View style={styles.reminderRow}>
       <View style={[styles.iconWrap, { backgroundColor: isBirthday ? c.warningBg : c.parchment }]}>
-        <Icon name={isBirthday ? 'cake' : 'candle'} size={18} color={isBirthday ? c.warning : c.muted} />
+        <Icon
+          name={isBirthday ? 'cake' : 'candle'}
+          size={18}
+          color={isBirthday ? c.warning : c.muted}
+        />
       </View>
       <View style={styles.reminderBody}>
         <Text variant="headingMd" color="ink">
@@ -234,24 +296,40 @@ function ReminderRow({ reminder, onToggle }: { reminder: Reminder; onToggle: (ne
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  context: { marginBottom: spacing.lg },
-  empty: { paddingVertical: spacing.md },
-  reminderRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.linen,
-  },
-  iconWrap: { width: 26, height: 26, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
-  reminderBody: { flex: 1 },
-  addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md },
-  sheetTitle: { marginBottom: spacing.md },
-  sheetField: { marginBottom: spacing.md },
-  autoDesc: { marginBottom: spacing.sm },
-  autoService: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.xs },
-  configureRow: { marginTop: spacing.sm },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    context: { marginBottom: spacing.lg },
+    empty: { paddingVertical: spacing.md },
+    reminderRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.linen,
+    },
+    iconWrap: {
+      width: 26,
+      height: 26,
+      borderRadius: 999,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    reminderBody: { flex: 1 },
+    addRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.md,
+    },
+    sheetTitle: { marginBottom: spacing.md },
+    sheetField: { marginBottom: spacing.md },
+    autoDesc: { marginBottom: spacing.sm },
+    autoService: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.xs,
+    },
+    configureRow: { marginTop: spacing.sm },
+  })

@@ -1,4 +1,12 @@
-import { AnimatedListItem, EmptyState, GroupedRow, spacing, Text, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import {
+  AnimatedListItem,
+  EmptyState,
+  GroupedRow,
+  spacing,
+  Text,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
 import { StyleSheet, View } from 'react-native'
@@ -41,7 +49,9 @@ export default function SavedScreen() {
           icon="saved"
           title={t('saved.empty')}
           actionLabel={t('saved.findGrave')}
-          onAction={() => router.push('/(tabs)')}
+          onAction={() => {
+            router.push('/(tabs)')
+          }}
         />
       ) : (
         <Animated.FlatList
@@ -58,7 +68,9 @@ export default function SavedScreen() {
                 avatarUri={item.photos[0]}
                 title={item.fullName}
                 subtitle={graveMeta(item)}
-                onPress={() => router.push(`/grave/${item.id}`)}
+                onPress={() => {
+                  router.push(`/grave/${item.id}`)
+                }}
                 position={groupedPosition(index, data?.length ?? 0)}
               />
             </AnimatedListItem>

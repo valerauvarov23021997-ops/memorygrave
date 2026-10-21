@@ -1,5 +1,14 @@
 import type { Cemetery } from '@pamyat/api'
-import { Icon, radii, shadowFor, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import {
+  Icon,
+  radii,
+  shadowFor,
+  spacing,
+  Text,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { Image } from 'expo-image'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
@@ -25,18 +34,30 @@ export function FeaturedCemeteryCard({ cemetery }: { cemetery: Cemetery }) {
 
   // Берём по одному снимку с разных людей — первый у каждого крупный план памятника
   const photos = useMemo(
-    () => (data ?? []).map(g => g.photos[0]).filter((u): u is string => !!u).slice(0, COVER_PHOTOS),
+    () =>
+      (data ?? [])
+        .map(g => g.photos[0])
+        .filter((u): u is string => !!u)
+        .slice(0, COVER_PHOTOS),
     [data]
   )
 
-  const openMap = () => router.push({ pathname: '/cemetery/[id]', params: { id: cemetery.id, name: cemetery.name } })
+  const openMap = () => {
+    router.push({ pathname: '/cemetery/[id]', params: { id: cemetery.id, name: cemetery.name } })
+  }
 
   return (
     <Pressable style={({ pressed }) => [styles.card, pressed && styles.pressed]} onPress={openMap}>
       {photos.length ? (
         <View style={styles.cover}>
           {photos.map(uri => (
-            <Image key={uri} source={{ uri }} style={styles.photo} contentFit="cover" transition={200} />
+            <Image
+              key={uri}
+              source={{ uri }}
+              style={styles.photo}
+              contentFit="cover"
+              transition={200}
+            />
           ))}
         </View>
       ) : null}
@@ -76,5 +97,11 @@ const makeStyles = (c: ThemeColors) =>
     photo: { flex: 1, height: '100%' },
     body: { padding: spacing.lg, gap: spacing.xs },
     kicker: { letterSpacing: 1 },
-    cta: { flexDirection: 'row', alignItems: 'center', gap: spacing.xs, marginTop: spacing.sm, minHeight: 44 },
+    cta: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.xs,
+      marginTop: spacing.sm,
+      minHeight: 44,
+    },
   })

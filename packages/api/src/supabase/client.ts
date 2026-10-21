@@ -13,7 +13,7 @@ const isWeb = Platform.OS === 'web'
 const authStorage = {
   getItem: async (key: string): Promise<string | null> => {
     if (isWeb) return typeof localStorage === 'undefined' ? null : localStorage.getItem(key)
-    return SecureStore.getItemAsync(key)
+    return await SecureStore.getItemAsync(key)
   },
   setItem: async (key: string, value: string): Promise<void> => {
     if (isWeb) {
@@ -78,7 +78,7 @@ async function diagFlush(): Promise<void> {
 // «предохранитель» — после серии таймаутов пауза вместо лавины повторов.
 const MAX_PARALLEL = 4
 let inFlight = 0
-const queue: Array<() => void> = []
+const queue: (() => void)[] = []
 
 async function acquireSlot(): Promise<void> {
   if (inFlight >= MAX_PARALLEL) {
@@ -98,11 +98,20 @@ let cooldownUntil = 0
 
 const rawTimeoutFetch: typeof fetch = (input, init) => {
   const controller = new AbortController()
-  const timer = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS)
+  const timer = setTimeout(() => {
+    controller.abort()
+  }, REQUEST_TIMEOUT_MS)
   // если снаружи передали свой signal — пробрасываем его отмену в наш контроллер
   if (init?.signal) {
     if (init.signal.aborted) controller.abort()
-    else init.signal.addEventListener('abort', () => controller.abort(), { once: true })
+    else
+      init.signal.addEventListener(
+        'abort',
+        () => {
+          controller.abort()
+        },
+        { once: true }
+      )
   }
   const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
   const path = url.replace(config.supabaseUrl, '').split('?')[0] ?? ''
@@ -110,7 +119,13 @@ const rawTimeoutFetch: typeof fetch = (input, init) => {
   const started = Date.now()
   return fetch(input, { ...init, signal: controller.signal })
     .then(resp => {
-      if (!skipDiag) diagLog({ path, method: init?.method ?? 'GET', ms: Date.now() - started, status: String(resp.status) })
+      if (!skipDiag)
+        diagLog({
+          path,
+          method: init?.method ?? 'GET',
+          ms: Date.now() - started,
+          status: String(resp.status),
+        })
       return resp
     })
     .catch((e: unknown) => {
@@ -120,7 +135,9 @@ const rawTimeoutFetch: typeof fetch = (input, init) => {
       }
       throw e
     })
-    .finally(() => clearTimeout(timer))
+    .finally(() => {
+      clearTimeout(timer)
+    })
 }
 
 const timeoutFetch: typeof fetch = async (input, init) => {
@@ -155,7 +172,9 @@ let instance: SupabaseClient | null = null
 export function getSupabase(): SupabaseClient {
   if (!instance) {
     if (!config.supabaseUrl || !config.supabaseAnonKey) {
-      throw new Error('Supabase не настроен: задайте EXPO_PUBLIC_SUPABASE_URL и EXPO_PUBLIC_SUPABASE_ANON_KEY')
+      throw new Error(
+        'Supabase не настроен: задайте EXPO_PUBLIC_SUPABASE_URL и EXPO_PUBLIC_SUPABASE_ANON_KEY'
+      )
     }
     instance = createClient(config.supabaseUrl, config.supabaseAnonKey, {
       auth: {
@@ -180,13 +199,28 @@ export async function runNetProbe(): Promise<string> {
   const probe = async (name: string, url: string): Promise<void> => {
     const started = Date.now()
     const controller = new AbortController()
-    const timer = setTimeout(() => controller.abort(), 8000)
+    const timer = setTimeout(() => {
+      controller.abort()
+    }, 8000)
     try {
-      const r = await fetch(url, { signal: controller.signal, headers: { apikey: config.supabaseAnonKey } })
-      diagLog({ path: `/probe/${name}`, method: 'GET', ms: Date.now() - started, status: String(r.status) })
+      const r = await fetch(url, {
+        signal: controller.signal,
+        headers: { apikey: config.supabaseAnonKey },
+      })
+      diagLog({
+        path: `/probe/${name}`,
+        method: 'GET',
+        ms: Date.now() - started,
+        status: String(r.status),
+      })
       results.push(`${name}: ${r.status} за ${Date.now() - started}мс`)
     } catch {
-      diagLog({ path: `/probe/${name}`, method: 'GET', ms: Date.now() - started, status: 'timeout' })
+      diagLog({
+        path: `/probe/${name}`,
+        method: 'GET',
+        ms: Date.now() - started,
+        status: 'timeout',
+      })
       results.push(`${name}: ✗ (${Date.now() - started}мс)`)
     } finally {
       clearTimeout(timer)

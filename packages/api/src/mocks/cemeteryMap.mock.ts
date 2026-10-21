@@ -1,5 +1,4 @@
 import type { CemeteryMap } from '../types'
-
 import raw from './cemeteryMap.json'
 
 interface RawMap {

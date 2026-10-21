@@ -1,8 +1,8 @@
 import React from 'react'
 import { StyleSheet, View } from 'react-native'
 
-import { spacing } from '../tokens/spacing'
 import { useColors } from '../theme/ThemeProvider'
+import { spacing } from '../tokens/spacing'
 
 export function Divider() {
   const c = useColors()

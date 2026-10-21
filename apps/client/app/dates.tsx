@@ -1,7 +1,27 @@
 import type { Reminder } from '@pamyat/api'
 import { remindersApi } from '@pamyat/api'
-import { AnimatedListItem, Card, EmptyState, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
-import { daysUntilAnnual, daysUntilIso, formatDayMonth, memorialDaysForYear, nextMemorialDay, pluralDays } from '@pamyat/utils'
+import {
+  AnimatedListItem,
+  Card,
+  EmptyState,
+  Icon,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  TopBar,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
+import {
+  daysUntilAnnual,
+  daysUntilIso,
+  formatDayMonth,
+  memorialDaysForYear,
+  nextMemorialDay,
+  pluralDays,
+} from '@pamyat/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useMemo } from 'react'
@@ -39,7 +59,12 @@ export default function DatesScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('dates.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('dates.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <SectionLabel>{t('dates.personal')}</SectionLabel>
         {isLoading ? (
@@ -49,7 +74,12 @@ export default function DatesScreen() {
         ) : (
           sorted.map((r, index) => (
             <AnimatedListItem key={r.id} index={index}>
-              <PersonalRow reminder={r} onPress={() => router.push(`/reminders/${r.graveId}`)} />
+              <PersonalRow
+                reminder={r}
+                onPress={() => {
+                  router.push(`/reminders/${r.graveId}`)
+                }}
+              />
             </AnimatedListItem>
           ))
         )}
@@ -57,7 +87,10 @@ export default function DatesScreen() {
         <SectionLabel style={styles.nationalLabel}>{t('dates.national')}</SectionLabel>
         <Card variant="surface" padding="md">
           {national.map((d, i) => (
-            <View key={d.date} style={[styles.nationalRow, i < national.length - 1 && styles.nationalDivider]}>
+            <View
+              key={d.date}
+              style={[styles.nationalRow, i < national.length - 1 && styles.nationalDivider]}
+            >
               <View style={styles.nationalIcon}>
                 <Icon name="candle" size={16} color={c.gold} />
               </View>
@@ -74,7 +107,9 @@ export default function DatesScreen() {
                   {formatDayMonth(d.date)}
                 </Text>
                 <Text variant="caption" color="light">
-                  {daysUntilIso(d.date) === 0 ? t('home.today') : t('home.inDays', { value: pluralDays(daysUntilIso(d.date)) })}
+                  {daysUntilIso(d.date) === 0
+                    ? t('home.today')
+                    : t('home.inDays', { value: pluralDays(daysUntilIso(d.date)) })}
                 </Text>
               </View>
             </View>
@@ -94,8 +129,14 @@ function PersonalRow({ reminder, onPress }: { reminder: Reminder; onPress: () =>
   const isBirthday = reminder.type === 'birthday'
   return (
     <Pressable style={styles.personalRow} onPress={onPress}>
-      <View style={[styles.personalIcon, { backgroundColor: isBirthday ? c.warningBg : c.parchment }]}>
-        <Icon name={isBirthday ? 'cake' : 'candle'} size={16} color={isBirthday ? c.warning : c.muted} />
+      <View
+        style={[styles.personalIcon, { backgroundColor: isBirthday ? c.warningBg : c.parchment }]}
+      >
+        <Icon
+          name={isBirthday ? 'cake' : 'candle'}
+          size={16}
+          color={isBirthday ? c.warning : c.muted}
+        />
       </View>
       <View style={styles.personalBody}>
         <Text variant="bodyMd" color="ink" numberOfLines={1}>
@@ -129,10 +170,21 @@ const makeStyles = (c: ThemeColors) =>
       borderBottomWidth: StyleSheet.hairlineWidth,
       borderBottomColor: c.linen,
     },
-    personalIcon: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
+    personalIcon: {
+      width: 32,
+      height: 32,
+      borderRadius: 16,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
     personalBody: { flex: 1 },
     nationalLabel: { marginTop: spacing.lg },
-    nationalRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, paddingVertical: spacing.sm },
+    nationalRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.sm,
+    },
     nationalDivider: { borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.linen },
     nationalIcon: {
       width: 32,

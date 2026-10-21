@@ -1,12 +1,12 @@
 import React from 'react'
 import { Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native'
 
-import { radii, spacing } from '../tokens/spacing'
-import { useColors, useThemedStyles } from '../theme/ThemeProvider'
-import { type ThemeColors } from '../tokens/colors'
 import { Avatar } from './Avatar'
 import { Icon } from './Icon'
 import { Text } from './Text'
+import { useColors, useThemedStyles } from '../theme/ThemeProvider'
+import { type ThemeColors } from '../tokens/colors'
+import { radii, spacing } from '../tokens/spacing'
 
 /** Положение строки в группе — управляет скруглениями и рамками. */
 export type GroupedPosition = 'first' | 'middle' | 'last' | 'single'
@@ -67,7 +67,12 @@ export function GroupedRow({
     <Pressable
       onPress={onPress}
       disabled={!onPress}
-      style={({ pressed }) => [styles.row, shape, pressed && onPress ? styles.pressed : null, style]}
+      style={({ pressed }) => [
+        styles.row,
+        shape,
+        pressed && onPress ? styles.pressed : null,
+        style,
+      ]}
     >
       {avatarName != null ? (
         <Avatar name={avatarName} size={40} imageUri={avatarUri} />
@@ -91,13 +96,20 @@ export function GroupedRow({
           </Text>
         ) : null}
       </View>
-      {right ?? (chevron && onPress ? <Icon name="chevronRight" size={16} color={c.light} /> : null)}
+      {right ??
+        (chevron && onPress ? <Icon name="chevronRight" size={16} color={c.light} /> : null)}
     </Pressable>
   )
 }
 
 /** Обёртка группы для статичных экранов: тень и рамка вокруг набора строк. */
-export function GroupedSection({ children, style }: { children: React.ReactNode; style?: StyleProp<ViewStyle> }) {
+export function GroupedSection({
+  children,
+  style,
+}: {
+  children: React.ReactNode
+  style?: StyleProp<ViewStyle>
+}) {
   const styles = useThemedStyles(makeStyles)
   return <View style={[styles.section, style]}>{children}</View>
 }

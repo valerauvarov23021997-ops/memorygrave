@@ -45,14 +45,22 @@ export default function LoginScreen() {
         <View style={styles.field}>
           <Input
             value={formatPhoneMask(digits)}
-            onChangeText={text => setDigits(normalizePhoneDigits(text))}
+            onChangeText={text => {
+              setDigits(normalizePhoneDigits(text))
+            }}
             placeholder={t('auth.phonePlaceholder')}
             keyboardType="phone-pad"
             autoFocus
             leftElement={<Text style={styles.flag}>🇷🇺</Text>}
           />
         </View>
-        <Button label={t('auth.getCode')} onPress={onLogin} disabled={!isPhoneComplete(digits)} loading={loading} fullWidth />
+        <Button
+          label={t('auth.getCode')}
+          onPress={onLogin}
+          disabled={!isPhoneComplete(digits)}
+          loading={loading}
+          fullWidth
+        />
       </View>
     </View>
   )

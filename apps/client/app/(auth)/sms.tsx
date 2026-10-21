@@ -1,5 +1,17 @@
 import { config } from '@pamyat/api'
-import { Button, Card, radii, useThemedStyles, type ThemeColors, haptics, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import {
+  Button,
+  Card,
+  radii,
+  useThemedStyles,
+  type ThemeColors,
+  haptics,
+  spacing,
+  Text,
+  TopBar,
+  typography,
+  useToast,
+} from '@pamyat/ui'
 import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
@@ -35,8 +47,12 @@ export default function SmsScreen() {
 
   useEffect(() => {
     if (seconds <= 0) return
-    const id = setTimeout(() => setSeconds(s => s - 1), 1000)
-    return () => clearTimeout(id)
+    const id = setTimeout(() => {
+      setSeconds(s => s - 1)
+    }, 1000)
+    return () => {
+      clearTimeout(id)
+    }
   }, [seconds])
 
   useEffect(() => {
@@ -80,7 +96,11 @@ export default function SmsScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar onBack={() => router.back()} />
+      <TopBar
+        onBack={() => {
+          router.back()
+        }}
+      />
       <View style={styles.content}>
         <Text variant="displayMd" color="forest">
           {t('auth.smsTitle')}
@@ -120,7 +140,9 @@ export default function SmsScreen() {
           <TextInput
             ref={inputRef}
             value={code}
-            onChangeText={text => setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))}
+            onChangeText={text => {
+              setCode(text.replace(/\D/g, '').slice(0, CODE_LENGTH))
+            }}
             keyboardType="number-pad"
             textContentType="oneTimeCode"
             autoFocus
@@ -138,11 +160,21 @@ export default function SmsScreen() {
           <Button label={t('auth.resend')} variant="ghost" onPress={resend} />
         )}
 
-        <Button label={t('auth.changeNumber')} variant="ghost" onPress={() => router.back()} />
+        <Button
+          label={t('auth.changeNumber')}
+          variant="ghost"
+          onPress={() => {
+            router.back()
+          }}
+        />
 
         <Card variant="success" padding="md" style={styles.hint}>
           <Text variant="bodySm" color="success">
-            {tgSent ? t('auth.tgSentHint') : viaTelegram ? t('auth.tgHint') : t('auth.autofillHint')}
+            {tgSent
+              ? t('auth.tgSentHint')
+              : viaTelegram
+                ? t('auth.tgHint')
+                : t('auth.autofillHint')}
           </Text>
         </Card>
       </View>
@@ -154,35 +186,35 @@ export default function SmsScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
-  subtitle: { marginTop: spacing.sm },
-  // фирменная кнопка Telegram: цвет мессенджера, высота как у Button
-  tgButton: {
-    marginTop: spacing.lg,
-    height: 52,
-    borderRadius: radii.full,
-    backgroundColor: '#2AABEE',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tgLabel: { ...typography.headingMd, color: c.white },
-  cells: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xl },
-  cell: {
-    flex: 1,
-    height: 48,
-    borderRadius: radii.md,
-    backgroundColor: c.parchment,
-    borderWidth: 1,
-    borderColor: c.linen,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  cellActive: { backgroundColor: c.white, borderWidth: 1.5, borderColor: c.sage },
-  cellFilled: { backgroundColor: c.successBg, borderColor: c.sage },
-  cellError: { backgroundColor: c.errorBg, borderColor: c.error },
-  cellText: { ...typography.headingLg, color: c.forest },
-  hiddenInput: { position: 'absolute', width: 1, height: 1, opacity: 0 },
-  timer: { marginTop: spacing.lg, textAlign: 'center' },
-  hint: { marginTop: spacing.xl },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.xl },
+    subtitle: { marginTop: spacing.sm },
+    // фирменная кнопка Telegram: цвет мессенджера, высота как у Button
+    tgButton: {
+      marginTop: spacing.lg,
+      height: 52,
+      borderRadius: radii.full,
+      backgroundColor: '#2AABEE',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    tgLabel: { ...typography.headingMd, color: c.white },
+    cells: { flexDirection: 'row', gap: spacing.xs, marginTop: spacing.xl },
+    cell: {
+      flex: 1,
+      height: 48,
+      borderRadius: radii.md,
+      backgroundColor: c.parchment,
+      borderWidth: 1,
+      borderColor: c.linen,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    cellActive: { backgroundColor: c.white, borderWidth: 1.5, borderColor: c.sage },
+    cellFilled: { backgroundColor: c.successBg, borderColor: c.sage },
+    cellError: { backgroundColor: c.errorBg, borderColor: c.error },
+    cellText: { ...typography.headingLg, color: c.forest },
+    hiddenInput: { position: 'absolute', width: 1, height: 1, opacity: 0 },
+    timer: { marginTop: spacing.lg, textAlign: 'center' },
+    hint: { marginTop: spacing.xl },
+  })

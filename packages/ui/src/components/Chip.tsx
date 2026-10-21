@@ -1,11 +1,11 @@
 import React from 'react'
 import { Pressable, StyleSheet } from 'react-native'
 
+import { Text } from './Text'
+import { useColors, useThemedStyles } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { MIN_TOUCH_TARGET, radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors, useThemedStyles } from '../theme/ThemeProvider'
-import { Text } from './Text'
 
 interface ChipProps {
   label: string

@@ -2,12 +2,12 @@ import React from 'react'
 import { StyleSheet, View } from 'react-native'
 import Animated, { FadeIn } from 'react-native-reanimated'
 
-import { type ThemeColors } from '../tokens/colors'
-import { radii, spacing } from '../tokens/spacing'
-import { useColors, useThemedStyles } from '../theme/ThemeProvider'
 import { Button } from './Button'
 import { Icon } from './Icon'
 import { Text } from './Text'
+import { useColors, useThemedStyles } from '../theme/ThemeProvider'
+import { type ThemeColors } from '../tokens/colors'
+import { radii, spacing } from '../tokens/spacing'
 
 interface EmptyStateProps {
   icon: string
@@ -48,7 +48,13 @@ export function EmptyState({ icon, title, subtitle, actionLabel, onAction }: Emp
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-    wrap: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
+    wrap: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.xl,
+      gap: spacing.sm,
+    },
     badge: {
       width: 76,
       height: 76,

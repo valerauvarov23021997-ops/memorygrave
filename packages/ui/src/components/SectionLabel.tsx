@@ -1,9 +1,9 @@
 import React from 'react'
 import { StyleSheet, type StyleProp, type TextStyle } from 'react-native'
 
+import { Text } from './Text'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { Text } from './Text'
 
 interface SectionLabelProps {
   children: string

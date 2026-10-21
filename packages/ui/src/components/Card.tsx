@@ -2,10 +2,10 @@ import React from 'react'
 import { Pressable, StyleSheet, View, type ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
+import { useColors } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { shadowFor, type ShadowToken } from '../tokens/shadows'
 import { radii, spacing } from '../tokens/spacing'
-import { useColors } from '../theme/ThemeProvider'
 
 type CardVariant = 'default' | 'surface' | 'featured' | 'success' | 'warning'
 type Padding = 'sm' | 'md' | 'lg'
@@ -52,7 +52,14 @@ function variantStyle(variant: CardVariant, c: ThemeColors): ViewStyle {
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable)
 
-export function Card({ children, variant = 'default', padding = 'md', onPress, style, shadow }: CardProps) {
+export function Card({
+  children,
+  variant = 'default',
+  padding = 'md',
+  onPress,
+  style,
+  shadow,
+}: CardProps) {
   const c = useColors()
   const scale = useSharedValue(1)
   const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }))

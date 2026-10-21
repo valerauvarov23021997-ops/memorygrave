@@ -1,5 +1,19 @@
 import { membersApi, type Member, type MemberRole } from '@pamyat/api'
-import { Avatar, Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, Text, TopBar } from '@pamyat/ui'
+import {
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+  Icon,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  TopBar,
+} from '@pamyat/ui'
 import { useQuery } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -25,7 +39,10 @@ export default function InviteScreen() {
     setInviting(true)
     try {
       const { url } = await membersApi.inviteLink(graveId ?? '')
-      await Share.share({ message: `Присоединяйтесь к странице памяти в приложении «Память»: ${url}`, url })
+      await Share.share({
+        message: `Присоединяйтесь к странице памяти в приложении «Память»: ${url}`,
+        url,
+      })
     } catch {
       // пользователь мог закрыть окно шэринга — не ошибка
     } finally {
@@ -35,7 +52,12 @@ export default function InviteScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('invite.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('invite.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="surface" padding="lg" style={styles.hero}>
           <Icon name="saved" size={28} color={c.sage} />
@@ -90,12 +112,12 @@ function roleBadge(role: MemberRole, t: (k: string) => string) {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  hero: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
-  heroText: { maxWidth: 260 },
-  row: { marginBottom: spacing.sm },
-  rowInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  name: { flex: 1 },
-  footer: { marginTop: spacing.lg },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    hero: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
+    heroText: { maxWidth: 260 },
+    row: { marginBottom: spacing.sm },
+    rowInner: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    name: { flex: 1 },
+    footer: { marginTop: spacing.lg },
+  })

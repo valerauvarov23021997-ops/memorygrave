@@ -1,6 +1,5 @@
 import React, { useEffect, useId } from 'react'
 import { StyleSheet, View } from 'react-native'
-import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
 import Animated, {
   Easing,
   useAnimatedStyle,
@@ -9,10 +8,13 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
+import Svg, { Defs, LinearGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
 
 // Фирменное пламя (как в логотипе и свече памяти)
-const FLAME = 'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
-const CORE = 'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
+const FLAME =
+  'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
+const CORE =
+  'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
 
 interface FlameLoaderProps {
   /** Высота огонька, px. */

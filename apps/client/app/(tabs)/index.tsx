@@ -1,3 +1,5 @@
+import { notificationsApi } from '@pamyat/api'
+import { useSearchStore } from '@pamyat/store'
 import {
   AnimatedListItem,
   Badge,
@@ -14,8 +16,6 @@ import {
   useThemedStyles,
   type ThemeColors,
 } from '@pamyat/ui'
-import { notificationsApi } from '@pamyat/api'
-import { useSearchStore } from '@pamyat/store'
 import { pluralResults } from '@pamyat/utils'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -27,9 +27,9 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { FeaturedCemeteryCard } from '../../src/components/FeaturedCemeteryCard'
 import { GraveResultSkeleton } from '../../src/components/GraveResultSkeleton'
 import { UpcomingDateCard } from '../../src/components/UpcomingDateCard'
+import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
 import { graveMeta, groupedPosition } from '../../src/lib/graveMeta'
 import { graveStatusBadge } from '../../src/lib/statusMaps'
-import { useCemeteries, useCities, useGraveSearch } from '../../src/hooks/queries'
 
 type Picker = 'city' | 'cemetery' | null
 
@@ -56,11 +56,19 @@ export default function SearchScreen() {
     [query, city, cemeteryId]
   )
   const { data, isLoading } = useGraveSearch(params, active)
-  const { data: notifications } = useQuery({ queryKey: ['notifications'], queryFn: () => notificationsApi.list() })
+  const { data: notifications } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationsApi.list(),
+  })
   const hasUnread = (notifications ?? []).some(n => !n.isRead)
 
   const addGraveCard = (
-    <Pressable style={styles.addCard} onPress={() => router.push('/grave/add')}>
+    <Pressable
+      style={styles.addCard}
+      onPress={() => {
+        router.push('/grave/add')
+      }}
+    >
       <Icon name="plus" size={18} color={c.sage} />
       <Text variant="bodySm" color="sage" style={styles.addLabel}>
         {t('search.addGrave')}
@@ -70,12 +78,21 @@ export default function SearchScreen() {
 
   return (
     // Тап по любому пустому месту прячет клавиатуру (нажатия детей не блокируются)
-    <Pressable style={[styles.root, { paddingTop: insets.top }]} onPress={Keyboard.dismiss} accessible={false}>
+    <Pressable
+      style={[styles.root, { paddingTop: insets.top }]}
+      onPress={Keyboard.dismiss}
+      accessible={false}
+    >
       <View style={styles.header}>
         <Text variant="displayMd" color="forest">
           {t('search.appName')}
         </Text>
-        <Pressable hitSlop={8} onPress={() => router.push('/notifications')}>
+        <Pressable
+          hitSlop={8}
+          onPress={() => {
+            router.push('/notifications')
+          }}
+        >
           <View>
             <Icon name="bell" size={22} color={c.sage} />
             {hasUnread ? <View style={styles.bellDot} /> : null}
@@ -89,15 +106,24 @@ export default function SearchScreen() {
           <TextInput
             value={query}
             onChangeText={setQuery}
-            onFocus={() => setFocused(true)}
-            onBlur={() => setFocused(false)}
+            onFocus={() => {
+              setFocused(true)
+            }}
+            onBlur={() => {
+              setFocused(false)
+            }}
             placeholder={t('search.placeholder')}
             placeholderTextColor={c.light}
             style={styles.searchInput}
             returnKeyType="search"
           />
           {hasQuery ? (
-            <Pressable onPress={() => setQuery('')} hitSlop={8}>
+            <Pressable
+              onPress={() => {
+                setQuery('')
+              }}
+              hitSlop={8}
+            >
               <Icon name="close" size={18} color={c.light} />
             </Pressable>
           ) : null}
@@ -108,12 +134,16 @@ export default function SearchScreen() {
         <Chip
           label={city ?? t('search.filterCity')}
           active={!!city}
-          onPress={() => (city ? setCity(null) : setPicker('city'))}
+          onPress={() => {
+            city ? setCity(null) : setPicker('city')
+          }}
         />
         <Chip
           label={cemeteryName ?? t('search.filterCemetery')}
           active={!!cemeteryId}
-          onPress={() => (cemeteryId ? setCemetery(null) : setPicker('cemetery'))}
+          onPress={() => {
+            cemeteryId ? setCemetery(null) : setPicker('cemetery')
+          }}
         />
       </View>
 
@@ -132,7 +162,11 @@ export default function SearchScreen() {
               ))}
             </View>
           ) : (
-            <EmptyState icon="search" title={t('search.emptyTitle')} subtitle={t('search.emptyHint')} />
+            <EmptyState
+              icon="search"
+              title={t('search.emptyTitle')}
+              subtitle={t('search.emptyHint')}
+            />
           )}
         </View>
       ) : isLoading ? (
@@ -164,7 +198,9 @@ export default function SearchScreen() {
                   title={item.fullName}
                   subtitle={graveMeta(item)}
                   right={<Badge label={badge.label} variant={badge.variant} />}
-                  onPress={() => router.push(`/grave/${item.id}`)}
+                  onPress={() => {
+                    router.push(`/grave/${item.id}`)
+                  }}
                   position={groupedPosition(index, data?.length ?? 0)}
                 />
               </AnimatedListItem>
@@ -181,7 +217,12 @@ export default function SearchScreen() {
         />
       )}
 
-      <BottomSheet visible={picker !== null} onClose={() => setPicker(null)}>
+      <BottomSheet
+        visible={picker !== null}
+        onClose={() => {
+          setPicker(null)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.pickerTitle}>
           {picker === 'city' ? t('search.filterCity') : t('search.filterCemetery')}
         </Text>
@@ -224,64 +265,75 @@ export default function SearchScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-  },
-  bellDot: {
-    position: 'absolute',
-    top: -1,
-    right: -1,
-    width: 9,
-    height: 9,
-    borderRadius: 5,
-    backgroundColor: c.gold,
-    borderWidth: 1.5,
-    borderColor: c.cream,
-  },
-  searchWrap: { paddingHorizontal: spacing.lg },
-  searchBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    height: 48,
-    borderRadius: radii.md,
-    paddingHorizontal: spacing.md,
-    backgroundColor: c.parchment,
-  },
-  searchBarActive: { backgroundColor: c.white, borderWidth: 0.5, borderColor: c.sage },
-  searchInput: { flex: 1, ...typography.bodyMd, color: c.ink },
-  chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  idle: { flex: 1 },
-  maps: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  mapsLabel: { marginBottom: spacing.xs, marginLeft: spacing.sm },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: spacing.xl, gap: spacing.sm },
-  emptyTitle: { marginTop: spacing.md },
-  emptyHint: { maxWidth: 200 },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: 120, gap: 0 },
-  count: { marginBottom: spacing.sm },
-  noResults: { paddingVertical: spacing.xl },
-  addCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: spacing.xs,
-    height: 52,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: c.stone,
-    marginTop: spacing.sm,
-  },
-  addLabel: { fontFamily: 'Manrope_500Medium' },
-  pickerTitle: { marginBottom: spacing.md },
-  pickerRow: {
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.linen,
-  },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    header: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+    },
+    bellDot: {
+      position: 'absolute',
+      top: -1,
+      right: -1,
+      width: 9,
+      height: 9,
+      borderRadius: 5,
+      backgroundColor: c.gold,
+      borderWidth: 1.5,
+      borderColor: c.cream,
+    },
+    searchWrap: { paddingHorizontal: spacing.lg },
+    searchBar: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      height: 48,
+      borderRadius: radii.md,
+      paddingHorizontal: spacing.md,
+      backgroundColor: c.parchment,
+    },
+    searchBarActive: { backgroundColor: c.white, borderWidth: 0.5, borderColor: c.sage },
+    searchInput: { flex: 1, ...typography.bodyMd, color: c.ink },
+    chips: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      paddingVertical: spacing.md,
+    },
+    idle: { flex: 1 },
+    maps: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    mapsLabel: { marginBottom: spacing.xs, marginLeft: spacing.sm },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      paddingHorizontal: spacing.xl,
+      gap: spacing.sm,
+    },
+    emptyTitle: { marginTop: spacing.md },
+    emptyHint: { maxWidth: 200 },
+    list: { paddingHorizontal: spacing.lg, paddingBottom: 120, gap: 0 },
+    count: { marginBottom: spacing.sm },
+    noResults: { paddingVertical: spacing.xl },
+    addCard: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.xs,
+      height: 52,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: c.stone,
+      marginTop: spacing.sm,
+    },
+    addLabel: { fontFamily: 'Manrope_500Medium' },
+    pickerTitle: { marginBottom: spacing.md },
+    pickerRow: {
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.linen,
+    },
+  })

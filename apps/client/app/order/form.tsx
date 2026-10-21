@@ -1,6 +1,23 @@
 import { ordersApi, type CreateOrderInput, type RecurringPeriod } from '@pamyat/api'
-import { Button, Card, haptics, radii, useColors, useThemedStyles, useToast, type ThemeColors, Divider, Icon, Input, SectionLabel, spacing, Text, TopBar, typography } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
+import {
+  Button,
+  Card,
+  haptics,
+  radii,
+  useColors,
+  useThemedStyles,
+  useToast,
+  type ThemeColors,
+  Divider,
+  Icon,
+  Input,
+  SectionLabel,
+  spacing,
+  Text,
+  TopBar,
+  typography,
+} from '@pamyat/ui'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -41,7 +58,9 @@ export default function OrderFormScreen() {
       draft.reset()
       router.replace('/(tabs)/orders')
     },
-    onError: () => showToast(t('common.error'), 'error'),
+    onError: () => {
+      showToast(t('common.error'), 'error')
+    },
   })
 
   const days = useMemo(() => {
@@ -70,7 +89,12 @@ export default function OrderFormScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('orderForm.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('orderForm.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -92,7 +116,11 @@ export default function OrderFormScreen() {
         </Card>
 
         <SectionLabel>{t('orderForm.dateLabel')}</SectionLabel>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.dates}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dates}
+        >
           {days.map(d => {
             const iso = toIso(d)
             const active = draft.date === iso
@@ -100,7 +128,9 @@ export default function OrderFormScreen() {
               <Pressable
                 key={iso}
                 style={[styles.dateCell, active ? styles.dateActive : styles.dateInactive]}
-                onPress={() => draft.setDate(iso)}
+                onPress={() => {
+                  draft.setDate(iso)
+                }}
               >
                 <Text variant="caption" style={{ color: active ? c.cream : c.muted }}>
                   {WEEKDAYS[d.getDay()]}
@@ -121,9 +151,14 @@ export default function OrderFormScreen() {
               <Pressable
                 key={p.key}
                 style={[styles.period, active ? styles.periodActive : styles.periodInactive]}
-                onPress={() => draft.setRecurring(p.key)}
+                onPress={() => {
+                  draft.setRecurring(p.key)
+                }}
               >
-                <Text variant="bodySm" style={{ color: active ? c.cream : c.muted, fontFamily: 'Manrope_500Medium' }}>
+                <Text
+                  variant="bodySm"
+                  style={{ color: active ? c.cream : c.muted, fontFamily: 'Manrope_500Medium' }}
+                >
                   {p.label}
                 </Text>
               </Pressable>
@@ -146,7 +181,9 @@ export default function OrderFormScreen() {
             {t('orderForm.total')}
           </Text>
           <Text style={styles.totalValue}>
-            {draft.fixedPrice && draft.priceFrom != null ? formatPrice(draft.priceFrom) : t('orderForm.priceOnRequest')}
+            {draft.fixedPrice && draft.priceFrom != null
+              ? formatPrice(draft.priceFrom)
+              : t('orderForm.priceOnRequest')}
           </Text>
         </View>
       </ScrollView>
@@ -166,25 +203,43 @@ export default function OrderFormScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
-  serviceCard: { marginBottom: spacing.lg },
-  serviceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  serviceInfo: { flex: 1 },
-  dates: { gap: spacing.sm, paddingBottom: spacing.md },
-  dateCell: { width: 52, height: 56, borderRadius: radii.md, alignItems: 'center', justifyContent: 'center', gap: 2 },
-  dateActive: { backgroundColor: c.forest },
-  dateInactive: { backgroundColor: c.parchment },
-  periods: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
-  period: { flex: 1, height: 40, borderRadius: 999, alignItems: 'center', justifyContent: 'center' },
-  periodActive: { backgroundColor: c.forest },
-  periodInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
-  totalRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  totalValue: { ...typography.priceDisplay, color: c.forest },
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: c.linen,
-  },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
+    serviceCard: { marginBottom: spacing.lg },
+    serviceRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    serviceInfo: { flex: 1 },
+    dates: { gap: spacing.sm, paddingBottom: spacing.md },
+    dateCell: {
+      width: 52,
+      height: 56,
+      borderRadius: radii.md,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: 2,
+    },
+    dateActive: { backgroundColor: c.forest },
+    dateInactive: { backgroundColor: c.parchment },
+    periods: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.lg },
+    period: {
+      flex: 1,
+      height: 40,
+      borderRadius: 999,
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    periodActive: { backgroundColor: c.forest },
+    periodInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
+    totalRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+    },
+    totalValue: { ...typography.priceDisplay, color: c.forest },
+    footer: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.linen,
+    },
+  })

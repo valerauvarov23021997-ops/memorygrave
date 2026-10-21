@@ -1,11 +1,16 @@
 import * as Phosphor from 'phosphor-react-native'
 import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withSequence, withSpring } from 'react-native-reanimated'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withSequence,
+  withSpring,
+} from 'react-native-reanimated'
 
+import { useColors } from '../theme/ThemeProvider'
 import { MIN_TOUCH_TARGET } from '../tokens/spacing'
 import { haptics } from '../utils/haptics'
-import { useColors } from '../theme/ThemeProvider'
 
 interface StarRatingProps {
   value: number
@@ -77,5 +82,10 @@ function Star({
 
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', gap: 4 },
-  star: { minHeight: MIN_TOUCH_TARGET, minWidth: MIN_TOUCH_TARGET, alignItems: 'center', justifyContent: 'center' },
+  star: {
+    minHeight: MIN_TOUCH_TARGET,
+    minWidth: MIN_TOUCH_TARGET,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 })

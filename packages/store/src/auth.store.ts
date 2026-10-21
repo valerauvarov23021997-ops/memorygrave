@@ -20,9 +20,13 @@ export const useAuthStore = create<AuthState>(set => ({
   name: null,
   status: 'idle',
   isLoggedIn: false,
-  setAuth: (userId, phone, name) =>
-    set({ userId, phone, name, isLoggedIn: true, status: 'authenticated' }),
-  setStatus: status => set({ status }),
-  clearAuth: () =>
-    set({ userId: null, phone: null, name: null, isLoggedIn: false, status: 'unauthenticated' }),
+  setAuth: (userId, phone, name) => {
+    set({ userId, phone, name, isLoggedIn: true, status: 'authenticated' })
+  },
+  setStatus: status => {
+    set({ status })
+  },
+  clearAuth: () => {
+    set({ userId: null, phone: null, name: null, isLoggedIn: false, status: 'unauthenticated' })
+  },
 }))

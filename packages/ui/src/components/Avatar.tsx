@@ -1,8 +1,7 @@
+import { initials } from '@pamyat/utils'
 import { Image } from 'expo-image'
 import React from 'react'
 import { StyleSheet, Text as RNText, View } from 'react-native'
-
-import { initials } from '@pamyat/utils'
 
 import { useColors } from '../theme/ThemeProvider'
 
@@ -28,7 +27,12 @@ export function Avatar({ name, size = 40, imageUri }: AvatarProps) {
   // из токенов обрезал крупные инициалы (герой 96px, редактор 72px).
   const fontSize = Math.round(size * 0.34)
   return (
-    <View style={[styles.placeholder, { width: size, height: size, borderRadius: radius, backgroundColor: c.sageXL }]}>
+    <View
+      style={[
+        styles.placeholder,
+        { width: size, height: size, borderRadius: radius, backgroundColor: c.sageXL },
+      ]}
+    >
       <RNText
         allowFontScaling={false}
         style={[

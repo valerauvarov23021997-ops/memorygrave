@@ -1,5 +1,14 @@
 import type { Coordinates } from '@pamyat/api'
-import { Icon, radii, spacing, Text, typography, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import {
+  Icon,
+  radii,
+  spacing,
+  Text,
+  typography,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { Image } from 'expo-image'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -40,10 +49,12 @@ export function MapPreview({ coordinates, label, height = 160 }: MapPreviewProps
     <Pressable style={[styles.card, { height }]} onPress={openYandex}>
       {showImage ? (
         <Image
-          source={{ uri: staticUrl! }}
+          source={{ uri: staticUrl }}
           style={StyleSheet.absoluteFill}
           contentFit="cover"
-          onError={() => setImgFailed(true)}
+          onError={() => {
+            setImgFailed(true)
+          }}
         />
       ) : (
         <View style={styles.placeholder}>

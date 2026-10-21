@@ -4,11 +4,11 @@ import React from 'react'
 import { Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { Text } from './Text'
+import { useColors, useThemedStyles, useTheme } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { MIN_TOUCH_TARGET, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors, useThemedStyles, useTheme } from '../theme/ThemeProvider'
-import { Text } from './Text'
 
 interface TopBarProps {
   title?: string
@@ -28,7 +28,13 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
     <View style={styles.row}>
       <View style={styles.side}>
         {onBack ? (
-          <Pressable accessibilityRole="button" accessibilityLabel="Назад" hitSlop={8} onPress={onBack} style={styles.touch}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Назад"
+            hitSlop={8}
+            onPress={onBack}
+            style={styles.touch}
+          >
             <Phosphor.CaretLeft size={24} color={c.light} weight="regular" />
           </Pressable>
         ) : null}
@@ -46,7 +52,11 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
 
   if (transparent) {
     return (
-      <BlurView intensity={30} tint={isDark ? 'dark' : 'light'} style={[styles.transparent, { paddingTop }]}>
+      <BlurView
+        intensity={30}
+        tint={isDark ? 'dark' : 'light'}
+        style={[styles.transparent, { paddingTop }]}
+      >
         {content}
       </BlurView>
     )
@@ -57,7 +67,11 @@ export function TopBar({ title, onBack, rightElement, transparent }: TopBarProps
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-    solid: { backgroundColor: c.cream, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: c.linen },
+    solid: {
+      backgroundColor: c.cream,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.linen,
+    },
     transparent: { backgroundColor: 'transparent' },
     row: {
       height: 52,

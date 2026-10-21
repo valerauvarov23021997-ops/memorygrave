@@ -1,5 +1,15 @@
 import type { Order } from '@pamyat/api'
-import { AnimatedListItem, Badge, Card, EmptyState, spacing, Text, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import {
+  AnimatedListItem,
+  Badge,
+  Card,
+  EmptyState,
+  spacing,
+  Text,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -22,7 +32,9 @@ export default function OrdersScreen() {
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   const [filter, setFilter] = useState<Filter>('all')
-  const { data, isLoading, refetch, isRefetching } = useOrders(filter === 'all' ? undefined : filter)
+  const { data, isLoading, refetch, isRefetching } = useOrders(
+    filter === 'all' ? undefined : filter
+  )
   const flame = useFlameRefresh({
     refreshing: isRefetching,
     onRefresh: () => void refetch(),
@@ -47,12 +59,17 @@ export default function OrdersScreen() {
         {filters.map(f => (
           <Pressable
             key={f.key}
-            onPress={() => setFilter(f.key)}
+            onPress={() => {
+              setFilter(f.key)
+            }}
             style={[styles.chip, filter === f.key ? styles.chipActive : styles.chipInactive]}
           >
             <Text
               variant="bodySm"
-              style={{ color: filter === f.key ? c.cream : c.muted, fontFamily: 'Manrope_500Medium' }}
+              style={{
+                color: filter === f.key ? c.cream : c.muted,
+                fontFamily: 'Manrope_500Medium',
+              }}
             >
               {f.label}
             </Text>
@@ -71,7 +88,9 @@ export default function OrdersScreen() {
           icon="orders"
           title={t('orders.empty')}
           actionLabel={t('orders.findGrave')}
-          onAction={() => router.push('/(tabs)')}
+          onAction={() => {
+            router.push('/(tabs)')
+          }}
         />
       ) : (
         <Animated.FlatList
@@ -82,7 +101,12 @@ export default function OrdersScreen() {
           {...flame.scrollProps}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
-              <OrderCard order={item} onPress={() => router.push(`/order/${item.id}`)} />
+              <OrderCard
+                order={item}
+                onPress={() => {
+                  router.push(`/order/${item.id}`)
+                }}
+              />
             </AnimatedListItem>
           )}
         />
@@ -125,18 +149,45 @@ function OrderCard({ order, onPress }: { order: Order; onPress: () => void }) {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
-  chips: { flexDirection: 'row', gap: spacing.sm, paddingHorizontal: spacing.lg, paddingBottom: spacing.md },
-  chip: { height: 36, paddingHorizontal: spacing.md, borderRadius: 999, justifyContent: 'center' },
-  chipActive: { backgroundColor: c.forest },
-  chipInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
-  list: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
-  card: { marginBottom: spacing.sm },
-  cardRow: { flexDirection: 'row' },
-  cardInfo: { flex: 1 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: spacing.sm, marginBottom: 2 },
-  cardFooter: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },
-  emptyText: { maxWidth: 220 },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    header: { paddingHorizontal: spacing.lg, paddingVertical: spacing.md },
+    chips: {
+      flexDirection: 'row',
+      gap: spacing.sm,
+      paddingHorizontal: spacing.lg,
+      paddingBottom: spacing.md,
+    },
+    chip: {
+      height: 36,
+      paddingHorizontal: spacing.md,
+      borderRadius: 999,
+      justifyContent: 'center',
+    },
+    chipActive: { backgroundColor: c.forest },
+    chipInactive: { backgroundColor: c.parchment, borderWidth: 0.5, borderColor: c.linen },
+    list: { paddingHorizontal: spacing.lg, paddingBottom: 120 },
+    card: { marginBottom: spacing.sm },
+    cardRow: { flexDirection: 'row' },
+    cardInfo: { flex: 1 },
+    titleRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      gap: spacing.sm,
+      marginBottom: 2,
+    },
+    cardFooter: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+    },
+    empty: {
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      gap: spacing.md,
+      paddingHorizontal: spacing.xl,
+    },
+    emptyText: { maxWidth: 220 },
+  })

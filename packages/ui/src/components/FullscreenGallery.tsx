@@ -4,10 +4,10 @@ import React, { useState } from 'react'
 import { Dimensions, FlatList, Modal, Pressable, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { Text } from './Text'
 import { colors } from '../tokens/colors'
 import { spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { Text } from './Text'
 
 interface FullscreenGalleryProps {
   visible: boolean
@@ -22,7 +22,12 @@ const { width, height } = Dimensions.get('window')
  * Полноэкранный просмотр фото: горизонтальный свайп между снимками,
  * тап по фото или крестик — закрыть. Чёрный фон, счётчик страниц.
  */
-export function FullscreenGallery({ visible, photos, initialIndex = 0, onClose }: FullscreenGalleryProps) {
+export function FullscreenGallery({
+  visible,
+  photos,
+  initialIndex = 0,
+  onClose,
+}: FullscreenGalleryProps) {
   const insets = useSafeAreaInsets()
   const [index, setIndex] = useState(initialIndex)
 
@@ -37,7 +42,9 @@ export function FullscreenGallery({ visible, photos, initialIndex = 0, onClose }
           showsHorizontalScrollIndicator={false}
           initialScrollIndex={initialIndex}
           getItemLayout={(_, i) => ({ length: width, offset: width * i, index: i })}
-          onMomentumScrollEnd={e => setIndex(Math.round(e.nativeEvent.contentOffset.x / width))}
+          onMomentumScrollEnd={e => {
+            setIndex(Math.round(e.nativeEvent.contentOffset.x / width))
+          }}
           renderItem={({ item }) => (
             <Pressable style={styles.page} onPress={onClose}>
               <Image source={{ uri: item }} style={styles.image} contentFit="contain" />

@@ -1,5 +1,19 @@
 import { profileApi, type PlanInfo, type SubscriptionPlan } from '@pamyat/api'
-import { Badge, Button, Card, useColors, useThemedStyles, type ThemeColors, Icon, Skeleton, spacing, Text, TopBar, typography, useToast } from '@pamyat/ui'
+import {
+  Badge,
+  Button,
+  Card,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+  Icon,
+  Skeleton,
+  spacing,
+  Text,
+  TopBar,
+  typography,
+  useToast,
+} from '@pamyat/ui'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
 import { useTranslation } from 'react-i18next'
@@ -16,7 +30,10 @@ export default function SubscriptionScreen() {
   const showToast = useToast()
   const qc = useQueryClient()
   const { data: profile } = useProfile()
-  const { data: plans, isLoading } = useQuery({ queryKey: ['plans'], queryFn: () => profileApi.plans() })
+  const { data: plans, isLoading } = useQuery({
+    queryKey: ['plans'],
+    queryFn: () => profileApi.plans(),
+  })
 
   const change = useMutation({
     mutationFn: (plan: SubscriptionPlan) => profileApi.changePlan(plan),
@@ -35,7 +52,12 @@ export default function SubscriptionScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('subscription.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('subscription.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Text variant="bodyMd" color="muted" center style={styles.description}>
           {t('subscription.description')}
@@ -54,7 +76,9 @@ export default function SubscriptionScreen() {
               plan={plan}
               isCurrent={plan.id === currentPlan}
               changing={change.isPending && change.variables === plan.id}
-              onChoose={() => change.mutate(plan.id)}
+              onChoose={() => {
+                change.mutate(plan.id)
+              }}
             />
           ))
         )}
@@ -96,7 +120,9 @@ function PlanCard({
           {isCurrent ? <Badge label={t('subscription.current')} variant="success" /> : null}
         </View>
         <View style={styles.priceRow}>
-          <Text style={[styles.price, { color: featured ? c.sageXL : c.forest }]}>{`${plan.price} ₽`}</Text>
+          <Text
+            style={[styles.price, { color: featured ? c.sageXL : c.forest }]}
+          >{`${plan.price} ₽`}</Text>
         </View>
         <Text variant="bodySm" style={{ color: featured ? 'rgba(250,247,242,0.6)' : c.light }}>
           {plan.periodNote}
@@ -104,7 +130,12 @@ function PlanCard({
         <View style={styles.features}>
           {plan.features.map(f => (
             <View key={f} style={styles.feature}>
-              <Icon name="checkCircle" size={16} color={featured ? c.sageL : c.sage} weight="fill" />
+              <Icon
+                name="checkCircle"
+                size={16}
+                color={featured ? c.sageL : c.sage}
+                weight="fill"
+              />
               <Text variant="bodySm" color={featured ? 'cream' : 'ink'} style={styles.featureText}>
                 {f}
               </Text>
@@ -126,25 +157,25 @@ function PlanCard({
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  description: { maxWidth: 280, alignSelf: 'center', marginBottom: spacing.xl },
-  planWrap: { marginBottom: spacing.lg, paddingTop: spacing.sm },
-  badge: {
-    position: 'absolute',
-    top: -6,
-    alignSelf: 'center',
-    zIndex: 1,
-    backgroundColor: c.sage,
-    borderRadius: 999,
-    paddingHorizontal: spacing.md,
-    paddingVertical: 4,
-  },
-  badgeText: { ...typography.caption, color: c.white, fontFamily: 'Manrope_500Medium' },
-  planHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  priceRow: { marginTop: spacing.sm },
-  price: { ...typography.priceDisplay },
-  features: { marginVertical: spacing.md, gap: spacing.sm },
-  feature: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  featureText: { flex: 1 },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    description: { maxWidth: 280, alignSelf: 'center', marginBottom: spacing.xl },
+    planWrap: { marginBottom: spacing.lg, paddingTop: spacing.sm },
+    badge: {
+      position: 'absolute',
+      top: -6,
+      alignSelf: 'center',
+      zIndex: 1,
+      backgroundColor: c.sage,
+      borderRadius: 999,
+      paddingHorizontal: spacing.md,
+      paddingVertical: 4,
+    },
+    badgeText: { ...typography.caption, color: c.white, fontFamily: 'Manrope_500Medium' },
+    planHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+    priceRow: { marginTop: spacing.sm },
+    price: { ...typography.priceDisplay },
+    features: { marginVertical: spacing.md, gap: spacing.sm },
+    feature: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    featureText: { flex: 1 },
+  })

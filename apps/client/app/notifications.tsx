@@ -1,6 +1,16 @@
 import type { AppNotification, NotificationType } from '@pamyat/api'
 import { notificationsApi } from '@pamyat/api'
-import { AnimatedListItem, EmptyState, Icon, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
+import {
+  AnimatedListItem,
+  EmptyState,
+  Icon,
+  spacing,
+  Text,
+  TopBar,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { pluralDays } from '@pamyat/utils'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -28,7 +38,10 @@ export default function NotificationsScreen() {
   const router = useRouter()
   const styles = useThemedStyles(makeStyles)
   const qc = useQueryClient()
-  const { data, isLoading } = useQuery({ queryKey: ['notifications'], queryFn: () => notificationsApi.list() })
+  const { data, isLoading } = useQuery({
+    queryKey: ['notifications'],
+    queryFn: () => notificationsApi.list(),
+  })
 
   // Открыли центр — помечаем всё прочитанным (бейдж на колокольчике гаснет).
   useEffect(() => {
@@ -46,9 +59,18 @@ export default function NotificationsScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('notifications.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('notifications.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       {!isLoading && (data?.length ?? 0) === 0 ? (
-        <EmptyState icon="bell" title={t('notifications.empty')} subtitle={t('notifications.emptyHint')} />
+        <EmptyState
+          icon="bell"
+          title={t('notifications.empty')}
+          subtitle={t('notifications.emptyHint')}
+        />
       ) : (
         <FlatList
           data={data ?? []}
@@ -56,7 +78,12 @@ export default function NotificationsScreen() {
           contentContainerStyle={styles.list}
           renderItem={({ item, index }) => (
             <AnimatedListItem index={index}>
-              <NotificationRow notification={item} onPress={() => onOpen(item)} />
+              <NotificationRow
+                notification={item}
+                onPress={() => {
+                  onOpen(item)
+                }}
+              />
             </AnimatedListItem>
           )}
         />
@@ -65,7 +92,13 @@ export default function NotificationsScreen() {
   )
 }
 
-function NotificationRow({ notification, onPress }: { notification: AppNotification; onPress: () => void }) {
+function NotificationRow({
+  notification,
+  onPress,
+}: {
+  notification: AppNotification
+  onPress: () => void
+}) {
   const { t } = useTranslation()
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
@@ -73,7 +106,11 @@ function NotificationRow({ notification, onPress }: { notification: AppNotificat
   return (
     <Pressable style={styles.row} onPress={tappable ? onPress : undefined}>
       <View style={[styles.iconWrap, !notification.isRead && styles.iconUnread]}>
-        <Icon name={typeIcon[notification.type]} size={18} color={notification.isRead ? c.muted : c.sage} />
+        <Icon
+          name={typeIcon[notification.type]}
+          size={18}
+          color={notification.isRead ? c.muted : c.sage}
+        />
       </View>
       <View style={styles.body}>
         <View style={styles.titleRow}>

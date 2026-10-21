@@ -9,7 +9,9 @@ export default function Index() {
   const [target, setTarget] = useState<'/login' | '/(tabs)' | null>(null)
 
   useEffect(() => {
-    void tokenStorage.getAccess().then(token => setTarget(token ? '/(tabs)' : '/login'))
+    void tokenStorage.getAccess().then(token => {
+      setTarget(token ? '/(tabs)' : '/login')
+    })
   }, [])
 
   if (!target) {
@@ -23,5 +25,10 @@ export default function Index() {
 }
 
 const styles = StyleSheet.create({
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.cream },
+  center: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.cream,
+  },
 })

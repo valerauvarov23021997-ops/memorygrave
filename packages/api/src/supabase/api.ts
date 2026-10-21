@@ -51,7 +51,8 @@ interface GraveRow {
   cemetery: { name: string; city: { name: string } | null } | null
 }
 
-const GRAVE_SELECT = 'id, full_name, birth_date, death_date, birth_year, death_year, cemetery_id, plot, biography, photos, lat, lng, status, cemetery:cemeteries(name, city:cities(name))'
+const GRAVE_SELECT =
+  'id, full_name, birth_date, death_date, birth_year, death_year, cemetery_id, plot, biography, photos, lat, lng, status, cemetery:cemeteries(name, city:cities(name))'
 
 // Заглушки placehold.co в мобильных сетях грузятся вечно и «подвешивают»
 // портреты — такие адреса отбрасываем, аватар покажет инициалы мгновенно
@@ -73,7 +74,8 @@ function mapGrave(row: GraveRow, savedIds: Set<string>): Grave {
     plot: row.plot,
     biography: row.biography,
     photos: realPhotos(row.photos),
-    coordinates: row.lat != null && row.lng != null ? { latitude: row.lat, longitude: row.lng } : null,
+    coordinates:
+      row.lat != null && row.lng != null ? { latitude: row.lat, longitude: row.lng } : null,
     status: row.status,
     isSaved: savedIds.has(row.id),
     lastOrder: null,
@@ -103,7 +105,8 @@ interface OrderRow {
   service: { name: string; icon: string } | null
 }
 
-const ORDER_SELECT = 'id, grave_id, service_id, status, date, amount, notes, is_recurring, recurring_period, executor_name, executor_rating, rating, created_at, grave:graves(full_name, cemetery:cemeteries(name)), service:services(name, icon)'
+const ORDER_SELECT =
+  'id, grave_id, service_id, status, date, amount, notes, is_recurring, recurring_period, executor_name, executor_rating, rating, created_at, grave:graves(full_name, cemetery:cemeteries(name)), service:services(name, icon)'
 
 function mapOrder(row: OrderRow): Order {
   return {
@@ -121,7 +124,13 @@ function mapOrder(row: OrderRow): Order {
     isRecurring: row.is_recurring,
     recurringPeriod: row.recurring_period,
     executor: row.executor_name
-      ? { id: 'exec', name: row.executor_name, ordersCount: 0, rating: row.executor_rating ?? 5, avatarUrl: null }
+      ? {
+          id: 'exec',
+          name: row.executor_name,
+          ordersCount: 0,
+          rating: row.executor_rating ?? 5,
+          avatarUrl: null,
+        }
       : null,
     rating: row.rating,
     createdAt: row.created_at,
@@ -167,7 +176,11 @@ export const authApi = {
       session = data.session
     }
     await sb.from('profiles').update({ phone }).eq('id', session.user.id)
-    const { data: profile } = await sb.from('profiles').select('name').eq('id', session.user.id).single()
+    const { data: profile } = await sb
+      .from('profiles')
+      .select('name')
+      .eq('id', session.user.id)
+      .single()
     // зеркалим токены: гейт приложения проверяет tokenStorage
     await tokenStorage.setTokens(session.access_token, session.refresh_token)
     return {
@@ -195,7 +208,10 @@ export const authApi = {
     return { success: true }
   },
 
-  async registerPushToken(token: string, platform: 'ios' | 'android'): Promise<{ success: boolean }> {
+  async registerPushToken(
+    token: string,
+    platform: 'ios' | 'android'
+  ): Promise<{ success: boolean }> {
     const uid = await requireUserId()
     const { error } = await getSupabase()
       .from('profiles')
@@ -209,9 +225,18 @@ export const authApi = {
 // ─── Захоронения ──────────────────────────────────────────────
 
 export const gravesApi = {
-  async search(params: { q?: string; city?: string; cemeteryId?: string; page?: number; limit?: number }): Promise<Grave[]> {
+  async search(params: {
+    q?: string
+    city?: string
+    cemeteryId?: string
+    page?: number
+    limit?: number
+  }): Promise<Grave[]> {
     const sb = getSupabase()
-    let query = sb.from('graves').select(GRAVE_SELECT).limit(params.limit ?? 30)
+    let query = sb
+      .from('graves')
+      .select(GRAVE_SELECT)
+      .limit(params.limit ?? 30)
     if (params.q?.trim()) query = query.ilike('full_name', `%${params.q.trim()}%`)
     if (params.cemeteryId) query = query.eq('cemetery_id', params.cemeteryId)
     const [{ data, error }, saved] = await Promise.all([query, savedIdSet()])
@@ -241,7 +266,12 @@ export const gravesApi = {
     const grave = mapGrave(data as unknown as GraveRow, saved)
     if (last) {
       const svc = last.service as unknown as { name: string } | null
-      grave.lastOrder = { id: last.id, serviceName: svc?.name ?? '', date: last.date, rating: last.rating }
+      grave.lastOrder = {
+        id: last.id,
+        serviceName: svc?.name ?? '',
+        date: last.date,
+        rating: last.rating,
+      }
     }
     return grave
   },
@@ -300,13 +330,14 @@ export const gravesApi = {
     let { data, error } = await run('id, name, city_id, has_map, city:cities(name), graves(count)')
     // 42703 — колонки has_map ещё нет: база не обновлена импортом съёмки.
     // Список кладбищ важнее карты, поэтому просто отдаём его без флага.
-    if (error?.code === '42703') ({ data, error } = await run('id, name, city_id, city:cities(name)'))
+    if (error?.code === '42703')
+      ({ data, error } = await run('id, name, city_id, city:cities(name)'))
     if (error) fail(error)
     return ((data ?? []) as unknown as Record<string, unknown>[]).map(r => ({
       id: r.id as string,
       name: r.name as string,
       cityId: r.city_id as string,
-      cityName: (r.city as unknown as { name: string } | null)?.name ?? '',
+      cityName: (r.city as { name: string } | null)?.name ?? '',
       // колонка появляется вместе с импортом съёмки — на старой базе её ещё нет
       hasMap: r.has_map === true,
       peopleCount: (r.graves as { count: number }[] | undefined)?.[0]?.count,
@@ -389,9 +420,17 @@ export const cemeteryMapApi = {
   async get(cemeteryId: string): Promise<CemeteryMap> {
     const sb = getSupabase()
     const [places, paths, plots, people] = await Promise.all([
-      sb.from('burial_places').select('id, number, lat, lng').eq('cemetery_id', cemeteryId).order('number'),
+      sb
+        .from('burial_places')
+        .select('id, number, lat, lng')
+        .eq('cemetery_id', cemeteryId)
+        .order('number'),
       sb.from('cemetery_paths').select('surface, polygon').eq('cemetery_id', cemeteryId),
-      sb.from('burial_places').select('plot_polygon').eq('cemetery_id', cemeteryId).not('plot_polygon', 'is', null),
+      sb
+        .from('burial_places')
+        .select('plot_polygon')
+        .eq('cemetery_id', cemeteryId)
+        .not('plot_polygon', 'is', null),
       sb
         .from('graves')
         .select('id, full_name, birth_date, death_date, birth_year, death_year, burial_place_id')
@@ -464,14 +503,20 @@ export const ordersApi = {
     return mapOrder(data as unknown as OrderRow)
   },
 
-  async list(status?: OrderStatus | 'active' | 'completed', _page = 1, limit = 50): Promise<Order[]> {
+  async list(
+    status?: OrderStatus | 'active' | 'completed',
+    _page = 1,
+    limit = 50
+  ): Promise<Order[]> {
     let query = getSupabase()
       .from('orders')
       .select(ORDER_SELECT)
       .order('created_at', { ascending: false })
       .limit(limit)
-    if (status === 'active') query = query.in('status', ['pending', 'assigned', 'on_the_way', 'working'])
-    else if (status === 'completed') query = query.in('status', ['completed', 'cancelled', 'refund'])
+    if (status === 'active')
+      query = query.in('status', ['pending', 'assigned', 'on_the_way', 'working'])
+    else if (status === 'completed')
+      query = query.in('status', ['completed', 'cancelled', 'refund'])
     else if (status) query = query.eq('status', status)
     const { data, error } = await query
     if (error) fail(error)
@@ -479,13 +524,20 @@ export const ordersApi = {
   },
 
   async getById(id: string): Promise<Order> {
-    const { data, error } = await getSupabase().from('orders').select(ORDER_SELECT).eq('id', id).single()
+    const { data, error } = await getSupabase()
+      .from('orders')
+      .select(ORDER_SELECT)
+      .eq('id', id)
+      .single()
     if (error || !data) fail(error)
     return mapOrder(data as unknown as OrderRow)
   },
 
   async cancel(id: string): Promise<{ success: boolean }> {
-    const { error } = await getSupabase().from('orders').update({ status: 'cancelled' }).eq('id', id)
+    const { error } = await getSupabase()
+      .from('orders')
+      .update({ status: 'cancelled' })
+      .eq('id', id)
     if (error) fail(error)
     return { success: true }
   },
@@ -549,7 +601,12 @@ export const memoriesApi = {
     }))
   },
 
-  async add(input: { graveId: string; authorName: string; text: string; photos?: string[] }): Promise<Memory> {
+  async add(input: {
+    graveId: string
+    authorName: string
+    text: string
+    photos?: string[]
+  }): Promise<Memory> {
     const uid = await requireUserId()
     const { data, error } = await getSupabase()
       .from('memories')
@@ -612,7 +669,8 @@ interface ReminderRow {
   grave: { full_name: string; cemetery: { name: string } | null } | null
 }
 
-const REMINDER_SELECT = 'id, grave_id, type, date, label, is_enabled, auto_order, grave:graves(full_name, cemetery:cemeteries(name))'
+const REMINDER_SELECT =
+  'id, grave_id, type, date, label, is_enabled, auto_order, grave:graves(full_name, cemetery:cemeteries(name))'
 
 function mapReminder(row: ReminderRow): Reminder {
   return {
@@ -661,7 +719,10 @@ export const remindersApi = {
     return mapReminder(data as unknown as ReminderRow)
   },
 
-  async update(id: string, patch: { isEnabled?: boolean; autoOrder?: string[] }): Promise<Reminder> {
+  async update(
+    id: string,
+    patch: { isEnabled?: boolean; autoOrder?: string[] }
+  ): Promise<Reminder> {
     const dbPatch: Record<string, unknown> = {}
     if (patch.isEnabled !== undefined) dbPatch.is_enabled = patch.isEnabled
     if (patch.autoOrder !== undefined) dbPatch.auto_order = patch.autoOrder
@@ -723,7 +784,7 @@ export const profileApi = {
     if (patch.avatarUrl !== undefined) dbPatch.avatar_url = patch.avatarUrl
     const { error } = await getSupabase().from('profiles').update(dbPatch).eq('id', uid)
     if (error) fail(error)
-    return profileApi.get()
+    return await profileApi.get()
   },
 
   async subscription(): Promise<Subscription> {
@@ -746,7 +807,7 @@ export const profileApi = {
       .update({ plan, plan_valid_until: paid ? until.toISOString().slice(0, 10) : null })
       .eq('id', uid)
     if (error) fail(error)
-    return profileApi.subscription()
+    return await profileApi.subscription()
   },
 
   async restoreSubscription(): Promise<{ success: boolean }> {
@@ -777,7 +838,10 @@ export const notificationsApi = {
   },
 
   async markAllRead(): Promise<{ success: boolean }> {
-    const { error } = await getSupabase().from('notifications').update({ is_read: true }).eq('is_read', false)
+    const { error } = await getSupabase()
+      .from('notifications')
+      .update({ is_read: true })
+      .eq('is_read', false)
     if (error) fail(error)
     return { success: true }
   },

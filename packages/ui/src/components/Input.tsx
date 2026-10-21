@@ -1,17 +1,11 @@
 import React, { useState } from 'react'
-import {
-  type KeyboardTypeOptions,
-  StyleSheet,
-  TextInput,
-  View,
-  type ViewStyle,
-} from 'react-native'
+import { type KeyboardTypeOptions, StyleSheet, TextInput, View, type ViewStyle } from 'react-native'
 
+import { Text } from './Text'
+import { useColors, useThemedStyles } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors, useThemedStyles } from '../theme/ThemeProvider'
-import { Text } from './Text'
 
 interface InputProps {
   label?: string
@@ -86,8 +80,12 @@ export function Input({
           multiline={multiline}
           editable={editable}
           autoFocus={autoFocus}
-          onFocus={() => setFocused(true)}
-          onBlur={() => setFocused(false)}
+          onFocus={() => {
+            setFocused(true)
+          }}
+          onBlur={() => {
+            setFocused(false)
+          }}
           style={[styles.textInput, multiline && styles.textInputMultiline]}
         />
         {rightElement}

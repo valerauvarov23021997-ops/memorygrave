@@ -12,9 +12,10 @@
       "rules": {
         "@typescript-eslint/no-explicit-any": "error",
         "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
-        "no-console": ["warn", { "allow": ["warn", "error"] }]
+        "no-console": ["warn", { "allow": ["warn", "error"] }],
+        "no-void": ["warn", { "allowAsStatement": true }]
       }
     }
   ],
-  "ignorePatterns": ["node_modules", "dist", ".expo", ".turbo", "babel.config.js", "metro.config.js"]
+  "ignorePatterns": ["node_modules", "dist", ".expo", ".turbo", "babel.config.js", "metro.config.js", "supabase/functions", "e2e"]
 }

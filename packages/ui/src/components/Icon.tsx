@@ -2,9 +2,9 @@ import * as Phosphor from 'phosphor-react-native'
 import React from 'react'
 import type { ColorValue } from 'react-native'
 
+import { useColors } from '../theme/ThemeProvider'
 import { icons, type IconName, type PhosphorIconName } from '../tokens/icons'
 import { iconSizes } from '../tokens/spacing'
-import { useColors } from '../theme/ThemeProvider'
 
 interface IconProps {
   /**

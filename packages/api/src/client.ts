@@ -23,11 +23,11 @@ const webStorage = {
 export const tokenStorage = {
   async getAccess() {
     if (isWeb) return webStorage.get(ACCESS_KEY)
-    return SecureStore.getItemAsync(ACCESS_KEY)
+    return await SecureStore.getItemAsync(ACCESS_KEY)
   },
   async getRefresh() {
     if (isWeb) return webStorage.get(REFRESH_KEY)
-    return SecureStore.getItemAsync(REFRESH_KEY)
+    return await SecureStore.getItemAsync(REFRESH_KEY)
   },
   async setTokens(access: string, refresh: string) {
     if (isWeb) {
@@ -72,19 +72,18 @@ client.interceptors.response.use(
       const refresh = await tokenStorage.getRefresh()
       if (refresh) {
         try {
-          const { data } = await axios.post<ApiResponse<{ accessToken: string; refreshToken: string }>>(
-            `${config.apiBaseUrl}/auth/refresh`,
-            { refreshToken: refresh }
-          )
+          const { data } = await axios.post<
+            ApiResponse<{ accessToken: string; refreshToken: string }>
+          >(`${config.apiBaseUrl}/auth/refresh`, { refreshToken: refresh })
           await tokenStorage.setTokens(data.data.accessToken, data.data.refreshToken)
           original.headers.Authorization = `Bearer ${data.data.accessToken}`
-          return client.request(original)
+          return await client.request(original)
         } catch {
           await tokenStorage.clear()
         }
       }
     }
-    return Promise.reject(error)
+    return await Promise.reject(error)
   }
 )
 

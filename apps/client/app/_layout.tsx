@@ -48,7 +48,9 @@ export default function RootLayout() {
     void Notifications.getLastNotificationResponseAsync().then(openFromResponse)
     // Приложение уже запущено.
     const sub = Notifications.addNotificationResponseReceivedListener(openFromResponse)
-    return () => sub.remove()
+    return () => {
+      sub.remove()
+    }
   }, [])
 
   if (!fontsLoaded && !fontError) return null
@@ -71,7 +73,13 @@ export default function RootLayout() {
               <Stack.Screen name="(auth)" />
               <Stack.Screen name="(tabs)" options={{ animation: 'fade' }} />
             </Stack>
-            {!splashDone ? <AnimatedSplash onFinish={() => setSplashDone(true)} /> : null}
+            {!splashDone ? (
+              <AnimatedSplash
+                onFinish={() => {
+                  setSplashDone(true)
+                }}
+              />
+            ) : null}
           </ToastProvider>
         </QueryClientProvider>
       </ThemeProvider>

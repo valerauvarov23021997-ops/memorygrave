@@ -1,3 +1,4 @@
+import { useOrderDraftStore } from '@pamyat/store'
 import {
   Avatar,
   Badge,
@@ -19,7 +20,6 @@ import {
   useToast,
   type ThemeColors,
 } from '@pamyat/ui'
-import { useOrderDraftStore } from '@pamyat/store'
 import { formatDate, formatLifespan } from '@pamyat/utils'
 import { LinearGradient } from 'expo-linear-gradient'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -97,13 +97,18 @@ export default function GraveScreen() {
   const onRoute = () => {
     if (!grave.coordinates) return
     const { latitude, longitude } = grave.coordinates
-    void Linking.openURL(`https://yandex.ru/maps/?ll=${longitude},${latitude}&z=17&pt=${longitude},${latitude},pm2rdm`)
+    void Linking.openURL(
+      `https://yandex.ru/maps/?ll=${longitude},${latitude}&z=17&pt=${longitude},${latitude},pm2rdm`
+    )
   }
 
   const onShare = async () => {
     try {
       await Share.share({
-        message: t('grave.shareMessage', { name: grave.fullName, url: `pamyat://grave/${grave.id}` }),
+        message: t('grave.shareMessage', {
+          name: grave.fullName,
+          url: `pamyat://grave/${grave.id}`,
+        }),
       })
     } catch {
       // пользователь мог закрыть окно шэринга — не ошибка
@@ -129,14 +134,26 @@ export default function GraveScreen() {
           end={{ x: 0.5, y: 1 }}
           style={[styles.hero, { paddingTop: insets.top + 52 }]}
         >
-          <Animated.View entering={Platform.OS === 'web' ? undefined : FadeIn.duration(500)} style={styles.heroContent}>
-            <View style={styles.portraitRing}>
+          <Animated.View
+            entering={Platform.OS === 'web' ? undefined : FadeIn.duration(500)}
+            style={styles.heroContent}
+          >
+            {/* портрет — самое заметное место: по нему тапают в первую очередь */}
+            <Pressable
+              style={styles.portraitRing}
+              onPress={() => setGalleryOpen(true)}
+              disabled={!grave.photos.length}
+              accessibilityRole="imagebutton"
+              accessibilityLabel={t('grave.actPhoto')}
+            >
               <Avatar name={grave.fullName} size={96} imageUri={grave.photos[0]} />
-            </View>
+            </Pressable>
             <Text variant="displayMd" color="cream" center style={styles.heroName}>
               {grave.fullName}
             </Text>
-            <Text style={styles.heroDates}>{formatLifespan(grave.birthDate, grave.deathDate, grave.birthYear, grave.deathYear)}</Text>
+            <Text style={styles.heroDates}>
+              {formatLifespan(grave.birthDate, grave.deathDate, grave.birthYear, grave.deathYear)}
+            </Text>
             <View style={styles.heroBadge}>
               <Badge label={badge.label} variant={badge.variant} />
             </View>
@@ -145,7 +162,12 @@ export default function GraveScreen() {
 
         {/* Плавающие кнопки поверх шапки */}
         <View style={[styles.topActions, { top: insets.top + spacing.xs }]}>
-          <RoundButton icon="back" onPress={() => router.back()} />
+          <RoundButton
+            icon="back"
+            onPress={() => {
+              router.back()
+            }}
+          />
           <RoundButton icon="share" onPress={() => void onShare()} />
         </View>
 
@@ -154,7 +176,9 @@ export default function GraveScreen() {
           <RoundAction
             icon="camera"
             label={t('grave.actPhoto')}
-            onPress={() => (grave.photos.length ? setGalleryOpen(true) : showToast(t('grave.photos'), 'info'))}
+            onPress={() => {
+              grave.photos.length ? setGalleryOpen(true) : showToast(t('grave.photos'), 'info')
+            }}
           />
           <RoundAction
             icon="saved"
@@ -162,7 +186,13 @@ export default function GraveScreen() {
             active={isSaved}
             onPress={onToggleSave}
           />
-          <RoundAction icon="bell" label={t('grave.actDates')} onPress={() => router.push(`/reminders/${grave.id}`)} />
+          <RoundAction
+            icon="bell"
+            label={t('grave.actDates')}
+            onPress={() => {
+              router.push(`/reminders/${grave.id}`)
+            }}
+          />
           {grave.coordinates ? (
             <RoundAction icon="mapPin" label={t('grave.actRoute')} onPress={onRoute} />
           ) : null}
@@ -171,7 +201,11 @@ export default function GraveScreen() {
         <View style={styles.body}>
           {grave.biography ? (
             <Card variant="surface" padding="lg" style={styles.bioCard}>
-              <Pressable onPress={() => setExpanded(e => !e)}>
+              <Pressable
+                onPress={() => {
+                  setExpanded(e => !e)
+                }}
+              >
                 <Text variant="bodyLg" color="ink" numberOfLines={expanded ? undefined : 4}>
                   {grave.biography}
                 </Text>
@@ -201,11 +235,20 @@ export default function GraveScreen() {
 
           <SectionLabel>{t('grave.more')}</SectionLabel>
           <GroupedSection style={styles.moreCard}>
-            <GroupedRow icon="saved" title={t('invite.title')} onPress={() => router.push(`/invite/${grave.id}`)} position="first" />
+            <GroupedRow
+              icon="saved"
+              title={t('invite.title')}
+              onPress={() => {
+                router.push(`/invite/${grave.id}`)
+              }}
+              position="first"
+            />
             <GroupedRow
               icon="QrCode"
               title={t('qr.title')}
-              onPress={() => router.push(`/qr/${grave.id}`)}
+              onPress={() => {
+                router.push(`/qr/${grave.id}`)
+              }}
               position={grave.lastOrder || hasMap ? 'middle' : 'last'}
             />
             {grave.lastOrder ? (
@@ -213,8 +256,14 @@ export default function GraveScreen() {
                 icon="camera"
                 title={grave.lastOrder.serviceName}
                 subtitle={formatDate(grave.lastOrder.date)}
-                right={grave.lastOrder.rating != null ? <StarRating value={grave.lastOrder.rating} size={16} /> : undefined}
-                onPress={() => router.push(`/report/${grave.lastOrder?.id}`)}
+                right={
+                  grave.lastOrder.rating != null ? (
+                    <StarRating value={grave.lastOrder.rating} size={16} />
+                  ) : undefined
+                }
+                onPress={() => {
+                  router.push(`/report/${grave.lastOrder?.id}`)
+                }}
                 position={hasMap ? 'middle' : 'last'}
               />
             ) : null}
@@ -225,12 +274,12 @@ export default function GraveScreen() {
                 icon="mapPin"
                 title={t('grave.cemeteryMap')}
                 subtitle={grave.cemeteryName}
-                onPress={() =>
+                onPress={() => {
                   router.push({
                     pathname: '/cemetery/[id]',
                     params: { id: grave.cemeteryId, name: grave.cemeteryName },
                   })
-                }
+                }}
                 position="last"
               />
             ) : null}
@@ -246,7 +295,13 @@ export default function GraveScreen() {
         <Button label={t('grave.orderCare')} onPress={onOrder} fullWidth />
       </View>
 
-      <FullscreenGallery visible={galleryOpen} photos={grave.photos} onClose={() => setGalleryOpen(false)} />
+      <FullscreenGallery
+        visible={galleryOpen}
+        photos={grave.photos}
+        onClose={() => {
+          setGalleryOpen(false)
+        }}
+      />
     </View>
   )
 }
@@ -276,7 +331,12 @@ function RoundAction({
   return (
     <Pressable style={styles.roundAction} onPress={onPress}>
       <View style={[styles.roundCircle, active ? styles.roundCircleActive : null]}>
-        <Icon name={icon} size={22} color={active ? c.cream : c.forest} weight={active ? 'fill' : 'regular'} />
+        <Icon
+          name={icon}
+          size={22}
+          color={active ? c.cream : c.forest}
+          weight={active ? 'fill' : 'regular'}
+        />
       </View>
       <Text variant="caption" color={active ? 'forest' : 'muted'} center>
         {label}
@@ -287,80 +347,98 @@ function RoundAction({
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  scroll: { paddingBottom: 0 },
-  bleed: { position: 'absolute', top: -600, left: 0, right: 0, height: 600, backgroundColor: c.forest },
-  hero: {
-    paddingBottom: spacing.xl + 30,
-    borderBottomLeftRadius: 28,
-    borderBottomRightRadius: 28,
-    alignItems: 'center',
-  },
-  heroContent: { alignItems: 'center', paddingHorizontal: spacing.lg },
-  portraitRing: {
-    padding: 4,
-    borderRadius: 999,
-    borderWidth: 2,
-    borderColor: 'rgba(250,247,242,0.35)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  heroName: { marginTop: spacing.md },
-  heroDates: { ...typography.bodySm, color: 'rgba(250,247,242,0.75)', marginTop: spacing.xs, textAlign: 'center' },
-  heroBadge: { marginTop: spacing.md },
-  heroSkeleton: { alignItems: 'center', backgroundColor: c.forest, paddingBottom: spacing.xl, borderBottomLeftRadius: 28, borderBottomRightRadius: 28 },
-  loadingBody: { padding: spacing.lg, gap: spacing.md },
-  topActions: {
-    position: 'absolute',
-    left: spacing.lg,
-    right: spacing.lg,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  roundBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  roundActions: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: spacing.lg,
-    marginTop: -34,
-    paddingHorizontal: spacing.lg,
-  },
-  roundAction: { alignItems: 'center', gap: 6, width: 64 },
-  roundCircle: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
-    backgroundColor: c.white,
-    alignItems: 'center',
-    justifyContent: 'center',
-    shadowColor: c.forest,
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.14,
-    shadowRadius: 12,
-    elevation: 4,
-  },
-  roundCircleActive: { backgroundColor: c.forest },
-  body: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
-  bioCard: { marginBottom: spacing.lg },
-  readMore: { marginTop: spacing.sm },
-  mapWrap: { marginBottom: spacing.lg },
-  candleWrap: { marginBottom: spacing.lg },
-  moreCard: { marginBottom: spacing.lg },
-  sticky: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    backgroundColor: c.cream,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: c.linen,
-  },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    scroll: { paddingBottom: 0 },
+    bleed: {
+      position: 'absolute',
+      top: -600,
+      left: 0,
+      right: 0,
+      height: 600,
+      backgroundColor: c.forest,
+    },
+    hero: {
+      paddingBottom: spacing.xl + 30,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+      alignItems: 'center',
+    },
+    heroContent: { alignItems: 'center', paddingHorizontal: spacing.lg },
+    portraitRing: {
+      padding: 4,
+      borderRadius: 999,
+      borderWidth: 2,
+      borderColor: 'rgba(250,247,242,0.35)',
+      backgroundColor: 'rgba(255,255,255,0.08)',
+    },
+    heroName: { marginTop: spacing.md },
+    heroDates: {
+      ...typography.bodySm,
+      color: 'rgba(250,247,242,0.75)',
+      marginTop: spacing.xs,
+      textAlign: 'center',
+    },
+    heroBadge: { marginTop: spacing.md },
+    heroSkeleton: {
+      alignItems: 'center',
+      backgroundColor: c.forest,
+      paddingBottom: spacing.xl,
+      borderBottomLeftRadius: 28,
+      borderBottomRightRadius: 28,
+    },
+    loadingBody: { padding: spacing.lg, gap: spacing.md },
+    topActions: {
+      position: 'absolute',
+      left: spacing.lg,
+      right: spacing.lg,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+    },
+    roundBtn: {
+      width: 40,
+      height: 40,
+      borderRadius: 20,
+      backgroundColor: 'rgba(255,255,255,0.18)',
+      alignItems: 'center',
+      justifyContent: 'center',
+    },
+    roundActions: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      gap: spacing.lg,
+      marginTop: -34,
+      paddingHorizontal: spacing.lg,
+    },
+    roundAction: { alignItems: 'center', gap: 6, width: 64 },
+    roundCircle: {
+      width: 54,
+      height: 54,
+      borderRadius: 27,
+      backgroundColor: c.white,
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: c.forest,
+      shadowOffset: { width: 0, height: 4 },
+      shadowOpacity: 0.14,
+      shadowRadius: 12,
+      elevation: 4,
+    },
+    roundCircleActive: { backgroundColor: c.forest },
+    body: { paddingHorizontal: spacing.lg, paddingTop: spacing.lg },
+    bioCard: { marginBottom: spacing.lg },
+    readMore: { marginTop: spacing.sm },
+    mapWrap: { marginBottom: spacing.lg },
+    candleWrap: { marginBottom: spacing.lg },
+    moreCard: { marginBottom: spacing.lg },
+    sticky: {
+      position: 'absolute',
+      bottom: 0,
+      left: 0,
+      right: 0,
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      backgroundColor: c.cream,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.linen,
+    },
+  })

@@ -2,12 +2,12 @@ import React from 'react'
 import { Pressable, StyleSheet, type TextStyle, type ViewStyle } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated'
 
+import { FlameLoader } from './FlameLoader'
+import { Text } from './Text'
+import { useColors } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors } from '../theme/ThemeProvider'
-import { FlameLoader } from './FlameLoader'
-import { Text } from './Text'
 
 type Variant = 'primary' | 'secondary' | 'destructive' | 'ghost' | 'light'
 
@@ -79,7 +79,9 @@ export function Button({
   const labelStyle: TextStyle = {
     ...typography.buttonLabel,
     color: labelColor(variant, c),
-    ...(variant === 'ghost' ? { textDecorationLine: 'underline', textTransform: 'none', letterSpacing: 0 } : {}),
+    ...(variant === 'ghost'
+      ? { textDecorationLine: 'underline', textTransform: 'none', letterSpacing: 0 }
+      : {}),
   }
 
   return (
@@ -96,11 +98,7 @@ export function Button({
       }}
       style={[containerStyle, animatedStyle]}
     >
-      {loading ? (
-        <FlameLoader size={24} glow={false} />
-      ) : (
-        <Text style={labelStyle}>{label}</Text>
-      )}
+      {loading ? <FlameLoader size={24} glow={false} /> : <Text style={labelStyle}>{label}</Text>}
     </AnimatedPressable>
   )
 }

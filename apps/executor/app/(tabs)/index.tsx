@@ -1,6 +1,20 @@
 import type { ExecutorOrder } from '@pamyat/api'
 import { executorApi } from '@pamyat/api'
-import { BottomSheet, Button, Card, colors, EmptyState, Icon, Input, SectionLabel, Skeleton, spacing, Text, typography, useToast } from '@pamyat/ui'
+import {
+  BottomSheet,
+  Button,
+  Card,
+  colors,
+  EmptyState,
+  Icon,
+  Input,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  typography,
+  useToast,
+} from '@pamyat/ui'
 import { formatDate, formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -69,15 +83,26 @@ export default function ActiveOrdersScreen() {
           renderItem={({ item }) => (
             <OrderCard
               order={item}
-              onAccept={() => accept.mutate(item.id)}
-              onReject={() => setRejectId(item.id)}
-              onOpen={() => router.push(`/execution/${item.id}`)}
+              onAccept={() => {
+                accept.mutate(item.id)
+              }}
+              onReject={() => {
+                setRejectId(item.id)
+              }}
+              onOpen={() => {
+                router.push(`/execution/${item.id}`)
+              }}
             />
           )}
         />
       )}
 
-      <BottomSheet visible={rejectId !== null} onClose={() => setRejectId(null)}>
+      <BottomSheet
+        visible={rejectId !== null}
+        onClose={() => {
+          setRejectId(null)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
           {t('active.rejectReason')}
         </Text>
@@ -165,7 +190,13 @@ const styles = StyleSheet.create({
   reward: { ...typography.priceDisplay, color: colors.forest, marginBottom: spacing.sm },
   actions: { flexDirection: 'row', gap: spacing.sm },
   actionCol: { flex: 1 },
-  empty: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: spacing.md, paddingHorizontal: spacing.xl },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.md,
+    paddingHorizontal: spacing.xl,
+  },
   emptyText: { maxWidth: 220 },
   sheetTitle: { marginBottom: spacing.md },
   sheetField: { marginBottom: spacing.md },

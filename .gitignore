@@ -19,6 +19,9 @@ google-play-key.json
 *.p8
 *.mobileprovision
 e2e/out/
+# сессия живого прогона (вход владельца) и сборка под него
+e2e/.profile/
+e2e/dist-live/
 
 # Фото памятников с ФИО — исходники для оцифровки, в историю git не кладём
 photos/

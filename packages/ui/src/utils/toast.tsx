@@ -3,9 +3,9 @@ import { StyleSheet, View } from 'react-native'
 import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
+import { useColors } from '../theme/ThemeProvider'
 import { radii, spacing } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors } from '../theme/ThemeProvider'
 
 type ToastType = 'success' | 'error' | 'info'
 
@@ -50,7 +50,12 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     [opacity, translateY]
   )
 
-  useEffect(() => () => (timer.current ? clearTimeout(timer.current) : undefined), [])
+  useEffect(
+    () => () => {
+      timer.current ? clearTimeout(timer.current) : undefined
+    },
+    []
+  )
 
   const animatedStyle = useAnimatedStyle(() => ({
     opacity: opacity.value,

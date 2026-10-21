@@ -9,8 +9,8 @@ import Animated, {
 } from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
-import { radii, spacing } from '../tokens/spacing'
 import { useColors } from '../theme/ThemeProvider'
+import { radii, spacing } from '../tokens/spacing'
 
 interface BottomSheetProps {
   visible: boolean
@@ -36,9 +36,13 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       overlayOpacity.value = withTiming(1, { duration: 250 })
     } else if (mounted) {
       overlayOpacity.value = withTiming(0, { duration: 250 })
-      translateY.value = withTiming(600, { duration: 300, easing: Easing.in(Easing.cubic) }, finished => {
-        if (finished) runOnJS(setMounted)(false)
-      })
+      translateY.value = withTiming(
+        600,
+        { duration: 300, easing: Easing.in(Easing.cubic) },
+        finished => {
+          if (finished) runOnJS(setMounted)(false)
+        }
+      )
     }
   }, [visible, mounted, translateY, overlayOpacity])
 
@@ -55,7 +59,11 @@ export function BottomSheet({ visible, onClose, children }: BottomSheetProps) {
       >
         <AnimatedPressable style={[styles.overlay, overlayStyle]} onPress={onClose} />
         <Animated.View
-          style={[styles.sheet, { backgroundColor: c.cream, paddingBottom: insets.bottom + spacing.lg }, sheetStyle]}
+          style={[
+            styles.sheet,
+            { backgroundColor: c.cream, paddingBottom: insets.bottom + spacing.lg },
+            sheetStyle,
+          ]}
         >
           <View style={[styles.handle, { backgroundColor: c.stone }]} />
           {children}

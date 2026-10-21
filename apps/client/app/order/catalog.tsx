@@ -1,6 +1,20 @@
 import type { Service } from '@pamyat/api'
-import { BottomSheet, Button, GroupedRow, GroupedSection, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useColors, useThemedStyles, type ThemeColors } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
+import {
+  BottomSheet,
+  Button,
+  GroupedRow,
+  GroupedSection,
+  Icon,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  TopBar,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+} from '@pamyat/ui'
 import { formatPrice } from '@pamyat/utils'
 import { useRouter } from 'expo-router'
 import { useState } from 'react'
@@ -35,7 +49,12 @@ export default function CatalogScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('grave.orderCare')} onBack={() => router.back()} />
+      <TopBar
+        title={t('grave.orderCare')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Text variant="bodySm" color="muted" style={styles.context}>
           {[graveName, cemeteryName].filter(Boolean).join(' · ')}
@@ -52,21 +71,40 @@ export default function CatalogScreen() {
             <SectionLabel>{t('catalog.quick')}</SectionLabel>
             <GroupedSection style={styles.group}>
               {quick.map((s, i) => (
-                <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} position={pos(i, quick.length)} />
+                <ServiceRow
+                  key={s.id}
+                  service={s}
+                  onPress={() => {
+                    setDetail(s)
+                  }}
+                  position={pos(i, quick.length)}
+                />
               ))}
             </GroupedSection>
 
             <SectionLabel>{t('catalog.major')}</SectionLabel>
             <GroupedSection style={styles.group}>
               {major.map((s, i) => (
-                <ServiceRow key={s.id} service={s} onPress={() => setDetail(s)} position={pos(i, major.length)} />
+                <ServiceRow
+                  key={s.id}
+                  service={s}
+                  onPress={() => {
+                    setDetail(s)
+                  }}
+                  position={pos(i, major.length)}
+                />
               ))}
             </GroupedSection>
           </>
         )}
       </ScrollView>
 
-      <BottomSheet visible={!!detail} onClose={() => setDetail(null)}>
+      <BottomSheet
+        visible={!!detail}
+        onClose={() => {
+          setDetail(null)
+        }}
+      >
         {detail ? (
           <View style={styles.detail}>
             <View style={styles.detailHeader}>
@@ -79,9 +117,17 @@ export default function CatalogScreen() {
               {detail.description}
             </Text>
             <Text variant="priceDisplay" color="forest" style={styles.detailPrice}>
-              {detail.fixedPrice ? formatPrice(detail.priceFrom) : t('catalog.priceFrom', { price: formatPrice(detail.priceFrom) })}
+              {detail.fixedPrice
+                ? formatPrice(detail.priceFrom)
+                : t('catalog.priceFrom', { price: formatPrice(detail.priceFrom) })}
             </Text>
-            <Button label={t('catalog.select')} onPress={() => choose(detail)} fullWidth />
+            <Button
+              label={t('catalog.select')}
+              onPress={() => {
+                choose(detail)
+              }}
+              fullWidth
+            />
           </View>
         ) : null}
       </BottomSheet>
@@ -125,13 +171,13 @@ function ServiceRow({
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
-  context: { marginBottom: spacing.lg },
-  skeletons: { gap: spacing.sm },
-  group: { marginBottom: spacing.lg },
-  detail: { gap: spacing.md, paddingBottom: spacing.md },
-  detailHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  detailDesc: {},
-  detailPrice: {},
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
+    context: { marginBottom: spacing.lg },
+    skeletons: { gap: spacing.sm },
+    group: { marginBottom: spacing.lg },
+    detail: { gap: spacing.md, paddingBottom: spacing.md },
+    detailHeader: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    detailDesc: {},
+    detailPrice: {},
+  })

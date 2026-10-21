@@ -1,11 +1,11 @@
 import React from 'react'
-import { StyleSheet, View, type ViewStyle } from 'react-native'
+import { StyleSheet, View } from 'react-native'
 
+import { Text } from './Text'
+import { useColors } from '../theme/ThemeProvider'
 import { type ThemeColors } from '../tokens/colors'
 import { radii } from '../tokens/spacing'
 import { typography } from '../tokens/typography'
-import { useColors } from '../theme/ThemeProvider'
-import { Text } from './Text'
 
 type BadgeVariant = 'success' | 'warning' | 'info' | 'neutral' | 'error'
 
@@ -46,6 +46,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.lg,
     paddingHorizontal: 8,
     paddingVertical: 2,
-  } as ViewStyle,
+  },
   text: { ...typography.caption, fontFamily: 'Manrope_500Medium' },
 })

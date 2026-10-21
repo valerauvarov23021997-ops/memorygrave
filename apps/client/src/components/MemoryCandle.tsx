@@ -5,7 +5,6 @@ import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Platform, Pressable, StyleSheet, View } from 'react-native'
-import Svg, { Circle, Defs, LinearGradient as SvgGradient, Path, RadialGradient, Rect, Stop } from 'react-native-svg'
 import Animated, {
   Easing,
   FadeIn,
@@ -18,10 +17,21 @@ import Animated, {
   withTiming,
   type SharedValue,
 } from 'react-native-reanimated'
+import Svg, {
+  Circle,
+  Defs,
+  LinearGradient as SvgGradient,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg'
 
 // Контур фирменного пламени (viewBox 0 0 100 140, кончик сверху)
-const FLAME = 'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
-const CORE = 'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
+const FLAME =
+  'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
+const CORE =
+  'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
 
 /** Блок «Свеча памяти»: зажечь виртуальную свечу с живым пламенем. */
 export function MemoryCandle({ graveId }: { graveId: string }) {
@@ -54,7 +64,9 @@ export function MemoryCandle({ graveId }: { graveId: string }) {
     try {
       const next = await candlesApi.light(graveId)
       setStatus(next)
-      setTimeout(() => haptics.success(), 500)
+      setTimeout(() => {
+        haptics.success()
+      }, 500)
     } catch {
       setJustLit(false) // не получилось — гасим обратно
     } finally {
@@ -247,7 +259,12 @@ function useEmberStyle(p: SharedValue<number>, x: number) {
 
 const styles = StyleSheet.create({
   card: { borderRadius: 20, padding: spacing.lg, alignItems: 'center' },
-  candleWrap: { height: 128, justifyContent: 'flex-end', alignItems: 'center', marginVertical: spacing.md },
+  candleWrap: {
+    height: 128,
+    justifyContent: 'flex-end',
+    alignItems: 'center',
+    marginVertical: spacing.md,
+  },
   candle: { alignItems: 'center' },
   flameSlot: { height: 50, width: 96, alignItems: 'center', justifyContent: 'flex-end' },
   glow: { position: 'absolute', bottom: -34, width: 96, height: 96 },
@@ -260,9 +277,21 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     backgroundColor: '#F6C86B',
   },
-  smoke: { width: 3, height: 3, borderRadius: 2, backgroundColor: 'rgba(250,247,242,0.4)', marginBottom: 4 },
+  smoke: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: 'rgba(250,247,242,0.4)',
+    marginBottom: 4,
+  },
   wick: { width: 2, height: 7, backgroundColor: colors.ink },
-  body: { width: 26, height: 68, borderTopLeftRadius: 5, borderTopRightRadius: 5, overflow: 'hidden' },
+  body: {
+    width: 26,
+    height: 68,
+    borderTopLeftRadius: 5,
+    borderTopRightRadius: 5,
+    overflow: 'hidden',
+  },
   litText: { ...typography.bodyMd, color: colors.sageXL, marginTop: spacing.xs },
   lightBtn: {
     backgroundColor: colors.cream,

@@ -1,5 +1,20 @@
 import { ordersApi } from '@pamyat/api'
-import { Button, Card, FullscreenGallery, useColors, useThemedStyles, type ThemeColors, Icon, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import {
+  Button,
+  Card,
+  FullscreenGallery,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+  Icon,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  StarRating,
+  Text,
+  TopBar,
+  useToast,
+} from '@pamyat/ui'
 import { useMutation } from '@tanstack/react-query'
 import { Image } from 'expo-image'
 import { useLocalSearchParams, useRouter } from 'expo-router'
@@ -31,23 +46,35 @@ export default function ReportScreen() {
 
   const review = useMutation({
     mutationFn: (value: number) => ordersApi.review(id ?? '', value),
-    onSuccess: () => showToast(t('report.rated'), 'success'),
+    onSuccess: () => {
+      showToast(t('report.rated'), 'success')
+    },
   })
 
   // Автосохранение оценки с задержкой 800мс.
   const onRate = (value: number) => {
     setRating(value)
     if (debounce.current) clearTimeout(debounce.current)
-    debounce.current = setTimeout(() => review.mutate(value), 800)
+    debounce.current = setTimeout(() => {
+      review.mutate(value)
+    }, 800)
   }
 
-  useEffect(() => () => (debounce.current ? clearTimeout(debounce.current) : undefined), [])
+  useEffect(
+    () => () => {
+      debounce.current ? clearTimeout(debounce.current) : undefined
+    },
+    []
+  )
 
   const onShare = async () => {
     if (!order) return
     try {
       await Share.share({
-        message: t('report.shareMessage', { service: order.serviceName, cemetery: order.cemeteryName }),
+        message: t('report.shareMessage', {
+          service: order.serviceName,
+          cemetery: order.cemeteryName,
+        }),
       })
     } catch {
       // пользователь мог закрыть окно шэринга — не ошибка
@@ -59,7 +86,12 @@ export default function ReportScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('report.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('report.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="success" padding="md" style={styles.done}>
           <View style={styles.doneRow}>
@@ -87,13 +119,23 @@ export default function ReportScreen() {
             {before.length > 0 ? (
               <>
                 <SectionLabel>{t('report.before')}</SectionLabel>
-                <PhotoGrid photos={before} onOpen={index => setGallery({ photos: before, index })} />
+                <PhotoGrid
+                  photos={before}
+                  onOpen={index => {
+                    setGallery({ photos: before, index })
+                  }}
+                />
               </>
             ) : null}
             {after.length > 0 ? (
               <>
                 <SectionLabel>{t('report.after')}</SectionLabel>
-                <PhotoGrid photos={after} onOpen={index => setGallery({ photos: after, index })} />
+                <PhotoGrid
+                  photos={after}
+                  onOpen={index => {
+                    setGallery({ photos: after, index })
+                  }}
+                />
               </>
             ) : null}
           </>
@@ -105,7 +147,13 @@ export default function ReportScreen() {
         </View>
 
         <View style={styles.buttons}>
-          <Button label={t('report.orderAgain')} onPress={() => router.push('/order/catalog')} fullWidth />
+          <Button
+            label={t('report.orderAgain')}
+            onPress={() => {
+              router.push('/order/catalog')
+            }}
+            fullWidth
+          />
           <Button label={t('report.share')} variant="secondary" onPress={onShare} fullWidth />
         </View>
         <View style={{ height: insets.bottom + spacing.lg }} />
@@ -115,7 +163,9 @@ export default function ReportScreen() {
         visible={gallery !== null}
         photos={gallery?.photos ?? []}
         initialIndex={gallery?.index ?? 0}
-        onClose={() => setGallery(null)}
+        onClose={() => {
+          setGallery(null)
+        }}
       />
     </View>
   )
@@ -126,7 +176,13 @@ function PhotoGrid({ photos, onOpen }: { photos: string[]; onOpen: (index: numbe
   return (
     <View style={styles.grid}>
       {photos.map((uri, i) => (
-        <Pressable key={uri} style={styles.photoBox} onPress={() => onOpen(i)}>
+        <Pressable
+          key={uri}
+          style={styles.photoBox}
+          onPress={() => {
+            onOpen(i)
+          }}
+        >
           <Image source={{ uri }} style={styles.photo} contentFit="cover" transition={200} />
         </Pressable>
       ))}
@@ -136,20 +192,20 @@ function PhotoGrid({ photos, onOpen }: { photos: string[]; onOpen: (index: numbe
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  done: { marginBottom: spacing.lg },
-  doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  loadingGrid: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
-  grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
-  photoBox: {
-    width: '48%',
-    aspectRatio: 1,
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: c.parchment,
-  },
-  photo: { width: '100%', height: '100%' },
-  rating: { marginBottom: spacing.lg },
-  buttons: { gap: spacing.sm },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    done: { marginBottom: spacing.lg },
+    doneRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    loadingGrid: { flexDirection: 'row', gap: spacing.sm, marginBottom: spacing.md },
+    grid: { flexDirection: 'row', flexWrap: 'wrap', gap: spacing.sm, marginBottom: spacing.md },
+    photoBox: {
+      width: '48%',
+      aspectRatio: 1,
+      borderRadius: 12,
+      overflow: 'hidden',
+      backgroundColor: c.parchment,
+    },
+    photo: { width: '100%', height: '100%' },
+    rating: { marginBottom: spacing.lg },
+    buttons: { gap: spacing.sm },
+  })

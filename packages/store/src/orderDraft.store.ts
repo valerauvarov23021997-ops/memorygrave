@@ -47,18 +47,28 @@ const initial = {
 
 export const useOrderDraftStore = create<OrderDraftState>(set => ({
   ...initial,
-  startOrder: grave =>
-    set({ graveId: grave.id, graveName: grave.name, cemeteryName: grave.cemetery }),
-  selectService: service =>
+  startOrder: grave => {
+    set({ graveId: grave.id, graveName: grave.name, cemeteryName: grave.cemetery })
+  },
+  selectService: service => {
     set({
       serviceId: service.id,
       serviceName: service.name,
       serviceIcon: service.icon,
       priceFrom: service.priceFrom,
       fixedPrice: service.fixedPrice,
-    }),
-  setDate: date => set({ date }),
-  setRecurring: recurringPeriod => set({ recurringPeriod }),
-  setNotes: notes => set({ notes }),
-  reset: () => set(initial),
+    })
+  },
+  setDate: date => {
+    set({ date })
+  },
+  setRecurring: recurringPeriod => {
+    set({ recurringPeriod })
+  },
+  setNotes: notes => {
+    set({ notes })
+  },
+  reset: () => {
+    set(initial)
+  },
 }))

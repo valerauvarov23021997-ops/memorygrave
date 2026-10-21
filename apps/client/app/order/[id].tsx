@@ -1,12 +1,33 @@
 import { ordersApi } from '@pamyat/api'
-import { Avatar, Badge, BottomSheet, Button, Card, useColors, useThemedStyles, type ThemeColors, SectionLabel, Skeleton, spacing, StarRating, Text, TopBar, useToast } from '@pamyat/ui'
+import {
+  Avatar,
+  Badge,
+  BottomSheet,
+  Button,
+  Card,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  StarRating,
+  Text,
+  TopBar,
+  useToast,
+} from '@pamyat/ui'
 import { formatDate, formatPrice, pluralOrders } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ScrollView, StyleSheet, View } from 'react-native'
-import Animated, { useAnimatedStyle, useSharedValue, withRepeat, withTiming } from 'react-native-reanimated'
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming,
+} from 'react-native-reanimated'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder } from '../../src/hooks/queries'
@@ -37,7 +58,12 @@ export default function OrderStatusScreen() {
   if (isLoading || !order) {
     return (
       <View style={styles.root}>
-        <TopBar title={t('orderStatus.title')} onBack={() => router.back()} />
+        <TopBar
+          title={t('orderStatus.title')}
+          onBack={() => {
+            router.back()
+          }}
+        />
         <View style={styles.loading}>
           <Skeleton width="100%" height={80} radius={10} />
           <Skeleton width="100%" height={200} radius={10} />
@@ -60,7 +86,12 @@ export default function OrderStatusScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('orderStatus.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('orderStatus.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="surface" padding="md">
           <View style={styles.headerRow}>
@@ -118,18 +149,32 @@ export default function OrderStatusScreen() {
         {order.status === 'completed' ? (
           <Button
             label={t('orderStatus.viewReport')}
-            onPress={() => router.push(`/report/${order.id}`)}
+            onPress={() => {
+              router.push(`/report/${order.id}`)
+            }}
             fullWidth
           />
         ) : null}
 
         {canCancel ? (
-          <Button label={t('orderStatus.cancelOrder')} variant="destructive" onPress={() => setConfirmCancel(true)} fullWidth />
+          <Button
+            label={t('orderStatus.cancelOrder')}
+            variant="destructive"
+            onPress={() => {
+              setConfirmCancel(true)
+            }}
+            fullWidth
+          />
         ) : null}
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
 
-      <BottomSheet visible={confirmCancel} onClose={() => setConfirmCancel(false)}>
+      <BottomSheet
+        visible={confirmCancel}
+        onClose={() => {
+          setConfirmCancel(false)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.confirmTitle}>
           {t('orderStatus.cancelConfirmTitle')}
         </Text>
@@ -140,11 +185,20 @@ export default function OrderStatusScreen() {
           <Button
             label={t('orderStatus.cancelConfirm')}
             variant="destructive"
-            onPress={() => cancel.mutate()}
+            onPress={() => {
+              cancel.mutate()
+            }}
             loading={cancel.isPending}
             fullWidth
           />
-          <Button label={t('orderStatus.cancelKeep')} variant="ghost" onPress={() => setConfirmCancel(false)} fullWidth />
+          <Button
+            label={t('orderStatus.cancelKeep')}
+            variant="ghost"
+            onPress={() => {
+              setConfirmCancel(false)
+            }}
+            fullWidth
+          />
         </View>
       </BottomSheet>
     </View>
@@ -205,24 +259,34 @@ function TimelineStep({
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  loading: { padding: spacing.lg, gap: spacing.md },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 2 },
-  metaRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: spacing.sm },
-  executor: { marginTop: spacing.md },
-  executorRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  executorInfo: { flex: 1 },
-  timeline: { marginBottom: spacing.lg },
-  step: { flexDirection: 'row', gap: spacing.md },
-  stepLeft: { alignItems: 'center' },
-  dot: { width: 10, height: 10, borderRadius: 5, marginTop: 4 },
-  dotCurrent: { borderWidth: 2, borderColor: c.sageL },
-  dotFuture: { borderWidth: 1, borderColor: c.stone },
-  line: { width: 1, flex: 1, backgroundColor: c.linen, marginVertical: 2 },
-  stepBody: { flex: 1, paddingBottom: spacing.lg },
-  currentLabel: { fontFamily: 'Manrope_500Medium' },
-  confirmTitle: { marginBottom: spacing.sm },
-  confirmText: { marginBottom: spacing.lg },
-  confirmButtons: { gap: spacing.sm },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    loading: { padding: spacing.lg, gap: spacing.md },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    headerRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginBottom: 2,
+    },
+    metaRow: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      marginTop: spacing.sm,
+    },
+    executor: { marginTop: spacing.md },
+    executorRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    executorInfo: { flex: 1 },
+    timeline: { marginBottom: spacing.lg },
+    step: { flexDirection: 'row', gap: spacing.md },
+    stepLeft: { alignItems: 'center' },
+    dot: { width: 10, height: 10, borderRadius: 5, marginTop: 4 },
+    dotCurrent: { borderWidth: 2, borderColor: c.sageL },
+    dotFuture: { borderWidth: 1, borderColor: c.stone },
+    line: { width: 1, flex: 1, backgroundColor: c.linen, marginVertical: 2 },
+    stepBody: { flex: 1, paddingBottom: spacing.lg },
+    currentLabel: { fontFamily: 'Manrope_500Medium' },
+    confirmTitle: { marginBottom: spacing.sm },
+    confirmText: { marginBottom: spacing.lg },
+    confirmButtons: { gap: spacing.sm },
+  })

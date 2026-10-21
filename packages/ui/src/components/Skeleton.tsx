@@ -9,8 +9,8 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated'
 
-import { radii } from '../tokens/spacing'
 import { useColors } from '../theme/ThemeProvider'
+import { radii } from '../tokens/spacing'
 
 interface SkeletonProps {
   width: DimensionValue
@@ -32,7 +32,12 @@ export function Skeleton({ width, height, radius = radii.md }: SkeletonProps) {
   }))
 
   return (
-    <View style={[styles.container, { width, height, borderRadius: radius, backgroundColor: c.parchment }]}>
+    <View
+      style={[
+        styles.container,
+        { width, height, borderRadius: radius, backgroundColor: c.parchment },
+      ]}
+    >
       <Animated.View style={[StyleSheet.absoluteFill, animatedStyle]}>
         <LinearGradient
           colors={[c.parchment, c.linen, c.parchment]}

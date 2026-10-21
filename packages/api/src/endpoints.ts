@@ -4,7 +4,6 @@
  */
 import client, { unwrap } from './client'
 import { config, mockDelay } from './config'
-import * as sb from './supabase/api'
 import {
   authTokensMock,
   cemeteriesMock,
@@ -24,8 +23,8 @@ import {
   servicesMock,
   userProfileMock,
 } from './mocks'
+import * as sb from './supabase/api'
 import type {
-  ApiResponse,
   AppNotification,
   CemeteryMap,
   AuthTokens,
@@ -321,7 +320,10 @@ export interface PaymentIntent {
 export const paymentsApi = {
   create(orderId: string, methodId: string): Promise<PaymentIntent> {
     if (USE_MOCKS || SUPA) {
-      return mockDelay({ paymentId: `pay-${Date.now()}`, confirmationUrl: 'https://yookassa.ru/mock' })
+      return mockDelay({
+        paymentId: `pay-${Date.now()}`,
+        confirmationUrl: 'https://yookassa.ru/mock',
+      })
     }
     return unwrap<PaymentIntent>(client.post('/payments/create', { orderId, methodId }))
   },
@@ -551,7 +553,9 @@ export const profileApi = {
 export const executorApi = {
   orders(status?: OrderStatus): Promise<ExecutorOrder[]> {
     if (USE_MOCKS || SUPA) {
-      return mockDelay(status ? executorOrdersMock.filter(o => o.status === status) : executorOrdersMock)
+      return mockDelay(
+        status ? executorOrdersMock.filter(o => o.status === status) : executorOrdersMock
+      )
     }
     return unwrap<ExecutorOrder[]>(client.get('/executor/orders', { params: { status } }))
   },
@@ -619,4 +623,3 @@ export const notificationsApi = {
   },
 }
 
-export type { ApiResponse }

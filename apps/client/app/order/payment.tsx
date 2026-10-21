@@ -1,6 +1,22 @@
 import { ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
-import { BottomSheet, Button, Card, useColors, useThemedStyles, type ThemeColors, Divider, haptics, Icon, SectionLabel, Skeleton, spacing, Text, TopBar, useToast } from '@pamyat/ui'
 import { useOrderDraftStore } from '@pamyat/store'
+import {
+  BottomSheet,
+  Button,
+  Card,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
+  Divider,
+  haptics,
+  Icon,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  TopBar,
+  useToast,
+} from '@pamyat/ui'
 import { formatPrice } from '@pamyat/utils'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from 'expo-router'
@@ -25,7 +41,8 @@ export default function PaymentScreen() {
   const amount = draft.priceFrom ?? 0
   const [selectedId, setSelectedId] = useState<string | null>(null)
   const [choosing, setChoosing] = useState(false)
-  const method = methods?.find(m => m.id === selectedId) ?? methods?.find(m => m.isDefault) ?? methods?.[0]
+  const method =
+    methods?.find(m => m.id === selectedId) ?? methods?.find(m => m.isDefault) ?? methods?.[0]
 
   const mutation = useMutation({
     mutationFn: async () => {
@@ -57,7 +74,12 @@ export default function PaymentScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('payment.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('payment.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <Card variant="success" padding="md" style={styles.secure}>
           <View style={styles.secureRow}>
@@ -76,7 +98,10 @@ export default function PaymentScreen() {
             <View style={styles.methodRow}>
               <Icon name="orders" size={20} color={c.sage} />
               <View style={styles.methodInfo}>
-                <Text variant="headingMd" color="ink">{`${method.brand} •••• ${method.last4}`}</Text>
+                <Text
+                  variant="headingMd"
+                  color="ink"
+                >{`${method.brand} •••• ${method.last4}`}</Text>
                 <Text variant="bodySm" color="muted">
                   {method.expiry}
                 </Text>
@@ -85,7 +110,12 @@ export default function PaymentScreen() {
             </View>
           </Card>
         ) : null}
-        <Pressable onPress={() => setChoosing(true)} hitSlop={8}>
+        <Pressable
+          onPress={() => {
+            setChoosing(true)
+          }}
+          hitSlop={8}
+        >
           <Text variant="bodySm" color="sage" style={styles.otherMethod}>
             {t('payment.otherMethod')}
           </Text>
@@ -120,11 +150,29 @@ export default function PaymentScreen() {
       </ScrollView>
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
-        <Button label={t('payment.pay', { amount: formatPrice(amount) })} onPress={() => mutation.mutate()} loading={mutation.isPending} fullWidth />
-        <Button label={t('common.cancel')} variant="ghost" onPress={() => router.back()} />
+        <Button
+          label={t('payment.pay', { amount: formatPrice(amount) })}
+          onPress={() => {
+            mutation.mutate()
+          }}
+          loading={mutation.isPending}
+          fullWidth
+        />
+        <Button
+          label={t('common.cancel')}
+          variant="ghost"
+          onPress={() => {
+            router.back()
+          }}
+        />
       </View>
 
-      <BottomSheet visible={choosing} onClose={() => setChoosing(false)}>
+      <BottomSheet
+        visible={choosing}
+        onClose={() => {
+          setChoosing(false)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
           {t('payment.method')}
         </Text>
@@ -157,28 +205,38 @@ export default function PaymentScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
-  secure: { marginBottom: spacing.lg },
-  secureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
-  methodRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
-  methodInfo: { flex: 1 },
-  otherMethod: { marginTop: spacing.md },
-  sheetTitle: { marginBottom: spacing.md },
-  methodOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.linen,
-  },
-  line: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: spacing.xs },
-  total: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34, color: c.forest },
-  footer: {
-    paddingHorizontal: spacing.lg,
-    paddingTop: spacing.md,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: c.linen,
-  },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
+    secure: { marginBottom: spacing.lg },
+    secureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    methodRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
+    methodInfo: { flex: 1 },
+    otherMethod: { marginTop: spacing.md },
+    sheetTitle: { marginBottom: spacing.md },
+    methodOption: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.md,
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.linen,
+    },
+    line: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      paddingVertical: spacing.xs,
+    },
+    total: {
+      fontFamily: 'PlayfairDisplay_400Regular',
+      fontSize: 28,
+      lineHeight: 34,
+      color: c.forest,
+    },
+    footer: {
+      paddingHorizontal: spacing.lg,
+      paddingTop: spacing.md,
+      borderTopWidth: StyleSheet.hairlineWidth,
+      borderTopColor: c.linen,
+    },
+  })

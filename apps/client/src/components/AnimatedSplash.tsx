@@ -1,16 +1,7 @@
-import { LinearGradient } from 'expo-linear-gradient'
 import * as Haptics from 'expo-haptics'
+import { LinearGradient } from 'expo-linear-gradient'
 import { useEffect } from 'react'
 import { StyleSheet, View } from 'react-native'
-import Svg, {
-  ClipPath,
-  Defs,
-  LinearGradient as SvgGradient,
-  Path,
-  RadialGradient,
-  Rect,
-  Stop,
-} from 'react-native-svg'
 import Animated, {
   Easing,
   interpolate,
@@ -23,13 +14,24 @@ import Animated, {
   withSequence,
   withTiming,
 } from 'react-native-reanimated'
+import Svg, {
+  ClipPath,
+  Defs,
+  LinearGradient as SvgGradient,
+  Path,
+  RadialGradient,
+  Rect,
+  Stop,
+} from 'react-native-svg'
 
 const AnimatedRect = Animated.createAnimatedComponent(Rect)
 
 // Контур пламени (viewBox 0 0 100 140, кончик сверху, низ ≈124)
-const FLAME = 'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
+const FLAME =
+  'M50,6 C64,38 79,50 79,80 C79,106 66,122 50,124 C34,122 21,106 21,80 C21,50 36,38 50,6 Z'
 // Светлое ядро пламени — как в иконке приложения
-const CORE = 'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
+const CORE =
+  'M50,44 C60,62 67,70 67,90 C67,105 59,115 50,116 C41,115 33,105 33,90 C33,70 40,62 50,44 Z'
 
 const GOLD = '#C2A05A'
 
@@ -52,9 +54,19 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
     fill.value = withDelay(450, withTiming(1, { duration: 1400, easing: soft }))
     breathe.value = withDelay(
       1950,
-      withRepeat(withSequence(withTiming(1, { duration: 1500, easing: soft }), withTiming(0, { duration: 1500, easing: soft })), -1, true)
+      withRepeat(
+        withSequence(
+          withTiming(1, { duration: 1500, easing: soft }),
+          withTiming(0, { duration: 1500, easing: soft })
+        ),
+        -1,
+        true
+      )
     )
-    word.value = withDelay(1500, withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) }))
+    word.value = withDelay(
+      1500,
+      withTiming(1, { duration: 1000, easing: Easing.out(Easing.cubic) })
+    )
     rule.value = withDelay(2200, withTiming(1, { duration: 550, easing: soft }))
     tag.value = withDelay(2550, withTiming(1, { duration: 750, easing: soft }))
     fade.value = withDelay(
@@ -90,7 +102,10 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
     transform: [{ translateY: (1 - word.value) * 10 }],
   }))
   const ruleStyle = useAnimatedStyle(() => ({ opacity: rule.value, width: rule.value * 44 }))
-  const tagStyle = useAnimatedStyle(() => ({ opacity: tag.value, transform: [{ translateY: (1 - tag.value) * 6 }] }))
+  const tagStyle = useAnimatedStyle(() => ({
+    opacity: tag.value,
+    transform: [{ translateY: (1 - tag.value) * 6 }],
+  }))
 
   return (
     <Animated.View style={[StyleSheet.absoluteFill, styles.root, rootStyle]} pointerEvents="none">
@@ -148,8 +163,20 @@ export function AnimatedSplash({ onFinish }: { onFinish: () => void }) {
               </ClipPath>
             </Defs>
             <Path d={FLAME} fill="#F4ECDB" stroke="#E0D2B4" strokeWidth={0.9} />
-            <AnimatedRect x={0} width={100} fill="url(#fire)" clipPath="url(#flameClip)" animatedProps={fillProps} />
-            <AnimatedRect x={0} width={100} fill="url(#fireCore)" clipPath="url(#coreClip)" animatedProps={fillProps} />
+            <AnimatedRect
+              x={0}
+              width={100}
+              fill="url(#fire)"
+              clipPath="url(#flameClip)"
+              animatedProps={fillProps}
+            />
+            <AnimatedRect
+              x={0}
+              width={100}
+              fill="url(#fireCore)"
+              clipPath="url(#coreClip)"
+              animatedProps={fillProps}
+            />
           </Svg>
         </View>
 
@@ -165,7 +192,13 @@ const styles = StyleSheet.create({
   root: { alignItems: 'center', justifyContent: 'center' },
   center: { alignItems: 'center' },
   emblem: { width: 200, height: 200, alignItems: 'center', justifyContent: 'center' },
-  glow: { position: 'absolute', width: 280, height: 280, alignItems: 'center', justifyContent: 'center' },
+  glow: {
+    position: 'absolute',
+    width: 280,
+    height: 280,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   word: {
     fontFamily: 'PlayfairDisplay_500Medium',
     fontSize: 44,

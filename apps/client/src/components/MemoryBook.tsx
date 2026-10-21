@@ -5,7 +5,9 @@ import {
   Button,
   Card,
   radii,
-  useColors, useThemedStyles, type ThemeColors,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
   FullscreenGallery,
   Icon,
   Input,
@@ -71,7 +73,10 @@ export function MemoryBook({ graveId }: { graveId: string }) {
   const pickPhoto = async () => {
     const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
     if (!perm.granted) return
-    const result = await ImagePicker.launchImageLibraryAsync({ quality: 0.8, allowsMultipleSelection: false })
+    const result = await ImagePicker.launchImageLibraryAsync({
+      quality: 0.8,
+      allowsMultipleSelection: false,
+    })
     if (!result.canceled && result.assets[0]) setPhotos(prev => [...prev, result.assets[0]!.uri])
   }
 
@@ -87,7 +92,13 @@ export function MemoryBook({ graveId }: { graveId: string }) {
         </Text>
       ) : (
         memories?.map(m => (
-          <MemoryCard key={m.id} memory={m} onOpenPhoto={index => setViewer({ photos: m.photos, index })} />
+          <MemoryCard
+            key={m.id}
+            memory={m}
+            onOpenPhoto={index => {
+              setViewer({ photos: m.photos, index })
+            }}
+          />
         ))
       )}
 
@@ -98,7 +109,12 @@ export function MemoryBook({ graveId }: { graveId: string }) {
         </Text>
       </Pressable>
 
-      <BottomSheet visible={open} onClose={() => setOpen(false)}>
+      <BottomSheet
+        visible={open}
+        onClose={() => {
+          setOpen(false)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
           {t('memoryBook.add')}
         </Text>
@@ -121,7 +137,11 @@ export function MemoryBook({ graveId }: { graveId: string }) {
           />
         </View>
 
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.photoRow}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.photoRow}
+        >
           {photos.map((uri, i) => (
             <Image key={i} source={{ uri }} style={styles.thumb} contentFit="cover" />
           ))}
@@ -132,7 +152,9 @@ export function MemoryBook({ graveId }: { graveId: string }) {
 
         <Button
           label={t('memoryBook.submit')}
-          onPress={() => add.mutate()}
+          onPress={() => {
+            add.mutate()
+          }}
           disabled={!canSubmit}
           loading={add.isPending}
           fullWidth
@@ -143,13 +165,21 @@ export function MemoryBook({ graveId }: { graveId: string }) {
         visible={!!viewer}
         photos={viewer?.photos ?? []}
         initialIndex={viewer?.index ?? 0}
-        onClose={() => setViewer(null)}
+        onClose={() => {
+          setViewer(null)
+        }}
       />
     </View>
   )
 }
 
-function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (index: number) => void }) {
+function MemoryCard({
+  memory,
+  onOpenPhoto,
+}: {
+  memory: Memory
+  onOpenPhoto: (index: number) => void
+}) {
   const styles = useThemedStyles(makeStyles)
   return (
     <Card padding="md" style={styles.card}>
@@ -168,9 +198,18 @@ function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (ind
         {memory.text}
       </Text>
       {memory.photos.length > 0 ? (
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.cardPhotos}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.cardPhotos}
+        >
           {memory.photos.map((uri, i) => (
-            <Pressable key={i} onPress={() => onOpenPhoto(i)}>
+            <Pressable
+              key={i}
+              onPress={() => {
+                onOpenPhoto(i)
+              }}
+            >
               <Image source={{ uri }} style={styles.cardThumb} contentFit="cover" />
             </Pressable>
           ))}
@@ -182,28 +221,38 @@ function MemoryCard({ memory, onOpenPhoto }: { memory: Memory; onOpenPhoto: (ind
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  wrap: { marginBottom: spacing.lg },
-  empty: { marginBottom: spacing.sm },
-  card: { marginBottom: spacing.sm },
-  cardHead: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, marginBottom: spacing.sm },
-  cardMeta: { flex: 1 },
-  cardText: { lineHeight: 24 },
-  cardPhotos: { gap: spacing.sm, marginTop: spacing.sm },
-  cardThumb: { width: 72, height: 72, borderRadius: radii.md },
-  addRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm, paddingVertical: spacing.md },
-  sheetTitle: { marginBottom: spacing.md },
-  field: { marginBottom: spacing.md },
-  photoRow: { gap: spacing.sm, marginBottom: spacing.lg, alignItems: 'center' },
-  thumb: { width: 64, height: 64, borderRadius: radii.md },
-  addPhoto: {
-    width: 64,
-    height: 64,
-    borderRadius: radii.md,
-    borderWidth: 1,
-    borderStyle: 'dashed',
-    borderColor: c.stone,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: c.parchment,
-  },
-})
+    wrap: { marginBottom: spacing.lg },
+    empty: { marginBottom: spacing.sm },
+    card: { marginBottom: spacing.sm },
+    cardHead: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      marginBottom: spacing.sm,
+    },
+    cardMeta: { flex: 1 },
+    cardText: { lineHeight: 24 },
+    cardPhotos: { gap: spacing.sm, marginTop: spacing.sm },
+    cardThumb: { width: 72, height: 72, borderRadius: radii.md },
+    addRow: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      gap: spacing.sm,
+      paddingVertical: spacing.md,
+    },
+    sheetTitle: { marginBottom: spacing.md },
+    field: { marginBottom: spacing.md },
+    photoRow: { gap: spacing.sm, marginBottom: spacing.lg, alignItems: 'center' },
+    thumb: { width: 64, height: 64, borderRadius: radii.md },
+    addPhoto: {
+      width: 64,
+      height: 64,
+      borderRadius: radii.md,
+      borderWidth: 1,
+      borderStyle: 'dashed',
+      borderColor: c.stone,
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: c.parchment,
+    },
+  })

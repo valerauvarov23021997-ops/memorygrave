@@ -3,7 +3,9 @@ import {
   BottomSheet,
   Button,
   Card,
-  useColors, useThemedStyles, type ThemeColors,
+  useColors,
+  useThemedStyles,
+  type ThemeColors,
   Icon,
   Input,
   spacing,
@@ -49,18 +51,32 @@ export default function AddGraveScreen() {
       showToast(t('addGrave.success'), 'success')
       router.replace(`/grave/${grave.id}`)
     },
-    onError: () => showToast(t('common.error'), 'error'),
+    onError: () => {
+      showToast(t('common.error'), 'error')
+    },
   })
 
   const onSubmit = () => {
     const nameError = validateFullName(fullName)
-    if (nameError) return setError(nameError)
-    if (!cemeteryId) return setError(t('addGrave.cemetery'))
+    if (nameError) {
+      setError(nameError)
+      return
+    }
+    if (!cemeteryId) {
+      setError(t('addGrave.cemetery'))
+      return
+    }
     // Даты необязательны, но если введены — должны существовать
     const birthIso = birthDate ? dateMaskToIso(birthDate) : null
     const deathIso = deathDate ? dateMaskToIso(deathDate) : null
-    if (birthDate && !birthIso) return setError(t('addGrave.dateInvalid'))
-    if (deathDate && !deathIso) return setError(t('addGrave.dateInvalid'))
+    if (birthDate && !birthIso) {
+      setError(t('addGrave.dateInvalid'))
+      return
+    }
+    if (deathDate && !deathIso) {
+      setError(t('addGrave.dateInvalid'))
+      return
+    }
     setError(undefined)
     mutation.mutate({
       fullName: fullName.trim(),
@@ -75,7 +91,12 @@ export default function AddGraveScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={t('addGrave.title')} onBack={() => router.back()} />
+      <TopBar
+        title={t('addGrave.title')}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled"
@@ -104,7 +125,9 @@ export default function AddGraveScreen() {
             <Input
               label={t('addGrave.birthDate')}
               value={birthDate}
-              onChangeText={text => setBirthDate(formatDateMask(text))}
+              onChangeText={text => {
+                setBirthDate(formatDateMask(text))
+              }}
               placeholder="ДД.ММ.ГГГГ"
               keyboardType="number-pad"
             />
@@ -113,14 +136,21 @@ export default function AddGraveScreen() {
             <Input
               label={t('addGrave.deathDate')}
               value={deathDate}
-              onChangeText={text => setDeathDate(formatDateMask(text))}
+              onChangeText={text => {
+                setDeathDate(formatDateMask(text))
+              }}
               placeholder="ДД.ММ.ГГГГ"
               keyboardType="number-pad"
             />
           </View>
         </View>
 
-        <Pressable style={styles.field} onPress={() => setSheetOpen(true)}>
+        <Pressable
+          style={styles.field}
+          onPress={() => {
+            setSheetOpen(true)
+          }}
+        >
           <Input
             label={t('addGrave.cemetery')}
             required
@@ -133,7 +163,12 @@ export default function AddGraveScreen() {
         </Pressable>
 
         <View style={styles.field}>
-          <Input label={t('addGrave.plot')} value={plot} onChangeText={setPlot} placeholder={t('addGrave.plotPlaceholder')} />
+          <Input
+            label={t('addGrave.plot')}
+            value={plot}
+            onChangeText={setPlot}
+            placeholder={t('addGrave.plotPlaceholder')}
+          />
         </View>
 
         <View style={styles.field}>
@@ -147,11 +182,21 @@ export default function AddGraveScreen() {
           />
         </View>
 
-        <Button label={t('addGrave.submit')} onPress={onSubmit} loading={mutation.isPending} fullWidth />
+        <Button
+          label={t('addGrave.submit')}
+          onPress={onSubmit}
+          loading={mutation.isPending}
+          fullWidth
+        />
         <View style={{ height: insets.bottom + spacing.xl }} />
       </ScrollView>
 
-      <BottomSheet visible={sheetOpen} onClose={() => setSheetOpen(false)}>
+      <BottomSheet
+        visible={sheetOpen}
+        onClose={() => {
+          setSheetOpen(false)
+        }}
+      >
         <Text variant="headingLg" color="forest" style={styles.sheetTitle}>
           {t('addGrave.cemetery')}
         </Text>
@@ -179,16 +224,16 @@ export default function AddGraveScreen() {
 
 const makeStyles = (c: ThemeColors) =>
   StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.cream },
-  content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
-  banner: { marginBottom: spacing.lg },
-  field: { marginBottom: spacing.lg },
-  dates: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg },
-  dateCol: { flex: 1 },
-  sheetTitle: { marginBottom: spacing.md },
-  cemeteryRow: {
-    paddingVertical: spacing.md,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: c.linen,
-  },
-})
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md },
+    banner: { marginBottom: spacing.lg },
+    field: { marginBottom: spacing.lg },
+    dates: { flexDirection: 'row', gap: spacing.md, marginBottom: spacing.lg },
+    dateCol: { flex: 1 },
+    sheetTitle: { marginBottom: spacing.md },
+    cemeteryRow: {
+      paddingVertical: spacing.md,
+      borderBottomWidth: StyleSheet.hairlineWidth,
+      borderBottomColor: c.linen,
+    },
+  })

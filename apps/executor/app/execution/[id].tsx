@@ -1,7 +1,20 @@
 import { executorApi } from '@pamyat/api'
-import { Button, Card, colors, Icon, radii, SectionLabel, Skeleton, spacing, Text, Toggle, TopBar, useToast } from '@pamyat/ui'
-import * as ImagePicker from 'expo-image-picker'
+import {
+  Button,
+  Card,
+  colors,
+  Icon,
+  radii,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  Toggle,
+  TopBar,
+  useToast,
+} from '@pamyat/ui'
 import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -31,7 +44,12 @@ export default function ExecutionScreen() {
   if (isLoading || !order) {
     return (
       <View style={styles.root}>
-        <TopBar title={t('execution.title')} onBack={() => router.back()} />
+        <TopBar
+          title={t('execution.title')}
+          onBack={() => {
+            router.back()
+          }}
+        />
         <View style={styles.loading}>
           <Skeleton width="100%" height={120} radius={10} />
         </View>
@@ -107,7 +125,12 @@ export default function ExecutionScreen() {
 
   return (
     <View style={styles.root}>
-      <TopBar title={stepTitle(step, t)} onBack={() => router.back()} />
+      <TopBar
+        title={stepTitle(step, t)}
+        onBack={() => {
+          router.back()
+        }}
+      />
       <ScrollView contentContainerStyle={styles.content}>
         <StepIndicator step={step} />
 
@@ -132,7 +155,12 @@ export default function ExecutionScreen() {
                 </Text>
               </>
             ) : null}
-            <Button label={t('execution.openNav')} variant="secondary" onPress={openNavigator} fullWidth />
+            <Button
+              label={t('execution.openNav')}
+              variant="secondary"
+              onPress={openNavigator}
+              fullWidth
+            />
             <Button label={t('execution.arrived')} onPress={arrive} loading={busy} fullWidth />
           </View>
         ) : null}
@@ -141,7 +169,9 @@ export default function ExecutionScreen() {
           <PhotoStep
             photos={before}
             onAdd={() => pickPhoto('before')}
-            onRemove={i => setBefore(prev => prev.filter((_, idx) => idx !== i))}
+            onRemove={i => {
+              setBefore(prev => prev.filter((_, idx) => idx !== i))
+            }}
             onSubmit={submitBefore}
             busy={busy}
             hint={t('execution.photoHint')}
@@ -158,10 +188,22 @@ export default function ExecutionScreen() {
                 <Text variant="bodyMd" color="ink" style={styles.checkLabel}>
                   {s}
                 </Text>
-                <Toggle value={!!checked[s]} onValueChange={v => setChecked(prev => ({ ...prev, [s]: v }))} />
+                <Toggle
+                  value={!!checked[s]}
+                  onValueChange={v => {
+                    setChecked(prev => ({ ...prev, [s]: v }))
+                  }}
+                />
               </View>
             ))}
-            <Button label={t('execution.finishWork')} onPress={() => setStep('after')} disabled={!allChecked} fullWidth />
+            <Button
+              label={t('execution.finishWork')}
+              onPress={() => {
+                setStep('after')
+              }}
+              disabled={!allChecked}
+              fullWidth
+            />
           </View>
         ) : null}
 
@@ -169,7 +211,9 @@ export default function ExecutionScreen() {
           <PhotoStep
             photos={after}
             onAdd={() => pickPhoto('after')}
-            onRemove={i => setAfter(prev => prev.filter((_, idx) => idx !== i))}
+            onRemove={i => {
+              setAfter(prev => prev.filter((_, idx) => idx !== i))
+            }}
             onSubmit={submitAfter}
             busy={busy}
             hint={t('execution.photoHint')}
@@ -226,7 +270,13 @@ function PhotoStep({
         {photos.map((uri, i) => (
           <View key={uri} style={styles.photoWrap}>
             <Image source={{ uri }} style={styles.photo} contentFit="cover" />
-            <Pressable style={styles.removePhoto} onPress={() => onRemove(i)} hitSlop={6}>
+            <Pressable
+              style={styles.removePhoto}
+              onPress={() => {
+                onRemove(i)
+              }}
+              hitSlop={6}
+            >
               <Icon name="close" size={12} color={colors.white} />
             </Pressable>
           </View>
@@ -238,7 +288,13 @@ function PhotoStep({
       <Text variant="bodySm" color="light">
         {countLabel}
       </Text>
-      <Button label={submitLabel} onPress={onSubmit} disabled={photos.length < MIN_PHOTOS} loading={busy} fullWidth />
+      <Button
+        label={submitLabel}
+        onPress={onSubmit}
+        disabled={photos.length < MIN_PHOTOS}
+        loading={busy}
+        fullWidth
+      />
     </View>
   )
 }
