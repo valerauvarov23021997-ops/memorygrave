@@ -23,6 +23,8 @@ const plan: BurialPlace[] = [
   place(176, [person('Тюканов Виктор Дмитриевич'), person('Тюканова Надежда Емельяновна')]),
   place(170, [person('Фёдоров Михаил Егорович', { birthYear: 1927, deathYear: 2016 })]),
   place(28),
+  place(38, [person('Костин Владислав Иванович')]),
+  place(9, [person('Иванов Никита Владимирович')]),
 ]
 
 describe('normalize', () => {
@@ -61,6 +63,15 @@ describe('searchPlaces', () => {
     const r = searchPlaces(plan, 'тюканов')
     expect(r?.people).toHaveLength(2)
     expect(r?.places.map(p => p.number)).toEqual([176])
+  })
+
+  it('слово ищется с начала, а не в середине', () => {
+    expect(searchPlaces(plan, 'ван')?.people).toHaveLength(0)
+  })
+
+  it('совпадения по фамилии — первыми, отчество — после', () => {
+    const names = searchPlaces(plan, 'иванов')?.people.map(x => x.person.fullName)
+    expect(names).toEqual(['Иванов Никита Владимирович', 'Костин Владислав Иванович'])
   })
 
   it('ничего не нашлось — пустой результат, а не null', () => {

@@ -58,6 +58,9 @@ const pause = ms => page.waitForTimeout(ms)
   })
   page = ctx.pages()[0] ?? (await ctx.newPage())
   page.on('pageerror', e => consoleErrors.push(`PAGEERROR: ${String(e).slice(0, 160)}`))
+  page.on('response', r => {
+    if (r.status() >= 400) consoleErrors.push(`HTTP ${r.status()}: ${r.url().slice(0, 140)}`)
+  })
   page.on('console', m => {
     if (m.type() === 'error' && !/vibrate/.test(m.text())) consoleErrors.push(`CONSOLE: ${m.text().slice(0, 160)}`)
   })
@@ -120,7 +123,8 @@ const pause = ms => page.waitForTimeout(ms)
     await text('Кладбище д. Даймище').click()
     await page.getByPlaceholder('Фамилия или номер места').waitFor({ timeout: 15000 })
     await page.getByPlaceholder('Фамилия или номер места').fill('Иванов')
-    await text('Найдено').waitFor({ timeout: 10000 })
+    // фамилия — первой строкой, совпадения по отчеству («Иванович») — ниже
+    await text('Иванов Никита Владимирович').waitFor({ timeout: 10000 })
   }, { shotName: '06-map-search' })
 
   await step('Карта: из списка — на место и страницу памяти', async () => {

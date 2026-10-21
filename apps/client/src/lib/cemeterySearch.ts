@@ -22,8 +22,9 @@ export interface PlaceSearchResult {
 
 /**
  * Поиск на плане кладбища: цифры — номер места, иначе ФИО.
- * Все слова запроса должны встретиться в имени — «куликова тамара» находит
- * «Куликова Тамара Николаевна» независимо от порядка слов.
+ * Каждое слово запроса — начало какого-то слова в ФИО, порядок любой:
+ * «куликова тамара» находит «Куликова Тамара Николаевна», а «ван» — не «Иванова».
+ * Совпавшие по фамилии идут первыми: «Иванов» — сначала Ивановы, потом «…Иванович».
  */
 export function searchPlaces(places: BurialPlace[], query: string): PlaceSearchResult | null {
   const q = normalize(query)
@@ -33,13 +34,17 @@ export function searchPlaces(places: BurialPlace[], query: string): PlaceSearchR
     return { byName: false, places: places.filter(p => p.number === n), people: [] }
   }
   const words = q.split(/\s+/)
-  const people: PlaceSearchResult['people'] = []
+  const bySurname: PlaceSearchResult['people'] = []
+  const byOther: PlaceSearchResult['people'] = []
   for (const place of places) {
     for (const person of place.people) {
-      const name = normalize(person.fullName)
-      if (words.every(w => name.includes(w))) people.push({ place, person })
+      const parts = normalize(person.fullName).split(/\s+/)
+      if (!words.every(w => parts.some(part => part.startsWith(w)))) continue
+      const surnameHit = words.some(w => parts[0]?.startsWith(w))
+      ;(surnameHit ? bySurname : byOther).push({ place, person })
     }
   }
+  const people = [...bySurname, ...byOther]
   const found = [...new Map(people.map(r => [r.place.id, r.place])).values()]
   return { byName: true, places: found, people }
 }
