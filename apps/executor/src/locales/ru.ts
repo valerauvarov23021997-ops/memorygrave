@@ -9,6 +9,13 @@ export const ru = {
     subtitle: 'Введите номер телефона',
     getCode: 'Войти',
     phonePlaceholder: '+7 (___) ___-__-__',
+    codeSubtitle: 'Код придёт от бота «Память» в Telegram',
+    tgButton: 'Получить код в Telegram',
+    tgOpen: 'Открыть Telegram',
+    codePlaceholder: 'Код из 6 цифр',
+    verify: 'Подтвердить',
+    badCode: 'Неверный или устаревший код',
+    notExecutor: 'Этого номера нет в списке исполнителей. Обратитесь к администратору «Памяти».',
   },
   tabs: {
     active: 'Заказы',
@@ -43,6 +50,7 @@ export const ru = {
     completed: 'Заказ выполнен',
     photoHint: 'Загрузите минимум 2 фотографии',
     photosCount: 'Фото: {{count}}',
+    uploading: 'Загружаем фото…',
   },
   profile: {
     online: 'Онлайн',

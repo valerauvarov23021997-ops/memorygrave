@@ -14,6 +14,8 @@ import { plansMock } from '../mocks'
 import type {
   AppNotification,
   CemeteryMap,
+  ExecutorOrder,
+  ExecutorProfile,
   PlacePerson,
   AuthTokens,
   Cemetery,
@@ -569,11 +571,28 @@ export const ordersApi = {
       .eq('id', id)
       .single()
     if (error || !data) fail(error)
-    return {
-      photosBefore: (data.photos_before ?? []) as string[],
-      photosAfter: (data.photos_after ?? []) as string[],
-    }
+    const [photosBefore, photosAfter] = await Promise.all([
+      signReportPhotos((data.photos_before ?? []) as string[]),
+      signReportPhotos((data.photos_after ?? []) as string[]),
+    ])
+    return { photosBefore, photosAfter }
   },
+}
+
+// Фотоотчёты лежат в закрытом хранилище: в заказе — пути файлов,
+// показываем по временным ссылкам. Старые демо-заказы хранят готовые URL.
+const REPORTS_BUCKET = 'reports'
+const SIGNED_URL_TTL_S = 60 * 60
+
+async function signReportPhotos(items: string[]): Promise<string[]> {
+  const paths = items.filter(p => !p.startsWith('http'))
+  if (!paths.length) return items
+  const { data, error } = await getSupabase()
+    .storage.from(REPORTS_BUCKET)
+    .createSignedUrls(paths, SIGNED_URL_TTL_S)
+  if (error) fail(error)
+  const signed = new Map((data ?? []).map(d => [d.path ?? '', d.signedUrl]))
+  return items.map(p => signed.get(p) ?? p).filter(u => u.startsWith('http'))
 }
 
 // ─── Свеча памяти ─────────────────────────────────────────────
@@ -856,4 +875,197 @@ export const notificationsApi = {
     if (error) fail(error)
     return { success: true }
   },
+}
+
+// ─── Исполнитель ──────────────────────────────────────────────
+
+interface ExecutorOrderRow {
+  id: string
+  service_id: string
+  status: OrderStatus
+  date: string
+  amount: number | null
+  notes: string | null
+  grave: {
+    full_name: string
+    plot: string | null
+    lat: number | null
+    lng: number | null
+    cemetery: { name: string; city: { name: string } | null } | null
+  } | null
+  service: { name: string; icon: string } | null
+}
+
+const EXECUTOR_ORDER_SELECT =
+  'id, service_id, status, date, amount, notes, grave:graves(full_name, plot, lat, lng, cemetery:cemeteries(name, city:cities(name))), service:services(name, icon)'
+
+// Чек-лист по услуге; для крупных работ — общий порядок
+const EXECUTION_STEPS: Record<string, string[]> = {
+  'svc-cleaning': ['Убрать мусор и листву', 'Протереть памятник', 'Покосить траву', 'Помыть ограду'],
+  'svc-flowers': ['Убрать увядшие цветы', 'Возложить свежие цветы'],
+  'svc-candles': ['Очистить лампадку', 'Установить и зажечь свечи'],
+}
+const DEFAULT_STEPS = ['Сверить место с заказом', 'Выполнить работу', 'Убрать за собой']
+
+// Отказ от нового заказа ни на что в базе не влияет — заказ просто
+// скрывается у этого исполнителя до перезапуска приложения
+const skippedOrders = new Set<string>()
+
+let rewardShare: number | null = null
+
+async function executorRewardShare(): Promise<number> {
+  if (rewardShare != null) return rewardShare
+  const uid = await requireUserId()
+  const { data, error } = await getSupabase()
+    .from('executors')
+    .select('reward_share')
+    .eq('user_id', uid)
+    .maybeSingle()
+  if (error) fail(error)
+  rewardShare = Number(data?.reward_share ?? 0)
+  return rewardShare
+}
+
+function mapExecutorOrder(row: ExecutorOrderRow, share: number): ExecutorOrder {
+  const cemetery = row.grave?.cemetery
+  const amount = row.amount ?? 0
+  return {
+    id: row.id,
+    serviceName: row.service?.name ?? '',
+    serviceIcon: row.service?.icon ?? 'Broom',
+    graveName: row.grave?.full_name ?? '',
+    cemeteryName: cemetery?.name ?? '',
+    plot: row.grave?.plot ?? null,
+    address: [cemetery?.city?.name, cemetery?.name].filter(Boolean).join(', '),
+    coordinates:
+      row.grave?.lat != null && row.grave.lng != null
+        ? { latitude: row.grave.lat, longitude: row.grave.lng }
+        : null,
+    distanceKm: null,
+    amount,
+    reward: Math.round(amount * share),
+    executionSteps: EXECUTION_STEPS[row.service_id] ?? DEFAULT_STEPS,
+    status: row.status,
+    date: row.date,
+    notes: row.notes,
+  }
+}
+
+async function uploadReportPhotos(
+  orderId: string,
+  kind: 'before' | 'after',
+  uris: string[]
+): Promise<string[]> {
+  const storage = getSupabase().storage.from(REPORTS_BUCKET)
+  const paths: string[] = []
+  // по одному: параллельные загрузки в мобильной сети душат друг друга
+  for (const [i, uri] of uris.entries()) {
+    const body = await (await fetch(uri)).arrayBuffer()
+    const path = `${orderId}/${kind}/${Date.now()}-${i}.jpg`
+    const { error } = await storage.upload(path, body, { contentType: 'image/jpeg' })
+    if (error) fail(error)
+    paths.push(path)
+  }
+  return paths
+}
+
+async function rpcVoid(fn: string, args: Record<string, unknown>): Promise<{ success: boolean }> {
+  const { error } = await getSupabase().rpc(fn, args)
+  if (error) fail(error)
+  return { success: true }
+}
+
+export const executorApi = {
+  /** Вход исполнителя: код из Telegram + телефон из списка исполнителей. */
+  async claim(phone: string, code: string): Promise<AuthTokens> {
+    const sb = getSupabase()
+    const existing = await sb.auth.getSession()
+    let session = existing.data.session
+    if (!session) {
+      const { data, error } = await sb.auth.signInAnonymously()
+      if (error || !data.session) fail(error)
+      session = data.session
+    }
+    const { data, error } = await sb.rpc('executor_claim', { p_phone: phone, p_code: code })
+    if (error) fail(error)
+    const res = data as { ok: boolean; reason?: string; name?: string }
+    if (!res.ok) {
+      throw new Error(res.reason === 'not_executor' ? 'not_executor' : 'Неверный код')
+    }
+    rewardShare = null
+    await tokenStorage.setTokens(session.access_token, session.refresh_token)
+    return {
+      accessToken: session.access_token,
+      refreshToken: session.refresh_token,
+      user: { id: session.user.id, phone, name: res.name ?? '' },
+    }
+  },
+
+  async orders(status?: OrderStatus): Promise<ExecutorOrder[]> {
+    const share = await executorRewardShare()
+    let query = getSupabase()
+      .from('orders')
+      .select(EXECUTOR_ORDER_SELECT)
+      .order('date', { ascending: true })
+      .limit(100)
+    if (status) query = query.eq('status', status)
+    const { data, error } = await query
+    if (error) fail(error)
+    return ((data ?? []) as unknown as ExecutorOrderRow[])
+      .filter(r => !skippedOrders.has(r.id))
+      .map(r => mapExecutorOrder(r, share))
+  },
+
+  async getById(id: string): Promise<ExecutorOrder> {
+    const share = await executorRewardShare()
+    const { data, error } = await getSupabase()
+      .from('orders')
+      .select(EXECUTOR_ORDER_SELECT)
+      .eq('id', id)
+      .single()
+    if (error || !data) fail(error)
+    return mapExecutorOrder(data as unknown as ExecutorOrderRow, share)
+  },
+
+  async profile(): Promise<ExecutorProfile> {
+    const { data, error } = await getSupabase().rpc('executor_profile')
+    if (error) fail(error)
+    if (!data) throw new Error('Вы не в списке исполнителей')
+    const p = data as Omit<ExecutorProfile, 'services'>
+    return {
+      id: p.id,
+      name: p.name,
+      rating: Number(p.rating),
+      isOnline: p.isOnline,
+      totalOrders: p.totalOrders,
+      monthEarnings: p.monthEarnings,
+      cities: p.cities,
+      services: ['Уборка могилы', 'Цветы и венки', 'Свечи и лампадки'],
+    }
+  },
+
+  accept: (id: string) => rpcVoid('executor_accept', { p_order: id }),
+
+  async reject(id: string, status: OrderStatus): Promise<{ success: boolean }> {
+    if (status === 'pending') {
+      skippedOrders.add(id)
+      return { success: true }
+    }
+    return await rpcVoid('executor_release', { p_order: id })
+  },
+
+  arrive: (id: string) => rpcVoid('executor_arrive', { p_order: id }),
+
+  async uploadPhotos(
+    id: string,
+    kind: 'before' | 'after',
+    uris: string[]
+  ): Promise<{ success: boolean }> {
+    const paths = await uploadReportPhotos(id, kind, uris)
+    return await rpcVoid('executor_set_photos', { p_order: id, p_kind: kind, p_paths: paths })
+  },
+
+  complete: (id: string) => rpcVoid('executor_complete', { p_order: id }),
+
+  setOnline: (isOnline: boolean) => rpcVoid('executor_set_online', { p_online: isOnline }),
 }

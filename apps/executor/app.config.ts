@@ -9,7 +9,15 @@ const config: ExpoConfig = {
   userInterfaceStyle: 'light',
   primaryColor: '#1C3318',
   icon: './assets/icon.png',
+  extra: {
+    eas: { projectId: 'e494b162-2210-46b3-8dd1-d6bde004afcf' },
+  },
+  updates: {
+    url: 'https://u.expo.dev/e494b162-2210-46b3-8dd1-d6bde004afcf',
+  },
   assetBundlePatterns: ['**/*'],
+  // как у клиента: sdkVersion-политика нужна, чтобы открывать обновления в Expo Go
+  runtimeVersion: { policy: 'sdkVersion' },
   ios: {
     bundleIdentifier: 'app.pamyat.executor',
     buildNumber: '1',

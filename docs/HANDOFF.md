@@ -76,6 +76,12 @@ EAS **не читает** локальный `.env`. Без строки `set -a
 2. `supabase/telegram-auth.sql` — коды входа через Telegram
 3. `supabase/import-daymische.sql` — съёмка кладбища (382 места)
 4. `supabase/import-daymische-names.sql` — ФИО на местах (генерируется, см. ниже)
+5. `supabase/executor.sql` — исполнители, этапы заказа, хранилище фотоотчётов
+
+**Добавить исполнителя:** `insert into executors (phone, name) values ('+7…', 'Имя Фамилия');`
+Сейчас в списке один — владелец (+79165821650). Приложение исполнителя —
+проект Expo `pamyat-executor` (тот же аккаунт), обновления — так же, как у
+клиента, из `apps/executor` (там свой `.env`, копия клиентского без Sentry).
 
 Файлы 3 и 4 **не правь руками** — они генерируются скриптами из `tools/cemetery/`.
 

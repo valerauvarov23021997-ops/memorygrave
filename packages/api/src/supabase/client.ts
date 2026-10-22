@@ -35,6 +35,8 @@ const authStorage = {
 // «замерзают» без ошибки. Жёсткий таймаут превращает зависание в ошибку,
 // которую react-query тут же ретраит — вместо вечного скелетона.
 const REQUEST_TIMEOUT_MS = 8000
+// Загрузка фото с камеры по мобильной сети идёт дольше обычного запроса
+const UPLOAD_TIMEOUT_MS = 60_000
 
 // ─── Диагностика: журнал скорости запросов пишется в базу ───
 // Каждый запрос (кроме самого журнала) логируется: путь, мс, статус.
@@ -97,10 +99,16 @@ let consecutiveTimeouts = 0
 let cooldownUntil = 0
 
 const rawTimeoutFetch: typeof fetch = (input, init) => {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+  const path = url.replace(config.supabaseUrl, '').split('?')[0] ?? ''
+  const isUpload = path.startsWith('/storage/v1/object/') && (init?.method ?? 'GET') !== 'GET'
   const controller = new AbortController()
-  const timer = setTimeout(() => {
-    controller.abort()
-  }, REQUEST_TIMEOUT_MS)
+  const timer = setTimeout(
+    () => {
+      controller.abort()
+    },
+    isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS
+  )
   // если снаружи передали свой signal — пробрасываем его отмену в наш контроллер
   if (init?.signal) {
     if (init.signal.aborted) controller.abort()
@@ -113,8 +121,6 @@ const rawTimeoutFetch: typeof fetch = (input, init) => {
         { once: true }
       )
   }
-  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
-  const path = url.replace(config.supabaseUrl, '').split('?')[0] ?? ''
   const skipDiag = path.includes('diag_events')
   const started = Date.now()
   return fetch(input, { ...init, signal: controller.signal })

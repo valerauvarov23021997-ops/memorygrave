@@ -16,7 +16,7 @@ import {
 import { Image } from 'expo-image'
 import * as ImagePicker from 'expo-image-picker'
 import { useLocalSearchParams, useRouter } from 'expo-router'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
@@ -40,6 +40,12 @@ export default function ExecutionScreen() {
   const [after, setAfter] = useState<string[]>([])
   const [checked, setChecked] = useState<Record<string, boolean>>({})
   const [busy, setBusy] = useState(false)
+
+  // Вернулись к начатому заказу — продолжаем с фото, а не с «Я на месте»
+  const status = order?.status
+  useEffect(() => {
+    if (status === 'working') setStep(prev => (prev === 'details' ? 'before' : prev))
+  }, [status])
 
   if (isLoading || !order) {
     return (
@@ -73,6 +79,8 @@ export default function ExecutionScreen() {
     try {
       await executorApi.arrive(orderId)
       setStep('before')
+    } catch (e) {
+      showToast(e instanceof Error && e.message ? e.message : t('common.error'), 'error')
     } finally {
       setBusy(false)
     }
@@ -84,7 +92,7 @@ export default function ExecutionScreen() {
       showToast(t('execution.photoHint'), 'error')
       return
     }
-    const result = await ImagePicker.launchCameraAsync({ quality: 0.8, allowsEditing: false })
+    const result = await ImagePicker.launchCameraAsync({ quality: 0.6, allowsEditing: false })
     if (!result.canceled && result.assets[0]) {
       const uri = result.assets[0].uri
       if (type === 'before') setBefore(prev => [...prev, uri])
@@ -94,9 +102,12 @@ export default function ExecutionScreen() {
 
   const submitBefore = async () => {
     setBusy(true)
+    showToast(t('execution.uploading'), 'info')
     try {
       await executorApi.uploadBefore(orderId, before)
       setStep('work')
+    } catch (e) {
+      showToast(e instanceof Error && e.message ? e.message : t('common.error'), 'error')
     } finally {
       setBusy(false)
     }
@@ -104,9 +115,12 @@ export default function ExecutionScreen() {
 
   const submitAfter = async () => {
     setBusy(true)
+    showToast(t('execution.uploading'), 'info')
     try {
       await executorApi.uploadAfter(orderId, after)
       setStep('done')
+    } catch (e) {
+      showToast(e instanceof Error && e.message ? e.message : t('common.error'), 'error')
     } finally {
       setBusy(false)
     }
@@ -118,6 +132,8 @@ export default function ExecutionScreen() {
       await executorApi.complete(orderId)
       showToast(t('execution.completed'), 'success')
       router.replace('/(tabs)')
+    } catch (e) {
+      showToast(e instanceof Error && e.message ? e.message : t('common.error'), 'error')
     } finally {
       setBusy(false)
     }

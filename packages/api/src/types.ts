@@ -212,7 +212,8 @@ export interface ExecutorOrder {
   plot: string | null
   address: string
   coordinates: Coordinates | null
-  distanceKm: number
+  /** Расстояние до кладбища; null — местоположение исполнителя неизвестно. */
+  distanceKm: number | null
   amount: number
   /** Вознаграждение исполнителя в рублях. */
   reward: number

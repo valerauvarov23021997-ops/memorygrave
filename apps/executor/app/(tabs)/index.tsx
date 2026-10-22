@@ -41,6 +41,10 @@ export default function ActiveOrdersScreen() {
   // Активная вкладка — только незавершённые заказы.
   const orders = (data ?? []).filter(o => ACTIVE_STATUSES.includes(o.status))
 
+  const onError = (e: Error) => {
+    showToast(e.message ? e.message : t('common.error'), 'error')
+  }
+
   const accept = useMutation({
     mutationFn: (id: string) => executorApi.accept(id),
     onSuccess: (_r, id) => {
@@ -48,10 +52,19 @@ export default function ActiveOrdersScreen() {
       showToast(t('active.accepted'), 'success')
       router.push(`/execution/${id}`)
     },
+    onError: (e: Error) => {
+      // заказ мог уйти другому исполнителю — обновляем список
+      void qc.invalidateQueries({ queryKey: executorKeys.orders() })
+      onError(e)
+    },
   })
 
   const reject = useMutation({
-    mutationFn: ({ id, reason: r }: { id: string; reason: string }) => executorApi.reject(id, r),
+    mutationFn: ({ id, reason: r }: { id: string; reason: string }) => {
+      const status = orders.find(o => o.id === id)?.status ?? 'pending'
+      return executorApi.reject(id, r, status)
+    },
+    onError,
     onSuccess: () => {
       void qc.invalidateQueries({ queryKey: executorKeys.orders() })
       showToast(t('active.rejected'), 'info')
@@ -139,7 +152,8 @@ function OrderCard({
   onOpen: () => void
 }) {
   const { t } = useTranslation()
-  const inProgress = order.status !== 'assigned'
+  // pending — заказ предложен всем; остальные статусы — уже взят этим исполнителем
+  const inProgress = order.status !== 'pending'
   return (
     <Card padding="md" style={styles.card}>
       <View style={styles.cardHead}>
@@ -149,10 +163,17 @@ function OrderCard({
             {order.serviceName}
           </Text>
           <Text variant="bodySm" color="muted">
-            {`${order.cemeteryName} · ${t('active.distanceKm', { km: order.distanceKm })}`}
+            {order.distanceKm != null
+              ? `${order.cemeteryName} · ${t('active.distanceKm', { km: order.distanceKm })}`
+              : order.cemeteryName}
           </Text>
         </View>
       </View>
+      {order.graveName ? (
+        <Text variant="headingLg" color="forest" style={styles.address}>
+          {order.graveName}
+        </Text>
+      ) : null}
       <Text variant="bodySm" color="light" style={styles.address}>
         {`${order.address}${order.plot ? ` · ${order.plot}` : ''}`}
       </Text>

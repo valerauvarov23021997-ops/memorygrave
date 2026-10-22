@@ -553,8 +553,14 @@ export const profileApi = {
 // ─── Исполнитель ──────────────────────────────────────────────
 
 export const executorApi = {
+  /** Вход исполнителя по коду; в моках пускает любой номер. */
+  claim(phone: string, code: string): Promise<AuthTokens> {
+    if (SUPA) return sb.executorApi.claim(phone, code)
+    return authApi.verifyCode(phone, code)
+  },
   orders(status?: OrderStatus): Promise<ExecutorOrder[]> {
-    if (USE_MOCKS || SUPA) {
+    if (SUPA) return sb.executorApi.orders(status)
+    if (USE_MOCKS) {
       return mockDelay(
         status ? executorOrdersMock.filter(o => o.status === status) : executorOrdersMock
       )
@@ -562,7 +568,8 @@ export const executorApi = {
     return unwrap<ExecutorOrder[]>(client.get('/executor/orders', { params: { status } }))
   },
   getById(id: string): Promise<ExecutorOrder> {
-    if (USE_MOCKS || SUPA) {
+    if (SUPA) return sb.executorApi.getById(id)
+    if (USE_MOCKS) {
       const order = executorOrdersMock.find(o => o.id === id)
       if (!order) return Promise.reject(new Error('Заказ не найден'))
       return mockDelay(order)
@@ -570,35 +577,45 @@ export const executorApi = {
     return unwrap<ExecutorOrder>(client.get(`/executor/orders/${id}`))
   },
   profile(): Promise<ExecutorProfile> {
-    if (USE_MOCKS || SUPA) return mockDelay(executorProfileMock)
+    if (SUPA) return sb.executorApi.profile()
+    if (USE_MOCKS) return mockDelay(executorProfileMock)
     return unwrap<ExecutorProfile>(client.get('/executor/profile'))
   },
   accept(id: string): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
+    if (SUPA) return sb.executorApi.accept(id)
+    if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.post(`/executor/orders/${id}/accept`))
   },
-  reject(id: string, reason: string): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
+  /** Новый заказ — скрыть у себя; взятый — вернуть в общий список. */
+  reject(id: string, reason: string, status: OrderStatus): Promise<{ success: boolean }> {
+    if (SUPA) return sb.executorApi.reject(id, status)
+    if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.post(`/executor/orders/${id}/reject`, { reason }))
   },
   arrive(id: string): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
+    if (SUPA) return sb.executorApi.arrive(id)
+    if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.post(`/executor/orders/${id}/arrive`))
   },
-  uploadBefore(id: string, urls: string[]): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
-    return unwrap(client.post(`/executor/orders/${id}/photos/before`, { urls }))
+  /** uris — локальные файлы с камеры; загружаются в хранилище фотоотчётов. */
+  uploadBefore(id: string, uris: string[]): Promise<{ success: boolean }> {
+    if (SUPA) return sb.executorApi.uploadPhotos(id, 'before', uris)
+    if (USE_MOCKS) return mockDelay({ success: true })
+    return unwrap(client.post(`/executor/orders/${id}/photos/before`, { urls: uris }))
   },
-  uploadAfter(id: string, urls: string[]): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
-    return unwrap(client.post(`/executor/orders/${id}/photos/after`, { urls }))
+  uploadAfter(id: string, uris: string[]): Promise<{ success: boolean }> {
+    if (SUPA) return sb.executorApi.uploadPhotos(id, 'after', uris)
+    if (USE_MOCKS) return mockDelay({ success: true })
+    return unwrap(client.post(`/executor/orders/${id}/photos/after`, { urls: uris }))
   },
   complete(id: string): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
+    if (SUPA) return sb.executorApi.complete(id)
+    if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.post(`/executor/orders/${id}/complete`))
   },
   setOnline(isOnline: boolean): Promise<{ success: boolean }> {
-    if (USE_MOCKS || SUPA) return mockDelay({ success: true })
+    if (SUPA) return sb.executorApi.setOnline(isOnline)
+    if (USE_MOCKS) return mockDelay({ success: true })
     return unwrap(client.put('/executor/profile', { isOnline }))
   },
 }
