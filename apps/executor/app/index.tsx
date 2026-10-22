@@ -1,17 +1,28 @@
-import { tokenStorage } from '@pamyat/api'
+import { executorApi, tokenStorage } from '@pamyat/api'
 import { colors, FlameLoader } from '@pamyat/ui'
 import { Redirect } from 'expo-router'
 import { useEffect, useState } from 'react'
 import { StyleSheet, View } from 'react-native'
 
-/** Гейт: есть токен → приложение, иначе вход. */
+const NOT_EXECUTOR = 'Вы не в списке исполнителей'
+
+/** Гейт: есть вход и номер в списке исполнителей → приложение, иначе вход. */
 export default function Index() {
   const [target, setTarget] = useState<'/login' | '/(tabs)' | null>(null)
 
   useEffect(() => {
-    void tokenStorage.getAccess().then(token => {
-      setTarget(token ? '/(tabs)' : '/login')
-    })
+    const check = async () => {
+      const token = await tokenStorage.getAccess()
+      if (!token) return '/login' as const
+      try {
+        await executorApi.profile()
+        return '/(tabs)' as const
+      } catch (e) {
+        // без списка исполнителей — на вход; сбой сети не выкидывает из приложения
+        return e instanceof Error && e.message === NOT_EXECUTOR ? '/login' : '/(tabs)'
+      }
+    }
+    void check().then(setTarget)
   }, [])
 
   if (!target) {

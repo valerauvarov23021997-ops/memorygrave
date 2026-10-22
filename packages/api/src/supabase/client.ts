@@ -4,6 +4,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js'
 import * as SecureStore from 'expo-secure-store'
 import { Platform } from 'react-native'
 
+import { storageKey } from '../client'
 import { config } from '../config'
 
 // Сессию Supabase храним так же, как токены: SecureStore на телефоне,
@@ -12,22 +13,22 @@ const isWeb = Platform.OS === 'web'
 
 const authStorage = {
   getItem: async (key: string): Promise<string | null> => {
-    if (isWeb) return typeof localStorage === 'undefined' ? null : localStorage.getItem(key)
-    return await SecureStore.getItemAsync(key)
+    if (isWeb) return typeof localStorage === 'undefined' ? null : localStorage.getItem(storageKey(key))
+    return await SecureStore.getItemAsync(storageKey(key))
   },
   setItem: async (key: string, value: string): Promise<void> => {
     if (isWeb) {
-      if (typeof localStorage !== 'undefined') localStorage.setItem(key, value)
+      if (typeof localStorage !== 'undefined') localStorage.setItem(storageKey(key), value)
       return
     }
-    await SecureStore.setItemAsync(key, value)
+    await SecureStore.setItemAsync(storageKey(key), value)
   },
   removeItem: async (key: string): Promise<void> => {
     if (isWeb) {
-      if (typeof localStorage !== 'undefined') localStorage.removeItem(key)
+      if (typeof localStorage !== 'undefined') localStorage.removeItem(storageKey(key))
       return
     }
-    await SecureStore.deleteItemAsync(key)
+    await SecureStore.deleteItemAsync(storageKey(key))
   },
 }
 

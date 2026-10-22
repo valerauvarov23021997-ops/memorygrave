@@ -5,6 +5,20 @@ import { Platform } from 'react-native'
 import { config } from './config'
 import type { ApiResponse } from './types'
 
+// В Expo Go оба приложения делят одно хранилище SecureStore: без
+// приставки исполнитель подхватывал вход клиента. Клиент приставку не
+// задаёт — иначе у всех клиентов слетел бы вход.
+let storagePrefix = ''
+
+/** Вызывать до первого запроса — разделяет сохранённый вход между приложениями. */
+export function setStoragePrefix(prefix: string): void {
+  storagePrefix = prefix
+}
+
+export function storageKey(key: string): string {
+  return storagePrefix + key
+}
+
 const ACCESS_KEY = 'accessToken'
 const REFRESH_KEY = 'refreshToken'
 
@@ -22,30 +36,30 @@ const webStorage = {
 
 export const tokenStorage = {
   async getAccess() {
-    if (isWeb) return webStorage.get(ACCESS_KEY)
-    return await SecureStore.getItemAsync(ACCESS_KEY)
+    if (isWeb) return webStorage.get(storageKey(ACCESS_KEY))
+    return await SecureStore.getItemAsync(storageKey(ACCESS_KEY))
   },
   async getRefresh() {
-    if (isWeb) return webStorage.get(REFRESH_KEY)
-    return await SecureStore.getItemAsync(REFRESH_KEY)
+    if (isWeb) return webStorage.get(storageKey(REFRESH_KEY))
+    return await SecureStore.getItemAsync(storageKey(REFRESH_KEY))
   },
   async setTokens(access: string, refresh: string) {
     if (isWeb) {
-      webStorage.set(ACCESS_KEY, access)
-      webStorage.set(REFRESH_KEY, refresh)
+      webStorage.set(storageKey(ACCESS_KEY), access)
+      webStorage.set(storageKey(REFRESH_KEY), refresh)
       return
     }
-    await SecureStore.setItemAsync(ACCESS_KEY, access)
-    await SecureStore.setItemAsync(REFRESH_KEY, refresh)
+    await SecureStore.setItemAsync(storageKey(ACCESS_KEY), access)
+    await SecureStore.setItemAsync(storageKey(REFRESH_KEY), refresh)
   },
   async clear() {
     if (isWeb) {
-      webStorage.del(ACCESS_KEY)
-      webStorage.del(REFRESH_KEY)
+      webStorage.del(storageKey(ACCESS_KEY))
+      webStorage.del(storageKey(REFRESH_KEY))
       return
     }
-    await SecureStore.deleteItemAsync(ACCESS_KEY)
-    await SecureStore.deleteItemAsync(REFRESH_KEY)
+    await SecureStore.deleteItemAsync(storageKey(ACCESS_KEY))
+    await SecureStore.deleteItemAsync(storageKey(REFRESH_KEY))
   },
 }
 
