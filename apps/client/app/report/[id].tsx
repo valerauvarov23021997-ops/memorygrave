@@ -1,4 +1,5 @@
 import { ordersApi } from '@pamyat/api'
+import { useOrderDraftStore } from '@pamyat/store'
 import {
   Button,
   Card,
@@ -25,6 +26,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useOrder, useReport } from '../../src/hooks/queries'
 import { goBack } from '../../src/lib/navigation'
+import { reportError } from '../../src/lib/sentry'
 import { shareText } from '../../src/lib/share'
 
 export default function ReportScreen() {
@@ -37,10 +39,12 @@ export default function ReportScreen() {
   const { id } = useLocalSearchParams<{ id: string }>()
   const { data: order } = useOrder(id ?? '')
   const { data: report, isLoading } = useReport(id ?? '')
+  const startOrder = useOrderDraftStore(s => s.startOrder)
 
   const [rating, setRating] = useState(0)
   const [gallery, setGallery] = useState<{ photos: string[]; index: number } | null>(null)
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const pendingRating = useRef<number | null>(null)
 
   useEffect(() => {
     if (order?.rating != null) setRating(order.rating)
@@ -48,8 +52,13 @@ export default function ReportScreen() {
 
   const review = useMutation({
     mutationFn: (value: number) => ordersApi.review(id ?? '', value),
+    // iOS обрывает запрос при уходе приложения в фон — повторяем, а не теряем оценку молча.
+    retry: 2,
     onSuccess: () => {
       showToast(t('report.rated'), 'success')
+    },
+    onError: () => {
+      showToast(t('common.error'), 'error')
     },
   })
 
@@ -57,16 +66,21 @@ export default function ReportScreen() {
   const onRate = (value: number) => {
     setRating(value)
     if (debounce.current) clearTimeout(debounce.current)
+    pendingRating.current = value
     debounce.current = setTimeout(() => {
+      pendingRating.current = null
       review.mutate(value)
     }, 800)
   }
 
+  // Ушли с экрана раньше 800мс — оценку всё равно сохраняем, иначе она пропадала.
   useEffect(
     () => () => {
-      debounce.current ? clearTimeout(debounce.current) : undefined
+      if (debounce.current) clearTimeout(debounce.current)
+      const value = pendingRating.current
+      if (value !== null && id) ordersApi.review(id, value).catch(reportError)
     },
-    []
+    [id]
   )
 
   const onShare = async () => {
@@ -145,7 +159,11 @@ export default function ReportScreen() {
         <View style={styles.buttons}>
           <Button
             label={t('report.orderAgain')}
+            disabled={!order}
             onPress={() => {
+              if (!order) return
+              // Без могилы в черновике оплата падала с ошибкой «draft».
+              startOrder({ id: order.graveId, name: order.graveName, cemetery: order.cemeteryName })
               router.push('/order/catalog')
             }}
             fullWidth
