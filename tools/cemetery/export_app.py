@@ -104,6 +104,12 @@ def build_sql(graves, plots, roads):
             f"{g['properties'].get('in_plot', 1)})"
         )
 
+    # все оградки отдельным слоем: у двух из них внутри нет ни одного
+    # номера, и привязать их контур к месту было не к чему
+    fence_rows = [
+        f"  ('{CEMETERY_ID}', '{json.dumps(polygon(p), separators=(',', ':'))}'::jsonb)"
+        for p in plots
+    ]
     road_rows = [
         f"  ('{CEMETERY_ID}', '{r['properties'].get('surface', 'ДОРОЖКА')}', "
         f"'{json.dumps(polygon(r), separators=(',', ':'))}'::jsonb)"
@@ -112,6 +118,7 @@ def build_sql(graves, plots, roads):
     with_poly = sum(1 for r in rows if '::jsonb' in r)
     place_rows = ',\n'.join(rows)
     path_rows = ',\n'.join(road_rows)
+    plot_rows = ',\n'.join(fence_rows)
 
     return f"""-- ============================================================
 --  Кладбище д. Даймище (Гатчинский р-н, Лен. обл.) — импорт съёмки.
@@ -150,6 +157,18 @@ alter table cemetery_paths enable row level security;
 drop policy if exists cemetery_paths_read on cemetery_paths;
 create policy cemetery_paths_read on cemetery_paths for select to authenticated using (true);
 
+-- Оградки — слой карты кладбища. plot_polygon у мест остаётся для старых
+-- версий приложения, новые читают контуры отсюда
+create table if not exists cemetery_plots (
+  id bigint generated always as identity primary key,
+  cemetery_id text not null references cemeteries,
+  polygon jsonb not null
+);
+create index if not exists cemetery_plots_cemetery_id on cemetery_plots (cemetery_id);
+alter table cemetery_plots enable row level security;
+drop policy if exists cemetery_plots_read on cemetery_plots;
+create policy cemetery_plots_read on cemetery_plots for select to authenticated using (true);
+
 -- Привязка человека к месту захоронения
 alter table graves add column if not exists burial_place_id text references burial_places;
 
@@ -178,10 +197,16 @@ delete from cemetery_paths where cemetery_id = '{CEMETERY_ID}';
 insert into cemetery_paths (cemetery_id, surface, polygon) values
 {path_rows};
 
+-- ─── Оградки: {len(fence_rows)} шт. ───
+delete from cemetery_plots where cemetery_id = '{CEMETERY_ID}';
+insert into cemetery_plots (cemetery_id, polygon) values
+{plot_rows};
+
 -- ─── Контроль ───
 -- select count(*) from burial_places where cemetery_id = '{CEMETERY_ID}';   -- {len(rows)}
 -- select count(*) from burial_places where plot_polygon is not null;        -- {with_poly}
 -- select count(*) from cemetery_paths where cemetery_id = '{CEMETERY_ID}';  -- {len(road_rows)}
+-- select count(*) from cemetery_plots where cemetery_id = '{CEMETERY_ID}';  -- {len(fence_rows)}
 """
 
 
