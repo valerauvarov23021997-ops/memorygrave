@@ -15,10 +15,11 @@ import { SafeAreaProvider } from 'react-native-safe-area-context'
 import '../src/lib/storage'
 import '../src/lib/i18n'
 import { queryClient } from '../src/lib/queryClient'
+import { Sentry } from '../src/lib/sentry'
 
 void SplashScreen.preventAutoHideAsync()
 
-export default function RootLayout() {
+function RootLayout() {
   const [fontsLoaded, fontError] = useFonts({
     PlayfairDisplay_400Regular,
     PlayfairDisplay_500Medium,
@@ -49,3 +50,6 @@ export default function RootLayout() {
     </SafeAreaProvider>
   )
 }
+
+// Sentry.wrap ловит падения рендера
+export default Sentry.wrap(RootLayout)
