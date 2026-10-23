@@ -1,0 +1,56 @@
+import type { ExpoConfig } from 'expo/config'
+
+const config: ExpoConfig = {
+  name: 'Память · Исполнитель',
+  slug: 'pamyat-executor',
+  version: '1.0.0',
+  scheme: 'pamyat-executor',
+  orientation: 'portrait',
+  userInterfaceStyle: 'light',
+  primaryColor: '#1C3318',
+  icon: './assets/icon.png',
+  extra: {
+    eas: { projectId: 'e494b162-2210-46b3-8dd1-d6bde004afcf' },
+  },
+  updates: {
+    url: 'https://u.expo.dev/e494b162-2210-46b3-8dd1-d6bde004afcf',
+  },
+  assetBundlePatterns: ['**/*'],
+  // как у клиента: sdkVersion-политика нужна, чтобы открывать обновления в Expo Go
+  runtimeVersion: { policy: 'sdkVersion' },
+  ios: {
+    bundleIdentifier: 'app.pamyat.executor',
+    buildNumber: '1',
+    supportsTablet: false,
+    infoPlist: {
+      NSLocationWhenInUseUsageDescription: 'Доступ к геолокации нужен, чтобы построить маршрут к кладбищу',
+      NSCameraUsageDescription: 'Доступ к камере нужен для фотоотчёта о выполненной работе',
+      NSPhotoLibraryUsageDescription: 'Доступ к фото нужен, чтобы выбрать снимки для отчёта',
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    package: 'app.pamyat.executor',
+    versionCode: 1,
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      backgroundColor: '#F0EBE0',
+    },
+  },
+  plugins: [
+    'expo-router',
+    // С SDK 58 заставка настраивается только через плагин
+    ['expo-splash-screen', { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#F0EBE0' }],
+    'expo-image',
+    'expo-status-bar',
+    'expo-secure-store',
+    'expo-font',
+    ['expo-notifications', { icon: './assets/notification-icon.png' }],
+    ['expo-image-picker', { cameraPermission: 'Для фотоотчёта о выполненной работе' }],
+  ],
+  experiments: {
+    typedRoutes: true,
+  },
+}
+
+export default config

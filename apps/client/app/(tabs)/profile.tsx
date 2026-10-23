@@ -1,0 +1,350 @@
+import { authApi, config, profileApi, runNetProbe } from '@pamyat/api'
+import {
+  Avatar,
+  BottomSheet,
+  Button,
+  GroupedRow,
+  GroupedSection,
+  Icon,
+  Input,
+  radii,
+  SectionLabel,
+  Skeleton,
+  spacing,
+  Text,
+  typography,
+  useColors,
+  useThemedStyles,
+  useToast,
+  type ThemeColors,
+} from '@pamyat/ui'
+import { formatDate } from '@pamyat/utils'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import Constants from 'expo-constants'
+import { Image } from 'expo-image'
+import * as ImagePicker from 'expo-image-picker'
+import { LinearGradient } from 'expo-linear-gradient'
+import { useRouter } from 'expo-router'
+import * as Updates from 'expo-updates'
+import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Linking, Pressable, ScrollView, StyleSheet, View } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
+
+import { queryKeys, useProfile } from '../../src/hooks/queries'
+import { useAuthActions } from '../../src/hooks/useAuthActions'
+import { links } from '../../src/lib/links'
+import { cancelAllReminders } from '../../src/lib/localReminders'
+import { reportError } from '../../src/lib/sentry'
+
+// Метка версии считается сама: ручная метка однажды застыла на «07.07»
+// и месяцами выдавала свежие обновления за июльские
+function buildTag(): string {
+  const sdk = Constants.expoConfig?.sdkVersion?.split('.')[0] ?? '?'
+  const published = Updates.createdAt ? formatDate(Updates.createdAt.toISOString()) : null
+  // короткий id обновления — сверить с `eas update`, какая версия открыта на телефоне
+  const id = Updates.updateId ? ` #${Updates.updateId.slice(-6)}` : ''
+  return published ? `SDK ${sdk} · обновление ${published}${id}` : `SDK ${sdk}`
+}
+
+export default function ProfileScreen() {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const insets = useSafeAreaInsets()
+  const showToast = useToast()
+  const c = useColors()
+  const styles = useThemedStyles(makeStyles)
+  const qc = useQueryClient()
+  const { logout } = useAuthActions()
+  const { data, isLoading } = useProfile()
+
+  const [editing, setEditing] = useState(false)
+  const [name, setName] = useState('')
+  const [avatar, setAvatar] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
+
+  const save = useMutation({
+    mutationFn: () => profileApi.update({ name: name.trim(), avatarUrl: avatar ?? undefined }),
+    onSuccess: () => {
+      void qc.invalidateQueries({ queryKey: queryKeys.profile })
+      showToast(t('profile.saved'), 'success')
+      setEditing(false)
+    },
+  })
+
+  const remove = useMutation({
+    mutationFn: () => authApi.deleteAccount(),
+    onSuccess: async () => {
+      try {
+        await cancelAllReminders()
+      } catch (e) {
+        reportError(e, { where: 'cancelAllReminders' })
+      }
+      setConfirmDelete(false)
+      qc.clear()
+      showToast(t('profile.deleted'), 'success')
+      await onLogout()
+    },
+    onError: (e: Error) => {
+      setConfirmDelete(false)
+      if (e.message === 'executor') {
+        showToast(t('profile.deleteExecutor'), 'error')
+        return
+      }
+      reportError(e, { where: 'deleteAccount' })
+      showToast(t('profile.deleteError'), 'error')
+    },
+  })
+
+  const openEdit = () => {
+    setName(data?.name ?? '')
+    setAvatar(data?.avatarUrl ?? null)
+    setEditing(true)
+  }
+
+  const pickAvatar = async () => {
+    const perm = await ImagePicker.requestMediaLibraryPermissionsAsync()
+    if (!perm.granted) return
+    const result = await ImagePicker.launchImageLibraryAsync({
+      quality: 0.8,
+      allowsEditing: true,
+      aspect: [1, 1],
+    })
+    if (!result.canceled && result.assets[0]) setAvatar(result.assets[0].uri)
+  }
+
+  const onLogout = async () => {
+    await logout()
+    router.replace('/(auth)/phone')
+  }
+
+  const openLink = async (url: string) => {
+    try {
+      await Linking.openURL(url)
+    } catch {
+      showToast(t('profile.linkError'), 'error')
+    }
+  }
+
+  return (
+    <View style={styles.root}>
+      <ScrollView
+        contentContainerStyle={[
+          styles.content,
+          { paddingTop: insets.top + spacing.md, paddingBottom: insets.bottom + 110 },
+        ]}
+      >
+        {isLoading || !data ? (
+          <Skeleton width="100%" height={64} radius={10} />
+        ) : (
+          <Pressable style={styles.userRow} onPress={openEdit}>
+            <Avatar name={data.name} size={40} imageUri={data.avatarUrl} />
+            <View style={styles.userInfo}>
+              <Text variant="headingLg" color="forest">
+                {data.name}
+              </Text>
+              <Text variant="bodySm" color="muted">
+                {data.phone}
+              </Text>
+            </View>
+            <View style={styles.editIcon}>
+              <Icon name="edit" size={20} color={c.sage} />
+            </View>
+          </Pressable>
+        )}
+
+        {data ? (
+          <LinearGradient
+            colors={[c.forest, c.moss]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 1 }}
+            style={styles.subscription}
+          >
+            <Text style={styles.subLabel}>{t('profile.subscription').toUpperCase()}</Text>
+            <Text variant="headingLg" color="cream">
+              {data.subscription.planName}
+            </Text>
+            {data.subscription.validUntil ? (
+              <Text style={styles.subValid}>
+                {t('profile.validUntil', { date: formatDate(data.subscription.validUntil) })}
+              </Text>
+            ) : null}
+            <View style={styles.manageBtn}>
+              <Button
+                label={t('profile.manage')}
+                variant="light"
+                onPress={() => {
+                  router.push('/subscription')
+                }}
+              />
+            </View>
+          </LinearGradient>
+        ) : null}
+
+        <SectionLabel>{t('profile.mine')}</SectionLabel>
+        <GroupedSection style={styles.group}>
+          <GroupedRow
+            icon="saved"
+            title={t('profile.savedGraves')}
+            onPress={() => {
+              router.push('/(tabs)/saved')
+            }}
+            position="first"
+          />
+          <GroupedRow
+            icon="bell"
+            title={t('profile.memorialDates')}
+            onPress={() => {
+              router.push('/dates')
+            }}
+          />
+          <GroupedRow
+            icon="orders"
+            title={t('profile.orderHistory')}
+            onPress={() => {
+              router.push('/(tabs)/orders')
+            }}
+            position="last"
+          />
+        </GroupedSection>
+
+        <SectionLabel>{t('profile.help')}</SectionLabel>
+        <GroupedSection style={styles.group}>
+          <GroupedRow
+            icon="support"
+            title={t('profile.support')}
+            onPress={() => openLink(links.support)}
+            position="first"
+          />
+          <GroupedRow
+            icon="lock"
+            title={t('profile.terms')}
+            onPress={() => openLink(links.terms)}
+          />
+          <GroupedRow
+            icon="lock"
+            title={t('profile.privacy')}
+            onPress={() => openLink(links.privacy)}
+            position="last"
+          />
+        </GroupedSection>
+
+        <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
+        <Button
+          label={t('profile.deleteAccount')}
+          variant="ghost"
+          onPress={() => {
+            setConfirmDelete(true)
+          }}
+        />
+        {/* метка сборки; тап — проба сети (результат в тосте и в журнале) */}
+        <Pressable
+          onPress={() => {
+            showToast('Проба сети: ~20 секунд…', 'info')
+            void runNetProbe().then(r => {
+              showToast(r, 'info')
+            })
+          }}
+          hitSlop={12}
+        >
+          <Text variant="caption" color="light" center>
+            {`${buildTag()} · ${config.backend}`}
+          </Text>
+        </Pressable>
+      </ScrollView>
+
+      <BottomSheet
+        visible={confirmDelete}
+        onClose={() => {
+          setConfirmDelete(false)
+        }}
+      >
+        <Text variant="headingLg" color="forest" style={styles.editTitle}>
+          {t('profile.deleteTitle')}
+        </Text>
+        <Text variant="bodyMd" color="muted" style={styles.editField}>
+          {t('profile.deleteText')}
+        </Text>
+        <Button
+          label={t('profile.deleteConfirm')}
+          variant="destructive"
+          onPress={() => {
+            remove.mutate()
+          }}
+          loading={remove.isPending}
+          fullWidth
+        />
+        <Button
+          label={t('profile.deleteKeep')}
+          variant="ghost"
+          onPress={() => {
+            setConfirmDelete(false)
+          }}
+          fullWidth
+        />
+      </BottomSheet>
+
+      <BottomSheet
+        visible={editing}
+        onClose={() => {
+          setEditing(false)
+        }}
+      >
+        <Text variant="headingLg" color="forest" style={styles.editTitle}>
+          {t('profile.editTitle')}
+        </Text>
+        <Pressable style={styles.avatarEdit} onPress={pickAvatar}>
+          {avatar ? (
+            <Image source={{ uri: avatar }} style={styles.avatarImg} contentFit="cover" />
+          ) : (
+            <Avatar name={name || ' '} size={72} />
+          )}
+          <Text variant="bodySm" color="sage" style={styles.changePhoto}>
+            {t('profile.changePhoto')}
+          </Text>
+        </Pressable>
+        <View style={styles.editField}>
+          <Input
+            label={t('profile.name')}
+            value={name}
+            onChangeText={setName}
+            placeholder={t('profile.namePlaceholder')}
+          />
+        </View>
+        <Button
+          label={t('profile.saveProfile')}
+          onPress={() => {
+            save.mutate()
+          }}
+          disabled={name.trim().length === 0}
+          loading={save.isPending}
+          fullWidth
+        />
+      </BottomSheet>
+    </View>
+  )
+}
+
+const makeStyles = (c: ThemeColors) =>
+  StyleSheet.create({
+    root: { flex: 1, backgroundColor: c.cream },
+    content: { paddingHorizontal: spacing.lg },
+    userRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md, minHeight: 48 },
+    userInfo: { flex: 1 },
+    editIcon: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+    subscription: {
+      borderRadius: radii.lg,
+      padding: spacing.md,
+      marginVertical: spacing.lg,
+      gap: 2,
+    },
+    subLabel: { ...typography.sectionLabel, color: c.sageL },
+    subValid: { ...typography.bodySm, color: 'rgba(250,247,242,0.7)' },
+    manageBtn: { alignSelf: 'flex-start', marginTop: spacing.sm },
+    editTitle: { marginBottom: spacing.md },
+    avatarEdit: { alignItems: 'center', gap: spacing.sm, marginBottom: spacing.lg },
+    avatarImg: { width: 72, height: 72, borderRadius: 36 },
+    changePhoto: {},
+    editField: { marginBottom: spacing.md },
+    group: { marginBottom: spacing.sm },
+  })

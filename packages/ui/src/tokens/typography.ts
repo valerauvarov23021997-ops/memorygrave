@@ -1,0 +1,46 @@
+import type { TextStyle } from 'react-native'
+
+/**
+ * Типографика: Playfair Display (заголовки, имена людей) + Manrope (остальное).
+ * Никаких fontWeight 700+ — для этой ниши выглядит грубо.
+ */
+export const typography = {
+  // Playfair Display (пакет не содержит вес 300 Light — используем 400 Regular)
+  displayLg: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 34, lineHeight: 42, letterSpacing: -0.5 },
+  displayMd: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 24, lineHeight: 30, letterSpacing: -0.3 },
+  headingLg: { fontFamily: 'PlayfairDisplay_500Medium', fontSize: 18, lineHeight: 24, letterSpacing: -0.2 },
+  priceDisplay: { fontFamily: 'PlayfairDisplay_400Regular', fontSize: 28, lineHeight: 34 },
+
+  // Manrope — в отличие от DM Sans, с кириллицей
+  headingMd: { fontFamily: 'Manrope_500Medium', fontSize: 15, lineHeight: 22 },
+  bodyLg: { fontFamily: 'Manrope_400Regular', fontSize: 16, lineHeight: 26 },
+  bodyMd: { fontFamily: 'Manrope_400Regular', fontSize: 14, lineHeight: 22 },
+  bodySm: { fontFamily: 'Manrope_400Regular', fontSize: 13, lineHeight: 20 },
+  caption: { fontFamily: 'Manrope_400Regular', fontSize: 11, lineHeight: 16 },
+  micro: { fontFamily: 'Manrope_400Regular', fontSize: 10, lineHeight: 14 },
+  label: { fontFamily: 'Manrope_500Medium', fontSize: 13, lineHeight: 18 },
+  buttonLabel: {
+    fontFamily: 'Manrope_500Medium',
+    fontSize: 13,
+    lineHeight: 18,
+    letterSpacing: 1.0,
+    textTransform: 'uppercase',
+  },
+  sectionLabel: {
+    fontFamily: 'Manrope_400Regular',
+    fontSize: 11,
+    lineHeight: 16,
+    letterSpacing: 1.6,
+    textTransform: 'uppercase',
+  },
+} as const satisfies Record<string, TextStyle>
+
+export type TypographyToken = keyof typeof typography
+
+/** Семейства шрифтов для загрузки через expo-font (useFonts). */
+export const fontFamilies = [
+  'PlayfairDisplay_400Regular',
+  'PlayfairDisplay_500Medium',
+  'Manrope_400Regular',
+  'Manrope_500Medium',
+] as const

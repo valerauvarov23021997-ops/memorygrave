@@ -1,0 +1,286 @@
+/**
+ * Доменные типы приложения «Память».
+ * Единый источник правды для клиента, стора и моков.
+ */
+
+/** Обёртка ответа REST API (см. docs/API.md). */
+export interface ApiResponse<T> {
+  data: T
+  error: string | null
+  meta?: { total: number; page: number; limit: number }
+}
+
+/** Статус оцифровки захоронения в реестре. */
+export type GraveStatus = 'digitized' | 'moderation' | 'not_digitized'
+
+export interface Coordinates {
+  latitude: number
+  longitude: number
+}
+
+export interface City {
+  id: string
+  name: string
+}
+
+export interface Cemetery {
+  id: string
+  name: string
+  cityId: string
+  cityName: string
+  /** План кладбища оцифрован — доступна карта с местами захоронений. */
+  hasMap: boolean
+  /** Сколько людей с известными именами можно найти на кладбище. */
+  peopleCount?: number
+}
+
+export interface Grave {
+  id: string
+  fullName: string
+  birthDate: string | null
+  deathDate: string | null
+  /** Только год — когда на памятнике нет полной даты. Напоминания по нему не ставим. */
+  birthYear?: number | null
+  deathYear?: number | null
+  cemeteryId: string
+  cemeteryName: string
+  city: string
+  plot: string | null
+  biography: string | null
+  photos: string[]
+  coordinates: Coordinates | null
+  status: GraveStatus
+  isSaved: boolean
+  lastOrder?: OrderSummary | null
+}
+
+/** Краткая сводка последнего заказа для карточки могилы. */
+export interface OrderSummary {
+  id: string
+  serviceName: string
+  date: string
+  rating: number | null
+}
+
+export type ServiceCategory = 'quick' | 'major'
+
+export interface Service {
+  id: string
+  name: string
+  description: string
+  icon: string
+  category: ServiceCategory
+  priceFrom: number
+  /** Точная цена известна (quick) либо уточняется (major). */
+  fixedPrice: boolean
+  photos: string[]
+}
+
+export type OrderStatus =
+  | 'pending'
+  | 'assigned'
+  | 'on_the_way'
+  | 'working'
+  | 'completed'
+  | 'cancelled'
+  | 'refund'
+
+export type RecurringPeriod = 'once' | 'monthly' | 'quarterly'
+
+export interface Executor {
+  id: string
+  name: string
+  ordersCount: number
+  rating: number
+  avatarUrl: string | null
+}
+
+export interface Order {
+  id: string
+  graveId: string
+  graveName: string
+  cemeteryName: string
+  serviceId: string
+  serviceName: string
+  serviceIcon: string
+  status: OrderStatus
+  date: string
+  amount: number | null
+  notes: string | null
+  isRecurring: boolean
+  recurringPeriod: RecurringPeriod
+  executor: Executor | null
+  rating: number | null
+  createdAt: string
+}
+
+export interface PhotoReport {
+  photosBefore: string[]
+  photosAfter: string[]
+}
+
+/** Запись в книге воспоминаний о человеке. */
+export interface Memory {
+  id: string
+  graveId: string
+  authorName: string
+  text: string
+  createdAt: string
+  photos: string[]
+}
+
+/** Участник совместного доступа к странице памяти. */
+export type MemberRole = 'owner' | 'editor' | 'viewer'
+
+export interface Member {
+  id: string
+  name: string
+  role: MemberRole
+  avatarUrl: string | null
+}
+
+export type ReminderType = 'birthday' | 'anniversary' | 'custom'
+
+export interface Reminder {
+  id: string
+  graveId: string
+  graveName: string
+  cemeteryName: string
+  type: ReminderType
+  date: string
+  label: string
+  isEnabled: boolean
+  autoOrder: string[]
+}
+
+export interface PaymentMethod {
+  id: string
+  brand: string
+  last4: string
+  expiry: string
+  isDefault: boolean
+}
+
+export type SubscriptionPlan = 'basic' | 'standard' | 'premium'
+
+export interface Subscription {
+  plan: SubscriptionPlan
+  planName: string
+  validUntil: string | null
+  gravesLimit: number
+}
+
+/** Тариф подписки для витрины. */
+export interface PlanInfo {
+  id: SubscriptionPlan
+  name: string
+  /** Цена в рублях за месяц; 0 = бесплатно. */
+  price: number
+  periodNote: string
+  features: string[]
+  featured: boolean
+}
+
+export interface UserProfile {
+  id: string
+  name: string
+  phone: string
+  avatarUrl: string | null
+  savedGravesCount: number
+  subscription: Subscription
+}
+
+export interface AuthUser {
+  id: string
+  phone: string
+  name: string
+}
+
+export interface AuthTokens {
+  accessToken: string
+  refreshToken: string
+  user: AuthUser
+}
+
+/** Заказ в приложении исполнителя. */
+export interface ExecutorOrder {
+  id: string
+  serviceName: string
+  serviceIcon: string
+  graveName: string
+  cemeteryName: string
+  plot: string | null
+  address: string
+  coordinates: Coordinates | null
+  /** Расстояние до кладбища; null — местоположение исполнителя неизвестно. */
+  distanceKm: number | null
+  amount: number
+  /** Вознаграждение исполнителя в рублях. */
+  reward: number
+  /** Чек-лист выполнения для данной услуги. */
+  executionSteps: string[]
+  status: OrderStatus
+  date: string
+  notes: string | null
+}
+
+/** Тип уведомления в центре уведомлений. */
+export type NotificationType = 'order' | 'date' | 'candle' | 'system'
+
+/** Запись в центре уведомлений. */
+export interface AppNotification {
+  id: string
+  type: NotificationType
+  title: string
+  body: string
+  createdAt: string
+  isRead: boolean
+  /** Куда ведёт нажатие: id заказа или захоронения. */
+  orderId?: string
+  graveId?: string
+}
+
+/** Место захоронения на карте кладбища (физическая точка, без ФИО). */
+export interface BurialPlace {
+  id: string
+  number: number
+  coordinates: Coordinates
+  /** Кто похоронен на месте — по надписям на памятниках. Пусто — имени нет. */
+  people: PlacePerson[]
+}
+
+/** Человек на месте захоронения — для подписей и поиска на карте кладбища. */
+export interface PlacePerson {
+  graveId: string
+  fullName: string
+  birthDate: string | null
+  deathDate: string | null
+  birthYear: number | null
+  deathYear: number | null
+}
+
+/** Контур дорожки или проезда на кладбище. */
+export interface CemeteryPath {
+  surface: string
+  /** Замкнутый контур в порядке [долгота, широта]. */
+  polygon: [number, number][]
+}
+
+/** Слой карты кладбища: места захоронений, дорожки, контуры участков. */
+export interface CemeteryMap {
+  places: BurialPlace[]
+  paths: CemeteryPath[]
+  plots: [number, number][][]
+}
+
+/** Профиль исполнителя со статистикой. */
+export interface ExecutorProfile {
+  id: string
+  name: string
+  rating: number
+  isOnline: boolean
+  totalOrders: number
+  monthEarnings: number
+  cities: string[]
+  services: string[]
+}

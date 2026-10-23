@@ -1,0 +1,23 @@
+{
+  "name": "@pamyat/api",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.ts",
+  "types": "src/index.ts",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "jest --passWithNoTests"
+  },
+  "dependencies": {
+    "@pamyat/utils": "*",
+    "@supabase/supabase-js": "^2.110.0",
+    "axios": "^1.7.0",
+    "react-native-url-polyfill": "^3.0.0"
+  },
+  "peerDependencies": {
+    "expo-secure-store": ">=15.0.0"
+  },
+  "devDependencies": {
+    "typescript": "~6.0.3"
+  }
+}

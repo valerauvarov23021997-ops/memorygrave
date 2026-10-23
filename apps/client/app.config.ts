@@ -1,0 +1,62 @@
+import type { ExpoConfig } from 'expo/config'
+
+const config: ExpoConfig = {
+  name: 'Память',
+  slug: 'pamyat-client',
+  version: '1.0.0',
+  scheme: 'pamyat',
+  orientation: 'portrait',
+  userInterfaceStyle: 'light',
+  primaryColor: '#1C3318',
+  icon: './assets/icon.png',
+  extra: {
+    eas: { projectId: 'da299e03-e3b6-4661-842e-5edb0e8ffdbf' },
+  },
+  updates: {
+    url: 'https://u.expo.dev/da299e03-e3b6-4661-842e-5edb0e8ffdbf',
+  },
+  assetBundlePatterns: ['**/*'],
+  // sdkVersion-политика нужна для тестирования опубликованных обновлений в Expo Go
+  runtimeVersion: { policy: 'sdkVersion' },
+  web: { output: 'single', bundler: 'metro', favicon: './assets/icon.png' },
+  ios: {
+    bundleIdentifier: 'app.pamyat.client',
+    buildNumber: '1',
+    supportsTablet: false,
+    infoPlist: {
+      NSCameraUsageDescription: 'Доступ к камере нужен, чтобы прикреплять фотографии к воспоминаниям и заказам',
+      NSPhotoLibraryUsageDescription: 'Доступ к фото нужен, чтобы выбрать снимки для страницы памяти',
+      ITSAppUsesNonExemptEncryption: false,
+    },
+  },
+  android: {
+    package: 'app.pamyat.client',
+    versionCode: 1,
+    adaptiveIcon: {
+      foregroundImage: './assets/adaptive-icon.png',
+      backgroundColor: '#F0EBE0',
+    },
+  },
+  plugins: [
+    'expo-router',
+    // С SDK 58 заставка настраивается только через плагин
+    ['expo-splash-screen', { image: './assets/splash.png', resizeMode: 'contain', backgroundColor: '#FAF7F2' }],
+    'expo-image',
+    'expo-status-bar',
+    'expo-secure-store',
+    'expo-font',
+    ['expo-notifications', { icon: './assets/notification-icon.png' }],
+    [
+      'expo-image-picker',
+      {
+        photosPermission: 'Доступ к фото нужен, чтобы выбрать снимки для страницы памяти',
+        cameraPermission: 'Доступ к камере нужен, чтобы прикреплять фотографии к воспоминаниям',
+      },
+    ],
+  ],
+  experiments: {
+    typedRoutes: true,
+  },
+}
+
+export default config

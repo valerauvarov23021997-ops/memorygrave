@@ -1,0 +1,252 @@
+import 'react-native-url-polyfill/auto'
+
+import { createClient, type SupabaseClient } from '@supabase/supabase-js'
+import * as SecureStore from 'expo-secure-store'
+import { Platform } from 'react-native'
+
+import { storageKey } from '../client'
+import { config } from '../config'
+
+// Сессию Supabase храним так же, как токены: SecureStore на телефоне,
+// localStorage в вебе.
+const isWeb = Platform.OS === 'web'
+
+const authStorage = {
+  getItem: async (key: string): Promise<string | null> => {
+    if (isWeb) return typeof localStorage === 'undefined' ? null : localStorage.getItem(storageKey(key))
+    return await SecureStore.getItemAsync(storageKey(key))
+  },
+  setItem: async (key: string, value: string): Promise<void> => {
+    if (isWeb) {
+      if (typeof localStorage !== 'undefined') localStorage.setItem(storageKey(key), value)
+      return
+    }
+    await SecureStore.setItemAsync(storageKey(key), value)
+  },
+  removeItem: async (key: string): Promise<void> => {
+    if (isWeb) {
+      if (typeof localStorage !== 'undefined') localStorage.removeItem(storageKey(key))
+      return
+    }
+    await SecureStore.deleteItemAsync(storageKey(key))
+  },
+}
+
+// В российских сетях соединения к Cloudflare (за ним Supabase) иногда
+// «замерзают» без ошибки. Жёсткий таймаут превращает зависание в ошибку,
+// которую react-query тут же ретраит — вместо вечного скелетона.
+const REQUEST_TIMEOUT_MS = 8000
+// Загрузка фото с камеры по мобильной сети идёт дольше обычного запроса
+const UPLOAD_TIMEOUT_MS = 60_000
+
+// ─── Диагностика: журнал скорости запросов пишется в базу ───
+// Каждый запрос (кроме самого журнала) логируется: путь, мс, статус.
+// Смотреть: select * from diag_events order by created_at desc
+interface DiagEvent {
+  path: string
+  method: string
+  ms: number
+  status: string
+}
+let diagBuffer: DiagEvent[] = []
+let diagTimer: ReturnType<typeof setTimeout> | null = null
+
+function diagLog(event: DiagEvent): void {
+  diagBuffer.push(event)
+  if (diagBuffer.length >= 15) void diagFlush()
+  else if (!diagTimer) diagTimer = setTimeout(() => void diagFlush(), 12_000)
+}
+
+async function diagFlush(): Promise<void> {
+  if (diagTimer) {
+    clearTimeout(diagTimer)
+    diagTimer = null
+  }
+  const batch = diagBuffer
+  diagBuffer = []
+  if (!batch.length || !instance) return
+  try {
+    const { error } = await instance.from('diag_events').insert(batch)
+    if (error) throw error
+  } catch {
+    // сеть недоступна — возвращаем в буфер, дошлём когда вернётся
+    diagBuffer = [...batch, ...diagBuffer].slice(-100)
+    if (!diagTimer) diagTimer = setTimeout(() => void diagFlush(), 20_000)
+  }
+}
+
+// ─── Дисциплина трафика ───────────────────────────────────────
+// DPI мобильных операторов чернодырит хост при шторме параллельных
+// TLS-соединений. Поэтому: максимум 4 одновременных запроса и
+// «предохранитель» — после серии таймаутов пауза вместо лавины повторов.
+const MAX_PARALLEL = 4
+let inFlight = 0
+const queue: (() => void)[] = []
+
+async function acquireSlot(): Promise<void> {
+  if (inFlight >= MAX_PARALLEL) {
+    await new Promise<void>(resolve => queue.push(resolve))
+  }
+  inFlight++
+}
+
+function releaseSlot(): void {
+  inFlight--
+  const next = queue.shift()
+  if (next) next()
+}
+
+let consecutiveTimeouts = 0
+let cooldownUntil = 0
+
+const rawTimeoutFetch: typeof fetch = (input, init) => {
+  const url = typeof input === 'string' ? input : input instanceof URL ? input.href : input.url
+  const path = url.replace(config.supabaseUrl, '').split('?')[0] ?? ''
+  const isUpload = path.startsWith('/storage/v1/object/') && (init?.method ?? 'GET') !== 'GET'
+  const controller = new AbortController()
+  const timer = setTimeout(
+    () => {
+      controller.abort()
+    },
+    isUpload ? UPLOAD_TIMEOUT_MS : REQUEST_TIMEOUT_MS
+  )
+  // если снаружи передали свой signal — пробрасываем его отмену в наш контроллер
+  if (init?.signal) {
+    if (init.signal.aborted) controller.abort()
+    else
+      init.signal.addEventListener(
+        'abort',
+        () => {
+          controller.abort()
+        },
+        { once: true }
+      )
+  }
+  const skipDiag = path.includes('diag_events')
+  const started = Date.now()
+  return fetch(input, { ...init, signal: controller.signal })
+    .then(resp => {
+      if (!skipDiag)
+        diagLog({
+          path,
+          method: init?.method ?? 'GET',
+          ms: Date.now() - started,
+          status: String(resp.status),
+        })
+      return resp
+    })
+    .catch((e: unknown) => {
+      if (!skipDiag) {
+        const status = e instanceof Error && e.name === 'AbortError' ? 'timeout' : 'error'
+        diagLog({ path, method: init?.method ?? 'GET', ms: Date.now() - started, status })
+      }
+      throw e
+    })
+    .finally(() => {
+      clearTimeout(timer)
+    })
+}
+
+const timeoutFetch: typeof fetch = async (input, init) => {
+  // предохранитель открыт — отдаём ошибку сразу, без похода в сеть
+  if (Date.now() < cooldownUntil) {
+    throw new Error('Сеть остывает после сбоев, повторите через несколько секунд')
+  }
+  await acquireSlot()
+  try {
+    const resp = await rawTimeoutFetch(input, init)
+    consecutiveTimeouts = 0
+    return resp
+  } catch (e) {
+    if (e instanceof Error && e.name === 'AbortError') {
+      consecutiveTimeouts++
+      // серия таймаутов = мёртвые соединения или гнев DPI:
+      // прекращаем шторм, даём сети 7 секунд прийти в себя
+      if (consecutiveTimeouts >= 4) {
+        cooldownUntil = Date.now() + 7000
+        consecutiveTimeouts = 0
+      }
+    }
+    throw e
+  } finally {
+    releaseSlot()
+  }
+}
+
+let instance: SupabaseClient | null = null
+
+/** Ленивая инициализация: клиент создаётся при первом обращении. */
+export function getSupabase(): SupabaseClient {
+  if (!instance) {
+    if (!config.supabaseUrl || !config.supabaseAnonKey) {
+      throw new Error(
+        'Supabase не настроен: задайте EXPO_PUBLIC_SUPABASE_URL и EXPO_PUBLIC_SUPABASE_ANON_KEY'
+      )
+    }
+    instance = createClient(config.supabaseUrl, config.supabaseAnonKey, {
+      auth: {
+        storage: authStorage,
+        autoRefreshToken: true,
+        persistSession: true,
+        detectSessionInUrl: false,
+      },
+      global: { fetch: timeoutFetch },
+    })
+  }
+  return instance
+}
+
+/**
+ * Проба сети из приложения: контрольные запросы к шлюзу, Яндексу
+ * и прямому Supabase. Результаты пишутся в diag_events (путь /probe/*)
+ * и возвращаются строкой для показа пользователю.
+ */
+export async function runNetProbe(): Promise<string> {
+  const results: string[] = []
+  const probe = async (name: string, url: string): Promise<void> => {
+    const started = Date.now()
+    const controller = new AbortController()
+    const timer = setTimeout(() => {
+      controller.abort()
+    }, 8000)
+    try {
+      const r = await fetch(url, {
+        signal: controller.signal,
+        headers: { apikey: config.supabaseAnonKey },
+      })
+      diagLog({
+        path: `/probe/${name}`,
+        method: 'GET',
+        ms: Date.now() - started,
+        status: String(r.status),
+      })
+      results.push(`${name}: ${r.status} за ${Date.now() - started}мс`)
+    } catch {
+      diagLog({
+        path: `/probe/${name}`,
+        method: 'GET',
+        ms: Date.now() - started,
+        status: 'timeout',
+      })
+      results.push(`${name}: ✗ (${Date.now() - started}мс)`)
+    } finally {
+      clearTimeout(timer)
+    }
+  }
+  for (let i = 1; i <= 3; i++) await probe(`шлюз${i}`, `${config.supabaseUrl}/auth/v1/health`)
+  await probe('яндекс', 'https://ya.ru/robots.txt')
+  await probe('supabase-напрямую', 'https://ajctgzzvoxrakbjvcpbt.supabase.co/auth/v1/health')
+  void diagFlush()
+  return results.join('\n')
+}
+
+/**
+ * id текущего пользователя; бросает, если сессии нет.
+ * getSession читает локально (без сетевого запроса) — важно для скорости.
+ */
+export async function requireUserId(): Promise<string> {
+  const { data } = await getSupabase().auth.getSession()
+  const uid = data.session?.user.id
+  if (!uid) throw new Error('Требуется вход в аккаунт')
+  return uid
+}

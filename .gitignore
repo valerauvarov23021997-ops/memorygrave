@@ -1,0 +1,32 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.env
+.env.local
+.DS_Store
+coverage/
+*.tsbuildinfo
+.turbo/
+ios/Pods/
+android/.gradle/
+android/app/build/
+
+# App Store / Google Play secrets
+google-play-key.json
+**/google-play-key.json
+*.p8
+*.mobileprovision
+e2e/out/
+# сессия живого прогона (вход владельца) и сборка под него
+e2e/.profile/
+e2e/dist-live/
+e2e/dist-dev/
+e2e/dist-exec/
+
+# Фото памятников с ФИО — исходники для оцифровки, в историю git не кладём
+photos/
+# Ведомость ФИО и SQL из неё — тоже: репозиторий публичный
+docs/cemetery/daymische-names.csv
+supabase/import-daymische-names.sql
