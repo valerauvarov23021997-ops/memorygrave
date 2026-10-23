@@ -1,4 +1,4 @@
-import { ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
+import { config, ordersApi, paymentsApi, type CreateOrderInput } from '@pamyat/api'
 import { useOrderDraftStore } from '@pamyat/store'
 import {
   BottomSheet,
@@ -37,6 +37,7 @@ export default function PaymentScreen() {
   const showToast = useToast()
   const qc = useQueryClient()
   const draft = useOrderDraftStore()
+  const payNow = config.paymentsEnabled
   const { data: methods, isLoading } = usePaymentMethods()
 
   const amount = draft.priceFrom ?? 0
@@ -57,42 +58,58 @@ export default function PaymentScreen() {
         recurringPeriod: draft.recurringPeriod,
       }
       const order = await ordersApi.create(input)
-      if (method) await paymentsApi.create(order.id, method.id)
+      if (payNow && method) await paymentsApi.create(order.id, method.id)
       return order
     },
     onSuccess: order => {
       haptics.success()
       void qc.invalidateQueries({ queryKey: ['orders'] })
-      showToast(t('payment.success'), 'success')
+      showToast(t(payNow ? 'payment.success' : 'payment.placed'), 'success')
       draft.reset()
       router.replace(`/order/${order.id}`)
     },
     onError: () => {
       haptics.error()
-      showToast(t('payment.error'), 'error')
+      showToast(t(payNow ? 'payment.error' : 'payment.placeError'), 'error')
     },
   })
 
   return (
     <View style={styles.root}>
       <TopBar
-        title={t('payment.title')}
+        title={t(payNow ? 'payment.title' : 'payment.confirmTitle')}
         onBack={() => {
           goBack()
         }}
       />
       <ScrollView contentContainerStyle={styles.content}>
-        <Card variant="success" padding="md" style={styles.secure}>
-          <View style={styles.secureRow}>
-            <Icon name="lock" size={20} color={c.sage} />
-            <Text variant="bodySm" color="success">
-              {t('payment.secure')}
-            </Text>
-          </View>
-        </Card>
+        {payNow ? (
+          <Card variant="success" padding="md" style={styles.secure}>
+            <View style={styles.secureRow}>
+              <Icon name="lock" size={20} color={c.sage} />
+              <Text variant="bodySm" color="success">
+                {t('payment.secure')}
+              </Text>
+            </View>
+          </Card>
+        ) : (
+          <Card variant="success" padding="md" style={styles.secure}>
+            <View style={styles.laterRow}>
+              <Icon name="camera" size={20} color={c.sage} />
+              <View style={styles.methodInfo}>
+                <Text variant="headingMd" color="success">
+                  {t('payment.laterTitle')}
+                </Text>
+                <Text variant="bodySm" color="success">
+                  {t('payment.laterText')}
+                </Text>
+              </View>
+            </View>
+          </Card>
+        )}
 
-        <SectionLabel>{t('payment.method')}</SectionLabel>
-        {isLoading ? (
+        {payNow ? <SectionLabel>{t('payment.method')}</SectionLabel> : null}
+        {!payNow ? null : isLoading ? (
           <Skeleton width="100%" height={56} radius={10} />
         ) : method ? (
           <Card padding="md">
@@ -111,18 +128,20 @@ export default function PaymentScreen() {
             </View>
           </Card>
         ) : null}
-        <Pressable
-          onPress={() => {
-            setChoosing(true)
-          }}
-          hitSlop={8}
-        >
-          <Text variant="bodySm" color="sage" style={styles.otherMethod}>
-            {t('payment.otherMethod')}
-          </Text>
-        </Pressable>
+        {payNow ? (
+          <Pressable
+            onPress={() => {
+              setChoosing(true)
+            }}
+            hitSlop={8}
+          >
+            <Text variant="bodySm" color="sage" style={styles.otherMethod}>
+              {t('payment.otherMethod')}
+            </Text>
+          </Pressable>
+        ) : null}
 
-        <Divider />
+        {payNow ? <Divider /> : null}
 
         <SectionLabel>{t('payment.composition')}</SectionLabel>
         <View style={styles.line}>
@@ -144,7 +163,7 @@ export default function PaymentScreen() {
         <Divider />
         <View style={styles.line}>
           <Text variant="headingMd" color="forest">
-            {t('payment.toPay')}
+            {t(payNow ? 'payment.toPay' : 'payment.toPayLater')}
           </Text>
           <Text style={styles.total}>{formatPrice(amount)}</Text>
         </View>
@@ -152,7 +171,9 @@ export default function PaymentScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button
-          label={t('payment.pay', { amount: formatPrice(amount) })}
+          label={
+            payNow ? t('payment.pay', { amount: formatPrice(amount) }) : t('payment.place')
+          }
           onPress={() => {
             mutation.mutate()
           }}
@@ -210,6 +231,7 @@ const makeStyles = (c: ThemeColors) =>
     content: { paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxl },
     secure: { marginBottom: spacing.lg },
     secureRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.sm },
+    laterRow: { flexDirection: 'row', alignItems: 'flex-start', gap: spacing.md },
     methodRow: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
     methodInfo: { flex: 1 },
     otherMethod: { marginTop: spacing.md },

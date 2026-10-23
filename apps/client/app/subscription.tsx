@@ -1,4 +1,4 @@
-import { profileApi, type PlanInfo, type SubscriptionPlan } from '@pamyat/api'
+import { config, profileApi, type PlanInfo, type SubscriptionPlan } from '@pamyat/api'
 import {
   Badge,
   Button,
@@ -82,7 +82,9 @@ export default function SubscriptionScreen() {
           ))
         )}
 
-        <Button label={t('subscription.restore')} variant="ghost" onPress={restore} />
+        {config.paymentsEnabled ? (
+          <Button label={t('subscription.restore')} variant="ghost" onPress={restore} />
+        ) : null}
         <View style={{ height: insets.bottom + spacing.lg }} />
       </ScrollView>
     </View>
@@ -104,6 +106,8 @@ function PlanCard({
   const c = useColors()
   const styles = useThemedStyles(makeStyles)
   const featured = plan.featured
+  // Без приёма денег платный тариф включался бесплатно одним нажатием
+  const soon = plan.price > 0 && !config.paymentsEnabled
   return (
     <View style={styles.planWrap}>
       {featured && !isCurrent ? (
@@ -142,10 +146,16 @@ function PlanCard({
           ))}
         </View>
         <Button
-          label={isCurrent ? t('subscription.yourPlan') : t('subscription.choose')}
+          label={
+            isCurrent
+              ? t('subscription.yourPlan')
+              : soon
+                ? t('subscription.soon')
+                : t('subscription.choose')
+          }
           variant={featured ? 'primary' : 'secondary'}
           onPress={onChoose}
-          disabled={isCurrent}
+          disabled={isCurrent || soon}
           loading={changing}
           fullWidth
         />

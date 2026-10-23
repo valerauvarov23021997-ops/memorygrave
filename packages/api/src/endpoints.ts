@@ -265,6 +265,8 @@ export const ordersApi = {
         rating: null,
         createdAt: new Date().toISOString(),
       }
+      // иначе экран статуса не находил только что созданный заказ
+      ordersMock.unshift(order)
       return mockDelay(order)
     }
     return unwrap<Order>(client.post('/orders', input))

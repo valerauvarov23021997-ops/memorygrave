@@ -1,10 +1,11 @@
-import { ordersApi } from '@pamyat/api'
+import { config, ordersApi } from '@pamyat/api'
 import {
   Avatar,
   Badge,
   BottomSheet,
   Button,
   Card,
+  EmptyState,
   useColors,
   useThemedStyles,
   type ThemeColors,
@@ -42,7 +43,7 @@ export default function OrderStatusScreen() {
   const showToast = useToast()
   const qc = useQueryClient()
   const { id } = useLocalSearchParams<{ id: string }>()
-  const { data: order, isLoading } = useOrder(id ?? '')
+  const { data: order, isLoading, isError, refetch } = useOrder(id ?? '')
   const [confirmCancel, setConfirmCancel] = useState(false)
 
   const cancel = useMutation({
@@ -55,6 +56,27 @@ export default function OrderStatusScreen() {
       goBack()
     },
   })
+
+  if (isError && !order) {
+    return (
+      <View style={styles.root}>
+        <TopBar
+          title={t('orderStatus.title')}
+          onBack={() => {
+            goBack()
+          }}
+        />
+        <EmptyState
+          icon="orders"
+          title={t('common.error')}
+          actionLabel={t('common.retry')}
+          onAction={() => {
+            void refetch()
+          }}
+        />
+      </View>
+    )
+  }
 
   if (isLoading || !order) {
     return (
@@ -78,7 +100,7 @@ export default function OrderStatusScreen() {
   const canCancel = order.status === 'pending' || order.status === 'assigned'
 
   const steps = [
-    t('orderStatus.stepPaid'),
+    t(config.paymentsEnabled ? 'orderStatus.stepPaid' : 'orderStatus.stepPlaced'),
     t('orderStatus.stepAssigned'),
     t('orderStatus.stepOnTheWay'),
     t('orderStatus.stepArrived'),
@@ -180,7 +202,11 @@ export default function OrderStatusScreen() {
           {t('orderStatus.cancelConfirmTitle')}
         </Text>
         <Text variant="bodyMd" color="muted" style={styles.confirmText}>
-          {t('orderStatus.cancelConfirmText')}
+          {t(
+            config.paymentsEnabled
+              ? 'orderStatus.cancelConfirmText'
+              : 'orderStatus.cancelConfirmTextUnpaid'
+          )}
         </Text>
         <View style={styles.confirmButtons}>
           <Button

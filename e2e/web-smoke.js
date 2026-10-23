@@ -129,25 +129,20 @@ const text = (t, exact = false) => page.getByText(t, { exact }).filter({ visible
     await text('Оформление заказа').waitFor({ timeout: 6000 })
   }, { shotName: '10-form' })
 
-  await step('Дата и переход к оплате', async () => {
+  // Оплата выключена до ЮКассы: экран подтверждения вместо выбора карты
+  await step('Дата и подтверждение заказа', async () => {
     // выбираем послезавтра в ленте дат
     const day = new Date(); day.setDate(day.getDate() + 2)
     await text(String(day.getDate()), true).click()
     await page.waitForTimeout(400)
-    await text('Перейти к оплате').click()
-    await text('Способ оплаты').waitFor({ timeout: 6000 })
+    await text('Далее', true).click()
+    await text('Платить сейчас не нужно').waitFor({ timeout: 6000 })
   }, { shotName: '11-payment' })
 
-  await step('Смена способа оплаты', async () => {
-    await text('Другая карта').click()
-    await page.waitForTimeout(800)
-    await text('Visa •••• 1881').click()
-    await page.waitForTimeout(600)
-  })
-
-  await step('Оплата и статус заказа', async () => {
-    await page.getByText(/Оплатить \d/).filter({ visible: true }).first().click()
+  await step('Оформление и статус заказа', async () => {
+    await text('Оформить заказ', true).click()
     await text('Статус заказа').waitFor({ timeout: 8000 })
+    await text('Оформлен', true).waitFor({ timeout: 6000 })
     await page.waitForTimeout(800)
   }, { shotName: '12-order-status' })
 
@@ -191,11 +186,8 @@ const text = (t, exact = false) => page.getByText(t, { exact }).filter({ visible
     await text('Премиум').waitFor({ timeout: 6000 })
   }, { shotName: '16-subscription' })
 
-  await step('Смена тарифа', async () => {
-    const btns = page.getByText('Выбрать', { exact: true }).filter({ visible: true })
-    await btns.last().click()
-    await page.waitForTimeout(1500)
-    await text('подключён').waitFor({ timeout: 6000 })
+  await step('Платные тарифы — «Скоро»', async () => {
+    await text('Скоро', true).first().waitFor({ timeout: 6000 })
     await page.goBack()
     await page.waitForTimeout(800)
   })
@@ -236,6 +228,20 @@ const text = (t, exact = false) => page.getByText(t, { exact }).filter({ visible
     await text('Захоронение № 100').first().waitFor({ timeout: 5000 })
     await text('Проложить маршрут').waitFor({ timeout: 3000 })
   }, { shotName: '20-cemetery-map' })
+
+  // последним: после удаления приложение уходит на экран входа
+  await step('Удаление аккаунта', async () => {
+    await page.goto(URL, { waitUntil: 'networkidle', timeout: 60000 })
+    await page.waitForTimeout(6500)
+    await page.mouse.click(341, 812) // таб «Профиль»
+    await page.waitForTimeout(1200)
+    await text('Удалить аккаунт', true).click()
+    await text('Удалить навсегда', true).waitFor({ timeout: 6000 })
+    await page.waitForTimeout(900)
+    await shot('21-delete-confirm')
+    await text('Удалить навсегда', true).click()
+    await text('Аккаунт удалён').waitFor({ timeout: 8000 })
+  }, { shotName: '22-deleted' })
 
   // ── Итог ──
   const passed = results.filter(r => r.ok).length

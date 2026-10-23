@@ -1,4 +1,4 @@
-import { ordersApi, type CreateOrderInput, type RecurringPeriod } from '@pamyat/api'
+import { config, ordersApi, type CreateOrderInput, type RecurringPeriod } from '@pamyat/api'
 import { useOrderDraftStore } from '@pamyat/store'
 import {
   Button,
@@ -191,7 +191,9 @@ export default function OrderFormScreen() {
 
       <View style={[styles.footer, { paddingBottom: insets.bottom + spacing.md }]}>
         <Button
-          label={draft.fixedPrice ? t('orderForm.toPayment') : t('orderForm.leaveRequest')}
+          label={draft.fixedPrice
+              ? t(config.paymentsEnabled ? 'orderForm.toPayment' : 'orderForm.toConfirm')
+              : t('orderForm.leaveRequest')}
           onPress={onProceed}
           disabled={!canProceed}
           loading={!draft.fixedPrice && request.isPending}

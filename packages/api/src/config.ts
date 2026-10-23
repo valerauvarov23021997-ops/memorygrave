@@ -25,6 +25,11 @@ export const config = {
   supabaseAnonKey,
   /** Username Telegram-бота кодов входа (без @). Пусто — коды отключены. */
   tgBot: process.env.EXPO_PUBLIC_TG_BOT ?? '',
+  /**
+   * Приём денег в приложении. Пока нет юрлица и договора с ЮКассой — выключен:
+   * заказ оформляется без оплаты, платят после фотоотчёта (решение владельца).
+   */
+  paymentsEnabled: process.env.EXPO_PUBLIC_PAYMENTS === 'true',
   timeout: 10_000,
 } as const
 
