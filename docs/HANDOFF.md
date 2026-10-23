@@ -72,11 +72,23 @@ EAS **не читает** локальный `.env`. Без строки `set -a
 Выполняет **владелец** в Supabase → SQL Editor (у Claude нет прав на DDL —
 и не должно быть). Все файлы безопасно запускать повторно.
 
-1. `supabase/setup.sql` — схема, RLS, справочники, демо-данные
+1. `supabase/setup.sql` — схема, RLS, справочник услуг
 2. `supabase/telegram-auth.sql` — коды входа через Telegram
-3. `supabase/import-daymische.sql` — съёмка кладбища (382 места)
+3. `supabase/import-daymische.sql` — съёмка кладбища (382 места, 266 оградок)
 4. `supabase/import-daymische-names.sql` — ФИО на местах (генерируется, см. ниже)
 5. `supabase/executor.sql` — исполнители, этапы заказа, хранилище фотоотчётов
+6. `supabase/diagnostics.sql` — журнал скорости запросов
+7. `supabase/hardening.sql` — закрытые функции, индексы (по советнику Supabase)
+8. `supabase/account.sql` — удаление аккаунта пользователем
+9. `supabase/cleanup-demo.sql` — убрать демо-данные (однократно, 23.10.2026)
+
+`supabase/demo-seed.sql` — 8 демо-кладбищ и 12 придуманных людей. **Только для
+отдельного тестового проекта**, в боевую базу не запускать (ADR-011).
+
+**Проверено 23.10.2026:** `apply_migration` через MCP система безопасности
+блокирует («Production Deploy») — так и задумано. DDL и удаление данных готовит
+Claude, запускает владелец. Удобно: Claude кладёт SQL в буфер обмена
+(PowerShell `-STA`, `System.Windows.Forms.Clipboard`), владелец вставляет Ctrl+V.
 
 **Добавить исполнителя:** `insert into executors (phone, name) values ('+7…', 'Имя Фамилия');`
 Сейчас в списке один — владелец (+79165821650). Приложение исполнителя —
@@ -137,6 +149,11 @@ iPhone с Windows не управляется.
 - **МТС LTE душит параллельные TLS-соединения** к Cloudflare (за ним Supabase).
   Поэтому в `packages/api/src/supabase/client.ts` очередь на 4 соединения,
   таймаут 8 с и автомат-размыкатель после 4 таймаутов подряд. Не убирай.
+- **Оплата выключена флагом** `EXPO_PUBLIC_PAYMENTS` (ADR-010): заказ без
+  оплаты, «оплата после фотоотчёта», платные тарифы «Скоро». С ЮКассой —
+  `EXPO_PUBLIC_PAYMENTS=true` в `.env` обоих приложений.
+- **Удаление аккаунта** — функция базы `delete_my_account()`. Исполнителя с
+  заказами она не удаляет (история и фото заказчиков): такого удаляет владелец.
 - **Выход из аккаунта не вызывает `signOut()`.** Пользователь анонимный:
   `signOut` уничтожает сессию, и при следующем входе создаётся новый
   пользователь — все сохранённые могилы и заказы теряются.
@@ -236,7 +253,8 @@ LibreDWG (`dwg2dxf`) — на Windows проще попросить у геод�
 Sentry MCP подключён (22.10.2026, `claude mcp add --transport http sentry https://mcp.sentry.dev/mcp`,
 локально для проекта; вход владелец сделал через `/mcp` → sentry → Authenticate).
 Claude читает ошибки сам: организация `memorygrave`, проект `pamyat-client`,
-regionUrl `https://us.sentry.io`. Новый сервер виден только после перезапуска
+regionUrl `https://us.sentry.io`. С 23.10.2026 туда же пишет приложение
+исполнителя — его ошибки с тегом `app:executor` (DSN в `apps/executor/.env`). Новый сервер виден только после перезапуска
 Claude Code (`claude --continue`).
 
 Экран владельца Claude видит снимком через PowerShell (System.Drawing),
@@ -253,5 +271,6 @@ Claude Code (`claude --continue`).
   на iPhone, оплата — пробует баланс телефона; российские карты Apple не берёт).
   Ждём письмо «Welcome…». Дальше — development build через EAS (Expo Go push
   на iOS не обещает) и APNs-ключ через `eas credentials`.
-- Вся работа — на ветке `claude/memmorygrave-mobile-app-42n04f`;
-  `main` отстаёт. Слияние в `main` — по решению владельца.
+- Ветки: `main` — основная, с 23.10.2026 в неё влита вся работа (решение
+  владельца). Рабочая ветка — `claude/expo-sdk-57`; старая
+  `claude/memmorygrave-mobile-app-42n04f` — история до SDK 57.
