@@ -8,7 +8,7 @@
  */
 import { queryWords, rankByName } from '@pamyat/utils'
 
-import { tokenStorage } from '../client'
+import { kvStorage, tokenStorage } from '../client'
 import { config } from '../config'
 import { plansMock } from '../mocks'
 import type {
@@ -204,9 +204,15 @@ export const authApi = {
   },
 
   async deleteAccount(): Promise<{ success: boolean }> {
-    // TODO: полное удаление auth-пользователя — через edge function с service-ключом
-    const uid = await requireUserId()
-    await getSupabase().from('profiles').delete().eq('id', uid)
+    // Удаляет сама база (supabase/account.sql): пользователя из auth.users
+    // и каскадом всё личное. Исполнителя с историей заказов — отказ.
+    await requireUserId()
+    const { error } = await getSupabase().rpc('delete_my_account')
+    if (error) {
+      if (error.message.includes('executor account')) throw new Error('executor')
+      fail(error)
+    }
+    // Сессия уже ничья: следующий запуск создаст нового анонимного пользователя
     await getSupabase().auth.signOut()
     await tokenStorage.clear()
     return { success: true }
@@ -432,18 +438,14 @@ export const servicesApi = {
 export const cemeteryMapApi = {
   async get(cemeteryId: string): Promise<CemeteryMap> {
     const sb = getSupabase()
-    const [places, paths, plots, people] = await Promise.all([
+    const [places, paths, fences, people] = await Promise.all([
       sb
         .from('burial_places')
         .select('id, number, lat, lng')
         .eq('cemetery_id', cemeteryId)
         .order('number'),
       sb.from('cemetery_paths').select('surface, polygon').eq('cemetery_id', cemeteryId),
-      sb
-        .from('burial_places')
-        .select('plot_polygon')
-        .eq('cemetery_id', cemeteryId)
-        .not('plot_polygon', 'is', null),
+      sb.from('cemetery_plots').select('polygon').eq('cemetery_id', cemeteryId),
       sb
         .from('graves')
         .select('id, full_name, birth_date, death_date, birth_year, death_year, burial_place_id')
@@ -451,6 +453,17 @@ export const cemeteryMapApi = {
         .not('burial_place_id', 'is', null),
     ])
     if (places.error) fail(places.error)
+    // Слой оградок появился позже мест: пока его нет в базе, берём контуры
+    // по-старому, с мест (там не хватает двух оградок без номеров внутри)
+    let plots = (fences.data ?? []).map(r => r.polygon as [number, number][])
+    if (!plots.length) {
+      const legacy = await sb
+        .from('burial_places')
+        .select('plot_polygon')
+        .eq('cemetery_id', cemeteryId)
+        .not('plot_polygon', 'is', null)
+      plots = (legacy.data ?? []).map(r => r.plot_polygon as [number, number][])
+    }
     const byPlace = new Map<string, PlacePerson[]>()
     for (const g of people.data ?? []) {
       const list = byPlace.get(g.burial_place_id as string) ?? []
@@ -475,7 +488,7 @@ export const cemeteryMapApi = {
         surface: r.surface as string,
         polygon: r.polygon as [number, number][],
       })),
-      plots: (plots.data ?? []).map(r => r.plot_polygon as [number, number][]),
+      plots,
     }
   },
 }
@@ -908,8 +921,31 @@ const EXECUTION_STEPS: Record<string, string[]> = {
 const DEFAULT_STEPS = ['Сверить место с заказом', 'Выполнить работу', 'Убрать за собой']
 
 // Отказ от нового заказа ни на что в базе не влияет — заказ просто
-// скрывается у этого исполнителя до перезапуска приложения
-const skippedOrders = new Set<string>()
+// скрывается у этого исполнителя. Список хранится на телефоне: раньше он жил
+// до перезапуска, и отклонённые заказы возвращались.
+const SKIPPED_KEY = 'skippedOrders'
+// SecureStore держит до 2 КБ на значение — старые отказы вытесняются
+const SKIPPED_LIMIT = 40
+let skippedOrders: string[] | null = null
+
+async function loadSkipped(): Promise<Set<string>> {
+  if (!skippedOrders) {
+    try {
+      const raw = await kvStorage.get(SKIPPED_KEY)
+      const parsed: unknown = raw ? JSON.parse(raw) : []
+      skippedOrders = Array.isArray(parsed) ? parsed.filter((x): x is string => typeof x === 'string') : []
+    } catch {
+      skippedOrders = []
+    }
+  }
+  return new Set(skippedOrders)
+}
+
+async function skipOrder(id: string): Promise<void> {
+  await loadSkipped()
+  skippedOrders = [...(skippedOrders ?? []).filter(x => x !== id), id].slice(-SKIPPED_LIMIT)
+  await kvStorage.set(SKIPPED_KEY, JSON.stringify(skippedOrders))
+}
 
 let rewardShare: number | null = null
 
@@ -1009,10 +1045,10 @@ export const executorApi = {
       .order('date', { ascending: true })
       .limit(100)
     if (status) query = query.eq('status', status)
-    const { data, error } = await query
+    const [{ data, error }, skipped] = await Promise.all([query, loadSkipped()])
     if (error) fail(error)
     return ((data ?? []) as unknown as ExecutorOrderRow[])
-      .filter(r => !skippedOrders.has(r.id))
+      .filter(r => !skipped.has(r.id))
       .map(r => mapExecutorOrder(r, share))
   },
 
@@ -1048,7 +1084,7 @@ export const executorApi = {
 
   async reject(id: string, status: OrderStatus): Promise<{ success: boolean }> {
     if (status === 'pending') {
-      skippedOrders.add(id)
+      await skipOrder(id)
       return { success: true }
     }
     return await rpcVoid('executor_release', { p_order: id })

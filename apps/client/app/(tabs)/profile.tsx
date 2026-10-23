@@ -1,4 +1,4 @@
-import { config, profileApi, runNetProbe } from '@pamyat/api'
+import { authApi, config, profileApi, runNetProbe } from '@pamyat/api'
 import {
   Avatar,
   BottomSheet,
@@ -34,6 +34,8 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { queryKeys, useProfile } from '../../src/hooks/queries'
 import { useAuthActions } from '../../src/hooks/useAuthActions'
 import { links } from '../../src/lib/links'
+import { cancelAllReminders } from '../../src/lib/localReminders'
+import { reportError } from '../../src/lib/sentry'
 
 // Метка версии считается сама: ручная метка однажды застыла на «07.07»
 // и месяцами выдавала свежие обновления за июльские
@@ -59,6 +61,7 @@ export default function ProfileScreen() {
   const [editing, setEditing] = useState(false)
   const [name, setName] = useState('')
   const [avatar, setAvatar] = useState<string | null>(null)
+  const [confirmDelete, setConfirmDelete] = useState(false)
 
   const save = useMutation({
     mutationFn: () => profileApi.update({ name: name.trim(), avatarUrl: avatar ?? undefined }),
@@ -66,6 +69,30 @@ export default function ProfileScreen() {
       void qc.invalidateQueries({ queryKey: queryKeys.profile })
       showToast(t('profile.saved'), 'success')
       setEditing(false)
+    },
+  })
+
+  const remove = useMutation({
+    mutationFn: () => authApi.deleteAccount(),
+    onSuccess: async () => {
+      try {
+        await cancelAllReminders()
+      } catch (e) {
+        reportError(e, { where: 'cancelAllReminders' })
+      }
+      setConfirmDelete(false)
+      qc.clear()
+      showToast(t('profile.deleted'), 'success')
+      await onLogout()
+    },
+    onError: (e: Error) => {
+      setConfirmDelete(false)
+      if (e.message === 'executor') {
+        showToast(t('profile.deleteExecutor'), 'error')
+        return
+      }
+      reportError(e, { where: 'deleteAccount' })
+      showToast(t('profile.deleteError'), 'error')
     },
   })
 
@@ -203,6 +230,13 @@ export default function ProfileScreen() {
         </GroupedSection>
 
         <Button label={t('profile.logout')} variant="ghost" onPress={onLogout} />
+        <Button
+          label={t('profile.deleteAccount')}
+          variant="ghost"
+          onPress={() => {
+            setConfirmDelete(true)
+          }}
+        />
         {/* метка сборки; тап — проба сети (результат в тосте и в журнале) */}
         <Pressable
           onPress={() => {
@@ -218,6 +252,37 @@ export default function ProfileScreen() {
           </Text>
         </Pressable>
       </ScrollView>
+
+      <BottomSheet
+        visible={confirmDelete}
+        onClose={() => {
+          setConfirmDelete(false)
+        }}
+      >
+        <Text variant="headingLg" color="forest" style={styles.editTitle}>
+          {t('profile.deleteTitle')}
+        </Text>
+        <Text variant="bodyMd" color="muted" style={styles.editField}>
+          {t('profile.deleteText')}
+        </Text>
+        <Button
+          label={t('profile.deleteConfirm')}
+          variant="destructive"
+          onPress={() => {
+            remove.mutate()
+          }}
+          loading={remove.isPending}
+          fullWidth
+        />
+        <Button
+          label={t('profile.deleteKeep')}
+          variant="ghost"
+          onPress={() => {
+            setConfirmDelete(false)
+          }}
+          fullWidth
+        />
+      </BottomSheet>
 
       <BottomSheet
         visible={editing}

@@ -63,6 +63,21 @@ export const tokenStorage = {
   },
 }
 
+/** Мелкие настройки, которые должны пережить перезапуск (с той же приставкой, что и вход). */
+export const kvStorage = {
+  async get(key: string): Promise<string | null> {
+    if (isWeb) return webStorage.get(storageKey(key))
+    return await SecureStore.getItemAsync(storageKey(key))
+  },
+  async set(key: string, value: string): Promise<void> {
+    if (isWeb) {
+      webStorage.set(storageKey(key), value)
+      return
+    }
+    await SecureStore.setItemAsync(storageKey(key), value)
+  },
+}
+
 const client = axios.create({
   baseURL: config.apiBaseUrl,
   timeout: config.timeout,

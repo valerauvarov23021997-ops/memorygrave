@@ -73,6 +73,15 @@ export async function cancelReminder(reminderId: string): Promise<void> {
   }
 }
 
+/** Снимает все напоминания с телефона — при удалении аккаунта. */
+export async function cancelAllReminders(): Promise<void> {
+  const map = await getMap()
+  for (const notificationId of Object.values(map)) {
+    await Notifications.cancelScheduledNotificationAsync(notificationId)
+  }
+  await saveMap({})
+}
+
 /** Синхронизирует расписание со списком напоминаний (включённые — планирует). */
 export async function syncReminders(reminders: Reminder[]): Promise<void> {
   // Планируем только если разрешение уже выдано — не дёргаем запрос при пассивной синхронизации.
