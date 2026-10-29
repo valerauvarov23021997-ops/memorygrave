@@ -6,7 +6,6 @@
  * Скриншоты — e2e/out/live-*.png, видео прогона — e2e/out/video/.
  *
  *   cd apps/client && npx expo export --platform web --output-dir ../../e2e/dist-live
- *   sed -i 's|" defer>|" type="module">|' ../../e2e/dist-live/index.html
  *   cd ../../e2e && python -m http.server 8098 --directory dist-live &
  *   E2E_BROWSER="C:/Program Files (x86)/Microsoft/Edge/Application/msedge.exe" node live-smoke.js
  *

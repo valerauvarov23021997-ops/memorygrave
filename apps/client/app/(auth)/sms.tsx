@@ -16,7 +16,7 @@ import { formatPhoneMask } from '@pamyat/utils'
 import { useLocalSearchParams, useRouter } from 'expo-router'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Linking, Pressable, StyleSheet, TextInput, View } from 'react-native'
+import { Linking, Pressable, StyleSheet, TextInput, View, type TextInputInstance } from 'react-native'
 import { useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import { useAuthActions } from '../../src/hooks/useAuthActions'
@@ -43,7 +43,7 @@ export default function SmsScreen() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(false)
   const [seconds, setSeconds] = useState(RESEND_SECONDS)
-  const inputRef = useRef<TextInput>(null)
+  const inputRef = useRef<TextInputInstance>(null)
 
   useEffect(() => {
     if (seconds <= 0) return

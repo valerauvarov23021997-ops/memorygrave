@@ -30,6 +30,25 @@
 
 ---
 
+## 🔼 Апгрейд до Expo SDK 58 — 29.10.2026
+
+Expo Go на телефоне владельца обновился до SDK 58 и перестал открывать проект
+на SDK 57. Версии взяты из `bundledNativeModules.json` пакета expo 58.0.21,
+`expo install --check` по обоим приложениям — «up to date».
+- expo 58, react 19.3, react-native 0.88.1, expo-router 58
+- крупные скачки: @sentry/react-native 7 → 8, gesture-handler 2 → 3 —
+  используемое API (`Sentry.init/wrap/captureException`, `Gesture`,
+  `GestureDetector`, `GestureHandlerRootView`) не изменилось
+- jest 30 в приложениях + `@react-native/jest-preset`: без него тесты клиента
+  не запускались с перехода на SDK 57
+- RN 0.88: тип ссылки на поле ввода — `TextInputInstance` (экран кода из SMS)
+- ESLint: `import/namespace` выключен для TS — он не понимает новую схему
+  экспорта expo-splash-screen, а TypeScript проверяет то же самое надёжнее
+- e2e: подмена `type="module"` в `index.html` больше не нужна и вредна
+
+Проверено: типы и ESLint чистые, 54/54 теста, iOS-сборки обоих приложений
+(Hermes), sdkVersion 58.0.0, веб-смоук 23/23 на фикстурах.
+
 ## 🔼 Апгрейд до Expo SDK 54
 
 Проект переведён с SDK 51 на **SDK 54** — актуальный Expo Go из сторов

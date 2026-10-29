@@ -184,8 +184,8 @@
 Период разработки   1 июля — 23 октября 2026
 ```
 
-**Стек:** React Native 0.86 + Expo SDK 57, TypeScript strict, Expo Router,
-Zustand, TanStack Query, Reanimated 3, react-native-maps, react-native-svg,
+**Стек:** React Native 0.88 + Expo SDK 58 (с 29.10.2026), TypeScript strict,
+Expo Router, Zustand, TanStack Query, Reanimated 4, react-native-svg,
 i18next, Supabase (Postgres + Auth + Edge Functions), Yandex Cloud.
 
 **Структура:**
@@ -201,7 +201,8 @@ tools/cemetery   обработка съёмки: DWG → координаты �
 supabase         схема БД, RLS, RPC, Edge Functions, импорт съёмки
 ```
 
-**Качество:** `tsc --noEmit` и ESLint без ошибок, 54 модульных теста. Сквозные
+**Качество:** `tsc --noEmit` и ESLint без ошибок, 54 модульных теста
+(с 21 по 29.10.2026 14 тестов клиента не запускались — починено при переходе на SDK 58). Сквозные
 автотесты в браузере: 23 сценария на фикстурах, 10 шагов на живой базе, обход
 всех кнопок 16 экранов (`e2e/`). Ошибки с телефонов — в Sentry (оба приложения).
 

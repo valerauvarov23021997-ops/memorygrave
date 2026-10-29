@@ -13,10 +13,10 @@
 cd apps/client
 npx expo export --platform web --output-dir ../../e2e/dist
 
-# 2. Скрипт грузится как модуль (zustand использует import.meta)
-sed -i 's|" defer>|" type="module">|' ../../e2e/dist/index.html
-
-# 3. Поднять сервер и прогнать
+# 2. Поднять сервер и прогнать
+#    index.html не трогать: с SDK 58 сборка делится на три файла, и подмена
+#    defer → type="module" прячет общие переменные Metro — белый экран.
+#    import.meta, ради которого её делали раньше, Expo теперь переводит сам.
 cd ../../e2e
 python3 -m http.server 8099 --directory dist &
 node web-smoke.js   # требует playwright-core и Chromium
@@ -27,7 +27,6 @@ node web-smoke.js   # требует playwright-core и Chromium
 ```bash
 cd apps/client
 EXPO_PUBLIC_USE_MOCKS=true npx expo export --platform web --output-dir ../../e2e/dist --clear
-sed -i 's|" defer>|" type="module">|' ../../e2e/dist/index.html
 cd ../../e2e
 npm install --no-save --no-package-lock playwright-core@1
 python -m http.server 8099 --directory dist &

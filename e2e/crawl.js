@@ -4,7 +4,6 @@
  *
  *   cd apps/client
  *   EXPO_PUBLIC_USE_MOCKS=true EXPO_PUBLIC_E2E=1 npx expo export --platform web --output-dir ../../e2e/dist --clear
- *   sed -i 's|" defer>|" type="module">|' ../../e2e/dist/index.html
  *   cd ../../e2e && node spa-server.js dist 8099 &
  *   node crawl.js            # SHOW=1 — в видимом окне
  *
