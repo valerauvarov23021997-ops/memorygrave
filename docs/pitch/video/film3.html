@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#081007}
+canvas{position:absolute;inset:0}
+#top{z-index:50;pointer-events:none}
+.sc{position:absolute;inset:0;display:none}
+.serif{font-family:'Playfair Display',Georgia,serif;font-weight:400}
+.sans{font-family:'Manrope',Arial,sans-serif}
+.ln{display:block}.wd{display:inline-block;white-space:nowrap}.c{display:inline-block;will-change:transform,opacity,filter}
+.eyebrow{font-family:'Manrope';font-weight:600;font-size:20px;letter-spacing:9px;text-transform:uppercase;color:#C9A15E}
+.cream{color:#F3EEE3}.muted{color:#AEB8A4}.gold{color:#C9A15E}
+/* приложение */
+#cam{position:absolute;inset:0;perspective:2400px;perspective-origin:1290px 540px}
+#glow{position:absolute;left:1290px;top:540px;width:1300px;height:1300px;margin:-650px 0 0 -650px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,161,94,.20),rgba(201,161,94,.05) 35%,rgba(201,161,94,0) 62%)}
+#rig{position:absolute;left:1080px;top:107px;width:420px;height:866px;transform-style:preserve-3d}
+.slab{position:absolute;inset:0;border-radius:62px;background:#0d140c}
+#front{position:absolute;inset:0;border-radius:62px;background:linear-gradient(145deg,#2a3428,#0f160e 40%,#0a0f09);
+  box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14),inset 0 0 0 5px #0a0f09}
+#screen{position:absolute;left:18px;top:18px;width:384px;height:830px;border-radius:46px;overflow:hidden;background:#FAF7F2}
+#screen img{position:absolute;inset:0;width:384px;height:830px}
+#gloss{position:absolute;inset:0;border-radius:62px;pointer-events:none;
+  background:linear-gradient(118deg,rgba(255,255,255,0) 30%,rgba(255,255,255,.10) 44%,rgba(255,255,255,0) 52%);background-size:260% 100%}
+#island{position:absolute;left:157px;top:30px;width:106px;height:30px;border-radius:15px;background:#050805}
+.chap{position:absolute;left:150px;top:0;width:760px;height:1080px;display:flex;flex-direction:column;justify-content:center;gap:26px}
+.chap .no{font-family:'Manrope';font-weight:600;font-size:20px;letter-spacing:6px;color:#C9A15E}
+.chap .no span{color:#5F6E58}
+.chap h2{font-family:'Playfair Display';font-weight:400;font-size:92px;line-height:1.04;color:#F3EEE3}
+.chap p{font-family:'Manrope';font-size:30px;line-height:1.5;color:#AEB8A4;max-width:640px}
+#bars{position:absolute;left:150px;bottom:110px;display:flex;gap:10px}
+#bars div{width:56px;height:2px;background:rgba(243,238,227,.14);overflow:hidden}
+#bars i{display:block;height:100%;background:#C9A15E;transform-origin:left;transform:scaleX(0)}
+#demo{position:absolute;left:150px;bottom:56px;font-family:'Manrope';font-size:17px;letter-spacing:1px;color:rgba(174,184,164,.55)}
+/* веер экранов */
+#fan{position:absolute;inset:0;perspective:2000px;perspective-origin:960px 540px}
+#fanrig{position:absolute;left:960px;top:540px;transform-style:preserve-3d}
+.card{position:absolute;left:-150px;top:-325px;width:300px;height:650px;border-radius:38px;overflow:hidden;
+  box-shadow:0 40px 80px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.08);backface-visibility:hidden}
+.card img{width:100%;height:100%;object-fit:cover}
+/* план */
+#planwrap{position:absolute;inset:0;perspective:1700px;perspective-origin:1250px 380px}
+#plan{position:absolute;left:820px;top:-80px;width:1000px;height:1141px;transform-origin:50% 50%;
+  -webkit-mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 40%,transparent 92%);mask-image:radial-gradient(ellipse 50% 50% at 50% 50%,#000 40%,transparent 92%)}
+#plan img{width:100%;height:100%;filter:invert(.94) hue-rotate(180deg) saturate(.65) brightness(1.05) contrast(1.05)}
+#plan{mix-blend-mode:screen}
+</style></head><body>
+<canvas id="bg" width="1920" height="1080"></canvas>
+
+<div class="sc" id="A"><div style="position:absolute;left:0;right:0;top:640px;text-align:center">
+  <p class="serif cream T" data-text="Человек жив, пока о нём помнят" style="font-size:66px;line-height:1.2"></p></div></div>
+
+<div class="sc" id="B"><div style="position:absolute;left:260px;top:0;height:1080px;display:flex;flex-direction:column;justify-content:center;gap:34px">
+  <p class="eyebrow T" data-text="Культурный код"></p>
+  <p class="serif cream T" data-text="Два чувства дивно близки нам,|В них обретает сердце пищу:|Любовь к родному пепелищу,|Любовь к отеческим гробам." style="font-size:70px;line-height:1.28;font-style:italic"></p>
+  <div style="display:flex;align-items:center;gap:24px"><div id="Brule" style="height:1px;width:120px;background:#C9A15E;transform-origin:left"></div><p class="sans muted T" data-text="А. С. Пушкин" style="font-size:24px;letter-spacing:4px"></p></div>
+</div></div>
+
+<div class="sc" id="C"><div style="position:absolute;left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:44px;text-align:center">
+  <p class="serif cream T" data-text="Миллионы семей живут|далеко от могил своих близких" style="font-size:76px;line-height:1.2"></p>
+  <p class="serif gold T" id="erode" data-text="Имена стираются" style="font-size:54px;font-style:italic"></p>
+</div></div>
+
+<div class="sc" id="D"><div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:30px">
+  <svg width="70" height="104" viewBox="0 0 64 96"><path id="emb" d="M32 4 C42 26 52 40 52 58 C52 76 43 88 32 88 C21 88 12 76 12 58 C12 40 22 26 32 4Z" fill="none" stroke="#C9A15E" stroke-width="2.4" stroke-dasharray="260" stroke-dashoffset="260"/><path id="emb2" d="M32 40 C37 52 40 58 40 66 C40 73 36 78 32 78 C28 78 24 73 24 66 C24 58 27 52 32 40Z" fill="#C9A15E" opacity="0"/></svg>
+  <h1 id="brand" class="serif" style="font-size:210px;line-height:1;color:transparent;-webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(100deg,#F3EEE3 0%,#F3EEE3 40%,#FBE3B0 50%,#F3EEE3 60%,#F3EEE3 100%);background-size:320% 100%">Память</h1>
+  <p class="sans muted T" data-text="Найти · Позаботиться · Сохранить" style="font-size:26px;letter-spacing:12px;text-transform:uppercase"></p>
+</div></div>
+
+<div class="sc" id="E">
+  <div id="fan"><div id="fanrig"></div></div>
+  <div style="position:absolute;left:0;right:0;bottom:96px;text-align:center"><p class="eyebrow T" data-text="Приложение «Память»"></p></div>
+</div>
+
+<div class="sc" id="F">
+  <div id="cam"><div id="glow"></div>
+    <div id="rig"></div>
+  </div>
+  <div class="chap" id="ch0"><p class="no">01 <span>/ 06</span></p><h2 class="T" data-text="Найти|близкого"></h2><p class="T" data-text="Фамилия — и вы на странице памяти. Свечу можно зажечь из любого города."></p></div>
+  <div class="chap" id="ch1"><p class="no">02 <span>/ 06</span></p><h2 class="T" data-text="Прийти|к нужному месту"></h2><p class="T" data-text="Реальный план кладбища в деревне Даймище. Номер места — и маршрут."></p></div>
+  <div class="chap" id="ch2"><p class="no">03 <span>/ 06</span></p><h2 class="T" data-text="Позаботиться"></h2><p class="T" data-text="Уборка, цветы, свечи — в пару касаний. Оплата после результата."></p></div>
+  <div class="chap" id="ch3"><p class="no">04 <span>/ 06</span></p><h2 class="T" data-text="Работу ведёт|кладбище"></h2><p class="T" data-text="Заказ выполняет администрация кладбища. Без фото «до» и «после» его не закрыть."></p></div>
+  <div class="chap" id="ch4"><p class="no">05 <span>/ 06</span></p><h2 class="T" data-text="Увидеть|результат"></h2><p class="T" data-text="Фотоотчёт: как было и как стало — даже за тысячу километров."></p></div>
+  <div class="chap" id="ch5"><p class="no">06 <span>/ 06</span></p><h2 class="T" data-text="Помнить|даты"></h2><p class="T" data-text="Напомним о годовщине и родительских субботах."></p></div>
+  <div id="bars"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+  <p id="demo">Демонстрационные данные · план Даймища — реальная съёмка</p>
+</div>
+
+<div class="sc" id="G">
+  <div id="planwrap"><div id="plan"><img src="../deck-img/plan.png"></div></div>
+  <div style="position:absolute;left:150px;top:0;height:1080px;width:760px;display:flex;flex-direction:column;justify-content:center;gap:30px">
+    <p class="eyebrow T" data-text="Уже сделано"></p>
+    <h2 class="serif cream T" data-text="Даймище|оцифровано полностью" style="font-size:88px;line-height:1.05"></h2>
+    <div id="nums" style="display:flex;gap:56px;margin-top:16px">
+      <div><p class="serif gold" id="n1" style="font-size:80px;line-height:1">382</p><p class="sans muted" style="font-size:22px;margin-top:10px">места на плане</p></div>
+      <div><p class="serif gold" id="n2" style="font-size:80px;line-height:1">375</p><p class="sans muted" style="font-size:22px;margin-top:10px">имён с памятников</p></div>
+      <div><p class="serif gold" style="font-size:80px;line-height:1">1–3 м</p><p class="sans muted" style="font-size:22px;margin-top:10px">точность</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sc" id="H">
+  <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center">
+    <p class="serif gold" id="n73" style="font-size:170px;line-height:1">73 000</p>
+    <p class="serif cream T" data-text="кладбищ в России.|Единый точный реестр — для каждого региона." style="font-size:56px;line-height:1.3"></p></div>
+  <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center">
+    <p class="eyebrow T" data-text="Честно и прозрачно"></p>
+    <p class="serif cream T" data-text="Каждый заказ — с договором,|чеком и фотоотчётом" style="font-size:76px;line-height:1.2"></p></div>
+  <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center">
+    <p class="eyebrow T" data-text="Связь поколений"></p>
+    <p class="serif cream T" data-text="Память о предках —|общее дело народа и государства" style="font-size:76px;line-height:1.2"></p></div>
+</div>
+
+<div class="sc" id="I"><div style="position:absolute;left:0;right:0;top:600px;display:flex;flex-direction:column;align-items:center;gap:26px;text-align:center">
+  <h1 class="serif cream T" data-text="Память" style="font-size:150px;line-height:1;letter-spacing:4px"></h1>
+  <p class="serif muted T" data-text="Сохраним память вместе" style="font-size:44px;font-style:italic"></p>
+  <p class="sans T" data-text="Д. С. Пчеленков   ·   В. В. Уваров   ·   П. А. Краснощеков" style="font-size:22px;letter-spacing:2px;color:rgba(174,184,164,.75);margin-top:30px"></p>
+</div></div>
+
+<canvas id="top" width="1920" height="1080"></canvas>
+<script>
+const $ = s => document.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)]
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x))
+const sm = x => { x = clamp(x); return x * x * (3 - 2 * x) }
+const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 }
+const expo = x => { x = clamp(x); return x === 1 ? 1 : 1 - Math.pow(2, -10 * x) }
+const inout = x => { x = clamp(x); return x < .5 ? 8 * x ** 4 : 1 - Math.pow(-2 * x + 2, 4) / 2 }
+const lerp = (a, b, k) => a + (b - a) * k
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+const T = window.TL
+
+// текст → строки/слова/буквы
+$$('.T').forEach(el => {
+  el.innerHTML = el.dataset.text.split('|').map(l => '<span class="ln">' + l.split(' ').map(w => w ? '<span class="wd">' + [...w].map(c => `<span class="c">${c}</span>`).join('') + '</span>' : '').join(' ') + '</span>').join('')
+  el._c = $$('.c', el)
+})
+// появление по буквам: из расфокуса, снизу; уход — расфокус и вверх
+function chars(el, t, a, b, o = {}) {
+  const st = o.st ?? .028, dur = o.dur ?? 1.1, dy = o.dy ?? .28, bl = o.blur ?? 12, out = o.out ?? .7
+  const ko = sm((b - t) / out)
+  el._c.forEach((c, i) => {
+    const k = expo((t - a - i * st) / dur)
+    c.style.opacity = Math.min(k, ko)
+    c.style.transform = `translateY(${(1 - k) * dy + (1 - ko) * -.25}em)`
+    const f = (1 - k) * bl + (1 - ko) * 10
+    c.style.filter = f > .05 ? `blur(${f}px)` : 'none'
+  })
+}
+
+// ---------- фон: свет, туман, боке; сверху — зерно и виньетка
+const bg = $('#bg').getContext('2d'), topc = $('#top').getContext('2d')
+let seed = 3; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+const bokeh = Array.from({ length: 46 }, () => ({ x: rnd() * 2200 - 140, y: rnd() * 1300 - 110, r: 6 + Math.pow(rnd(), 2) * 70, z: .2 + rnd() * .9, a: .04 + rnd() * .16, ph: rnd() * 6.28, gold: rnd() < .7 }))
+const dust = Array.from({ length: 120 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, r: .5 + rnd() * 1.6, v: 6 + rnd() * 16, ph: rnd() * 6.28 }))
+const dots = []
+for (let i = 0; i < 2400; i++) {
+  const x = rnd(), y = rnd()
+  const edge = .35 + .25 * Math.sin(x * 5.2 + 1) * Math.cos(x * 2.1) + .1 * Math.sin(x * 13), tp = .18 + .12 * Math.sin(x * 4 + .5) + .05 * Math.cos(x * 11)
+  if (y > tp && y < tp + edge + .25) dots.push({ x: 160 + x * 1600, y: 140 + y * 800, d: rnd(), r: .8 + rnd() * 1.5 })
+}
+const grains = [0, 1, 2, 3, 4, 5].map(() => {
+  const c = document.createElement('canvas'); c.width = 480; c.height = 270; const g = c.getContext('2d'), im = g.createImageData(480, 270)
+  for (let i = 0; i < im.data.length; i += 4) { const v = 128 + (rnd() - .5) * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255 }
+  g.putImageData(im, 0, 0); return c
+})
+function blob(g, x, y, r, col, a) {
+  const gr = g.createRadialGradient(x, y, 0, x, y, r)
+  gr.addColorStop(0, `rgba(${col},${a})`); gr.addColorStop(.45, `rgba(${col},${a * .45})`); gr.addColorStop(1, `rgba(${col},0)`)
+  g.fillStyle = gr; g.fillRect(x - r, y - r, r * 2, r * 2)
+}
+function flame(g, x, y, s, t, a) {
+  const fl = 1 + .05 * Math.sin(t * 11) + .04 * Math.sin(t * 17.3) + .03 * Math.sin(t * 5.1)
+  blob(g, x, y - 10 * s, 420 * s * (1 + .03 * Math.sin(t * 6)), '255,196,110', .30 * a)
+  blob(g, x, y - 10 * s, 120 * s, '255,214,150', .45 * a)
+  g.save(); g.translate(x + Math.sin(t * 3.1) * 1.5 * s, y); g.scale(s * (1 + .02 * Math.sin(t * 9)), s * fl)
+  const p = new Path2D('M0 -64 C10 -40 17 -26 17 -10 C17 2 9 10 0 10 C-9 10 -17 2 -17 -10 C-17 -26 -10 -40 0 -64Z')
+  const gr = g.createLinearGradient(0, 10, 0, -64)
+  gr.addColorStop(0, `rgba(233,150,60,${a})`); gr.addColorStop(.45, `rgba(250,206,120,${a})`); gr.addColorStop(1, `rgba(255,246,220,${a})`)
+  g.filter = 'blur(1.4px)'; g.fillStyle = gr; g.fill(p)
+  const core = g.createRadialGradient(0, -6, 0, 0, -6, 12); core.addColorStop(0, `rgba(255,255,245,${a})`); core.addColorStop(1, 'rgba(255,255,245,0)')
+  g.fillStyle = core; g.fill(p); g.filter = 'none'; g.restore()
+}
+function drawBg(t, st) {
+  const g = bg
+  const base = g.createRadialGradient(960, 520, 0, 960, 540, 1250)
+  base.addColorStop(0, '#1b3217'); base.addColorStop(.55, '#0f1d0d'); base.addColorStop(1, '#050a05')
+  g.fillStyle = base; g.fillRect(0, 0, 1920, 1080)
+  g.globalCompositeOperation = 'screen'
+  const w = st.warm
+  blob(g, 960 + 520 * Math.sin(t * .07), 420 + 160 * Math.cos(t * .09), 900, '201,161,94', .10 + .10 * w)
+  blob(g, 420 + 260 * Math.cos(t * .05 + 1), 760 + 120 * Math.sin(t * .08), 760, '90,138,82', .10)
+  blob(g, 1560 + 200 * Math.sin(t * .06 + 2), 300 + 140 * Math.sin(t * .05), 700, '142,189,134', .06)
+  // туман
+  for (let i = 0; i < 3; i++) blob(g, ((t * (14 + i * 6) + i * 700) % 2600) - 340, 600 + i * 150, 620, '220,230,210', .025)
+  // боке с параллаксом
+  for (const b of bokeh) {
+    const x = b.x + st.px * b.z * 120 + Math.sin(t * .2 + b.ph) * 30 * b.z, y = b.y - t * 8 * b.z + Math.cos(t * .17 + b.ph) * 20
+    const yy = ((y % 1300) + 1300) % 1300 - 110, tw = .7 + .3 * Math.sin(t * .9 + b.ph)
+    blob(g, x, yy, b.r, b.gold ? '230,190,120' : '200,225,195', b.a * tw * st.bokeh)
+  }
+  for (const d of dust) {
+    const y = ((d.y - t * d.v) % 1080 + 1080) % 1080, x = d.x + Math.sin(t * .4 + d.ph) * 26
+    g.fillStyle = `rgba(230,200,140,${(.18 + .25 * Math.sin(t * 1.3 + d.ph * 3)) * st.dust})`; g.beginPath(); g.arc(x, y, d.r, 0, 6.283); g.fill()
+  }
+  if (st.dots > 0) {
+    for (const p of dots) {
+      const ex = (p.x - 960) / 820, ey = (p.y - 540) / 260, q = .15 + .85 * clamp((Math.hypot(ex, ey) - .5) / .6)
+      const on = clamp((st.lit - p.d) * 7) * q
+      const x = p.x + st.px * 40, y = p.y + Math.sin(t * .5 + p.d * 9) * 3
+      g.fillStyle = on > 0 ? `rgba(236,198,126,${(.18 + .7 * on) * st.dots})` : `rgba(196,222,192,${.07 * q * st.dots})`
+      g.beginPath(); g.arc(x, y, p.r + on, 0, 6.283); g.fill()
+      if (on > .7 && p.r > 1.9) blob(g, x, y, 14, '236,198,126', .10 * st.dots)
+    }
+  }
+  if (st.flame > 0) flame(g, st.fx, st.fy, st.fs, t, st.flame)
+  g.globalCompositeOperation = 'source-over'
+}
+function drawTop(t, f) {
+  const g = topc; g.clearRect(0, 0, 1920, 1080)
+  const v = g.createRadialGradient(960, 540, 380, 960, 540, 1150)
+  v.addColorStop(0, 'rgba(0,0,0,0)'); v.addColorStop(1, 'rgba(0,0,0,.62)')
+  g.fillStyle = v; g.fillRect(0, 0, 1920, 1080)
+  g.globalAlpha = .055; g.globalCompositeOperation = 'overlay'
+  g.drawImage(grains[f % grains.length], (f * 37) % 40 - 40, (f * 53) % 30 - 30, 1980, 1114)
+  g.globalAlpha = 1; g.globalCompositeOperation = 'source-over'
+  if (T.fadeBlack(t) > 0) { g.fillStyle = `rgba(4,8,4,${T.fadeBlack(t)})`; g.fillRect(0, 0, 1920, 1080) }
+}
+
+// ---------- телефон с толщиной
+const rig = $('#rig')
+for (let i = 12; i >= 1; i--) { const d = document.createElement('div'); d.className = 'slab'; d.style.transform = `translateZ(${-i * 1.5}px)`; d.style.background = i === 12 ? '#070b07' : (i < 3 ? '#1d261b' : '#10170f'); rig.appendChild(d) }
+rig.insertAdjacentHTML('beforeend', '<div id="front"><div id="screen"><img id="shB"><img id="shA"></div><div id="gloss"></div></div>')
+
+// ---------- веер экранов
+const IMGS = ['01-search', '02-grave', '04-candle', '03-catalog', '05-report']
+IMGS.forEach((n, i) => $('#fanrig').insertAdjacentHTML('beforeend', `<div class="card"><img src="../deck-img/${n}.png"></div>`))
+
+const shots = window.SHOTS
+function frameAt(ci, local) {
+  const s = shots[ci], ts = s.a + Math.max(0, local) * s.speed, f = s.frames
+  let lo = 0, hi = f.length - 1
+  if (ts <= f[0][1]) return `${s.dir}/${f[0][0]}`
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (f[m][1] <= ts) lo = m; else hi = m - 1 }
+  return `${s.dir}/${f[lo][0]}`
+}
+async function setImg(img, src) { if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; try { await img.decode() } catch (e) {} } }
+function cam(keys, t) {   // ключи [t, zoom, fx, fy] → плавно
+  if (t <= keys[0][0]) return keys[0]
+  for (let i = 1; i < keys.length; i++) if (t <= keys[i][0]) {
+    const [a, ...A] = keys[i - 1], [b, ...B] = keys[i], k = inout((t - a) / (b - a)); return [t, ...A.map((v, j) => lerp(v, B[j], k))]
+  }
+  return keys[keys.length - 1]
+}
+function show(id, t, a, b) { const on = t > a - .05 && t < b + .05; $('#' + id).style.display = on ? 'block' : 'none'; return on }
+
+window.render = async function (t, frame) {
+  const S = T.sc
+  const st = { warm: 0, px: 0, bokeh: 1, dust: .6, dots: 0, lit: 0, flame: 0, fx: 960, fy: 470, fs: 1 }
+  // A — свеча
+  if (show('A', t, ...S.A)) chars($('#A .T'), t, S.A[0] + 1.6, S.A[1], { st: .045, dur: 1.4 })
+  st.flame = Math.min(sm((t - .3) / 2.2), sm((S.A[1] + .2 - t) / 1.2)) + sm((t - S.I[0] - .2) / 2) * .9
+  st.fy = t < 60 ? 470 - 20 * sm(t / 8) : 470; st.fs = t < 60 ? 1.5 : 1.25
+  st.warm = Math.max(sm((t - S.D[0]) / 2) * sm((S.D[1] - t) / 1.5), .4 * st.flame)
+  // B — Пушкин
+  if (show('B', t, ...S.B)) {
+    const els = $$('#B .T'); chars(els[0], t, S.B[0] + .2, S.B[1]); chars(els[1], t, S.B[0] + .6, S.B[1], { st: .02, dur: 1.3 }); chars(els[2], t, S.B[0] + 3.4, S.B[1])
+    $('#Brule').style.transform = `scaleX(${expo((t - S.B[0] - 3.2) / 1.2) * sm((S.B[1] - t) / .7)})`
+    $('#B > div').style.transform = `translateX(${-(t - S.B[0]) * 6}px)`
+  }
+  // C — расстояние и «стирающиеся имена»
+  if (show('C', t, ...S.C)) {
+    const [l1, l2] = $$('#C .T'); chars(l1, t, S.C[0] + .2, S.C[1], { st: .022 })
+    chars(l2, t, S.C[0] + 2.6, S.C[1], { st: .05, dur: 1.2 })
+    l2._c.forEach((c, i) => {   // буквы рассыпаются в туман
+      const s = S.C[0] + 5.0 + ((i * 7) % 11) * .12, k = sm((t - s) / 1.3)
+      if (k > 0) { c.style.opacity = Math.min(+c.style.opacity, 1 - k); c.style.filter = `blur(${k * 14}px)`; c.style.transform = `translate(${k * (i % 2 ? 18 : -14)}px,${-k * 30}px)` }
+    })
+    $('#C > div').style.transform = `scale(${1 + .03 * clamp((t - S.C[0]) / 8)})`
+  }
+  // D — название
+  if (show('D', t, ...S.D)) {
+    const a = S.D[0], ko = sm((S.D[1] - t) / .8)
+    $('#emb').style.strokeDashoffset = 260 * (1 - inout((t - a - .2) / 1.6)); $('#emb2').setAttribute('opacity', sm((t - a - 1.4) / .8))
+    const k = expo((t - a - .5) / 1.8)
+    const br = $('#brand'); br.style.opacity = Math.min(k, ko); br.style.letterSpacing = `${lerp(60, 6, k)}px`
+    br.style.filter = `blur(${(1 - k) * 18 + (1 - ko) * 12}px)`; br.style.backgroundPosition = `${100 - 100 * clamp((t - a - 1.6) / 2.4)}% 0`
+    br.style.transform = `scale(${1 + .04 * clamp((t - a) / 6)})`
+    chars($('#D .T'), t, a + 1.8, S.D[1], { st: .02 })
+    $('#D svg').style.opacity = ko
+  }
+  // E — веер экранов
+  if (show('E', t, ...S.E)) {
+    const a = S.E[0], b = S.E[1], k = (t - a) / (b - a), kin = expo((t - a) / 1.8), kout = inout((t - (b - 1.4)) / 1.4)
+    $$('.card').forEach((c, i) => {
+      const n = i - 2, spread = lerp(.55, 1, kin) + kout * .9
+      c.style.transform = `translateX(${n * 350 * spread - k * 120}px) translateZ(${-Math.abs(n) * 160 - 380 + kin * 200 + kout * 900}px) rotateY(${-n * 14 + (1 - kin) * n * 10}deg)`
+      c.style.opacity = Math.min(kin, 1 - kout)
+    })
+    $('#fanrig').style.transform = `translateZ(${kin * 120}px) rotateX(${4 - 4 * k}deg)`
+    chars($('#E .T'), t, a + .6, b - .3)
+    st.px = -k
+  }
+  // F — приложение
+  if (show('F', t, ...S.F)) {
+    const [a, b] = S.F, i = Math.max(0, T.ch.findIndex(([x, y]) => t < y)), [c0, c1] = T.ch[i], local = t - c0
+    const [, z, fx, fy] = cam(T.cams[i], local)
+    const zf = clamp((z - 1) / .9)
+    const enter = inout((t - a) / 1.8), leave = inout((t - (b - 1.2)) / 1.2)
+    const swing = i > 0 ? Math.sin(clamp(local / .9) * Math.PI) * 16 : 0
+    const ry = lerp(-38, 0, enter) + (-11 + 3 * Math.sin(t * .33)) * (1 - zf) + swing + leave * 30
+    const rx = (4 + 1.5 * Math.sin(t * .27)) * (1 - zf) + leave * 8
+    const ox = (fx - 195) * 384 / 390, oy = (fy - 422) * 830 / 844
+    const tz = lerp(-1400, 0, enter) - leave * 900
+    rig.style.transform = `translate3d(${-z * ox + zf * 70}px,${-z * oy + Math.sin(t * .6) * 6 * (1 - zf)}px,${tz}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${z})`
+    rig.style.opacity = Math.min(sm((t - a) / .8), 1 - sm((t - (b - .6)) / .6))
+    $('#gloss').style.backgroundPosition = `${50 + ry * 3}% 0`
+    $('#glow').style.opacity = .7 + .3 * Math.sin(t * .5)
+    const A = $('#shA'), B = $('#shB')
+    await setImg(A, frameAt(i, local))
+    const x = local / .6
+    if (i > 0 && x < 1) { await setImg(B, frameAt(i - 1, t - T.ch[i - 1][0])); B.style.opacity = 1; A.style.opacity = sm(x); A.style.filter = `blur(${(1 - sm(x)) * 8}px)` }
+    else { B.style.opacity = 0; A.style.opacity = 1; A.style.filter = 'none' }
+    T.ch.forEach(([x0, x1], j) => {
+      const el = $('#ch' + j), on = t > x0 - .1 && t < x1 + .1
+      el.style.display = on ? 'flex' : 'none'
+      if (on) {
+        const [h, p] = $$('.T', el); chars(h, t, x0 + .15, x1, { st: .03, out: .5 }); chars(p, t, x0 + .7, x1, { st: .008, dur: .9, blur: 8, out: .45 })
+        const no = $('.no', el), kk = Math.min(expo((t - x0) / .8), sm((x1 - t) / .4)); no.style.opacity = kk; no.style.transform = `translateX(${(1 - kk) * -20}px)`
+      }
+      $$('#bars i')[j].style.transform = `scaleX(${clamp((t - x0) / (x1 - x0))})`
+    })
+    const fo = Math.min(sm((t - a - 1) / 1), sm((b - t) / .8)); $('#bars').style.opacity = fo; $('#demo').style.opacity = fo
+    st.px = Math.sin(t * .2) * .5; st.bokeh = .8
+  }
+  // G — план Даймища в пространстве
+  if (show('G', t, ...S.G)) {
+    const [a, b] = S.G, k = (t - a) / (b - a), kin = inout((t - a) / 2), ko = sm((b - t) / .9)
+    const pl = $('#plan')
+    pl.style.transform = `rotateX(${lerp(20, 54, kin)}deg) rotateZ(${lerp(-8, -26, k)}deg) translateY(${lerp(120, -60, k)}px) scale(${lerp(.8, 1.12, kin)})`
+    pl.style.opacity = Math.min(kin, ko)
+    const [e, h] = $$('#G .T'); chars(e, t, a + .4, b); chars(h, t, a + .7, b, { st: .03 })
+    const nk = expo((t - a - 2.2) / 1.8), nm = $('#nums'); nm.style.opacity = Math.min(sm((t - a - 2) / .8), ko); nm.style.transform = `translateY(${(1 - sm((t - a - 2) / .8)) * 20}px)`
+    $('#n1').textContent = fmt(382 * nk); $('#n2').textContent = fmt(375 * nk)
+    st.px = k
+  }
+  // H — страна
+  st.dots = Math.min(sm((t - S.H[0] + .5) / 1.5), sm((S.H[1] + .8 - t) / 1.4)); st.lit = clamp((t - S.H[0]) / 11)
+  if (show('H', t, ...S.H)) {
+    $$('#H .st').forEach((el, i) => {
+      const a = S.H[0] + .3 + i * T.stLen, b = a + T.stLen - .1, on = t > a - .05 && t < b + .05
+      el.style.display = on ? 'flex' : 'none'
+      if (!on) return
+      $$('.T', el).forEach((x, j) => chars(x, t, a + .15 + j * .35, b, { st: .022, out: .55 }))
+      el.style.transform = `scale(${1 + .03 * clamp((t - a) / T.stLen)})`
+      if (i === 0) { const n = $('#n73'), k = expo((t - a) / 2.2); n.textContent = fmt(73000 * k); n.style.opacity = Math.min(sm((t - a) / .5), sm((b - t) / .55)); n.style.filter = `blur(${(1 - sm((t - a) / .6)) * 10 + (1 - sm((b - t) / .55)) * 10}px)` }
+    })
+    st.px = (t - S.H[0]) / 12; st.dust = .3
+  }
+  // I — финал
+  if (show('I', t, ...S.I)) { const T3 = $$('#I .T'); chars(T3[0], t, S.I[0] + 1.2, S.I[1] + 9, { st: .08, dur: 1.6 }); chars(T3[1], t, S.I[0] + 2.4, S.I[1] + 9); chars(T3[2], t, S.I[0] + 3.4, S.I[1] + 9, { st: .01 }) }
+  drawBg(t, st); drawTop(t, frame)
+}
+</script></body></html>
