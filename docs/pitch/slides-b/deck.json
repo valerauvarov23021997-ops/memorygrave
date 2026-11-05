@@ -1,0 +1,30 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-11-05T15:20:00Z" },
+  "lists": "css",
+  "title": "«Память» — партнёрство с государством (вариант Б: бесплатный реестр)",
+  "cover": "cover",
+  "order": [
+    "cover", "pushkin", "legend",
+    "problem", "daymische-truth",
+    "solution", "proof", "accuracy", "app",
+    "how", "bread", "problems-solved",
+    "state-why", "state-args", "treasury", "concession",
+    "cost", "model", "unit", "plan3y", "compare",
+    "offer", "roadmap", "more", "now", "team", "close"
+  ],
+  "sections": {
+    "s1": { "description": "Зачем: память о предках как общее дело народа", "start": "cover" },
+    "s2": { "description": "Проблема: память о конкретных людях теряется каждый день", "start": "problem" },
+    "s3": { "description": "Решение и доказательство: кладбище Даймище оцифровано полностью", "start": "solution" },
+    "s4": { "description": "Как работаем с администрациями кладбищ и какие проблемы закрываем", "start": "how" },
+    "s5": { "description": "Зачем это государству", "start": "state-why" },
+    "s6": { "description": "Себестоимость, бизнес-модель и финансовая модель с бесплатным реестром", "start": "cost" },
+    "s7": { "description": "Предложение о доле государства, национальный план и честный статус", "start": "offer" }
+  },
+  "faces": {
+    "playfair-display": { "family": "Playfair Display", "href": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&display=swap" },
+    "manrope": { "family": "Manrope", "href": "https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" }
+  },
+  "designSystems": []
+}
