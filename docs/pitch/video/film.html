@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Manrope:wght@300..700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#1C3318}
+#bg{position:absolute;inset:0}
+canvas{position:absolute;inset:0}
+.layer{position:absolute;inset:0;opacity:0;will-change:opacity,transform}
+.serif{font-family:'Playfair Display',Georgia,serif;font-weight:400}
+.sans{font-family:'Manrope',Arial,sans-serif}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.eyebrow{font-family:'Manrope';font-weight:600;font-size:22px;letter-spacing:7px;text-transform:uppercase;color:#B8935A}
+.line{opacity:0}
+.rule{width:120px;height:2px;background:#B8935A}
+#phone{position:absolute;left:1180px;top:90px;width:436px;height:900px;border-radius:66px;background:#141d12;
+  box-shadow:0 40px 90px rgba(28,51,24,.28),0 8px 24px rgba(28,51,24,.18),inset 0 0 0 2px #2a3527;opacity:0}
+#screen{position:absolute;left:19px;top:19px;width:398px;height:862px;border-radius:50px;overflow:hidden;background:#FAF7F2}
+#screen img{position:absolute;inset:0;width:398px;height:862px}
+#halo{position:absolute;left:1398px;top:540px;width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,147,90,.18),rgba(184,147,90,0) 65%);opacity:0}
+.ch{position:absolute;left:150px;top:0;width:820px;height:1080px;display:flex;flex-direction:column;justify-content:center;gap:28px;opacity:0}
+.ch .num{font-family:'Playfair Display';font-size:30px;color:#B8935A;letter-spacing:3px}
+.ch h2{font-family:'Playfair Display';font-weight:400;font-size:96px;line-height:1.02;color:#1C3318}
+.ch p{font-family:'Manrope';font-size:33px;line-height:1.5;color:#4A4A40;max-width:720px}
+.ch .note{font-size:22px;color:#9A9A8E;letter-spacing:.3px}
+#progress{position:absolute;left:150px;bottom:92px;display:flex;gap:14px;opacity:0}
+#progress div{width:64px;height:3px;background:#DDD5C4;position:relative;overflow:hidden}
+#progress div i{position:absolute;inset:0;background:#B8935A;transform-origin:left;transform:scaleX(0)}
+#demo{position:absolute;left:150px;bottom:44px;font-family:'Manrope';font-size:19px;color:#A8A294;opacity:0}
+</style></head><body>
+<div id="bg"></div>
+<canvas id="fx" width="1920" height="1080"></canvas>
+
+<!-- 1. Вступление -->
+<div class="layer center" id="s1">
+  <svg id="candle" width="120" height="260" viewBox="0 0 120 260" style="margin-bottom:56px">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="40%" r="50%"><stop offset="0" stop-color="#F6D58A" stop-opacity=".55"/><stop offset="1" stop-color="#F6D58A" stop-opacity="0"/></radialGradient>
+      <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E8A23A"/><stop offset=".55" stop-color="#F6CF6E"/><stop offset="1" stop-color="#FFF4D6"/></linearGradient>
+      <linearGradient id="wax" x1="0" x2="1"><stop offset="0" stop-color="#E9E1CF"/><stop offset=".5" stop-color="#FAF7F2"/><stop offset="1" stop-color="#D9CFB9"/></linearGradient>
+    </defs>
+    <circle id="glowc" cx="60" cy="62" r="60" fill="url(#glow)"/>
+    <path id="flamep" d="M60 18 C70 40 76 52 76 66 C76 78 69 86 60 86 C51 86 44 78 44 66 C44 52 50 40 60 18Z" fill="url(#flame)"/>
+    <line x1="60" y1="84" x2="60" y2="98" stroke="#3a2f22" stroke-width="2.5"/>
+    <rect x="38" y="96" width="44" height="164" rx="4" fill="url(#wax)"/>
+  </svg>
+  <p class="serif line" id="s1a" style="font-size:64px;color:#FAF7F2;line-height:1.2">Человек жив, пока о нём помнят</p>
+</div>
+
+<!-- 2. Пушкин -->
+<div class="layer center" id="s2" style="gap:22px">
+  <p class="eyebrow line" id="s2e" style="margin-bottom:26px">Культурный код</p>
+  <p class="serif line" style="font-size:58px;color:#1C3318;font-style:italic">Два чувства дивно близки нам,</p>
+  <p class="serif line" style="font-size:58px;color:#1C3318;font-style:italic">В них обретает сердце пищу:</p>
+  <p class="serif line" style="font-size:58px;color:#1C3318;font-style:italic">Любовь к родному пепелищу,</p>
+  <p class="serif line" style="font-size:58px;color:#1C3318;font-style:italic">Любовь к отеческим гробам.</p>
+  <p class="sans line" style="font-size:26px;color:#6B6B5E;margin-top:30px;letter-spacing:2px">А. С. Пушкин</p>
+</div>
+
+<!-- 3. Традиции -->
+<div class="layer center" id="s3" style="gap:30px">
+  <p class="eyebrow line">Веками</p>
+  <p class="serif line" style="font-size:76px;color:#FAF7F2">Радоница. Родительские субботы.</p>
+  <p class="serif line" style="font-size:76px;color:#FAF7F2">Мы приходим к своим.</p>
+</div>
+
+<!-- 4. Проблема -->
+<div class="layer center" id="s4" style="gap:34px">
+  <p class="serif line" style="font-size:66px;color:#1C3318;max-width:1400px;line-height:1.25">Но миллионы семей живут далеко<br>от могил своих близких</p>
+  <div class="rule line"></div>
+  <p class="sans line" style="font-size:36px;color:#4A4A40">Могилы зарастают. Имена стираются. Память уходит — тихо.</p>
+</div>
+
+<!-- 5. Имя -->
+<div class="layer center" id="s5" style="gap:30px">
+  <svg width="64" height="96" viewBox="0 0 64 96" class="line"><path d="M32 4 C42 26 52 40 52 58 C52 76 43 88 32 88 C21 88 12 76 12 58 C12 40 22 26 32 4Z" fill="none" stroke="#B8935A" stroke-width="3"/><path d="M32 40 C37 52 40 58 40 66 C40 73 36 78 32 78 C28 78 24 73 24 66 C24 58 27 52 32 40Z" fill="#B8935A"/></svg>
+  <h1 class="serif line" style="font-size:180px;font-weight:400;color:#FAF7F2;letter-spacing:6px;line-height:1">Память</h1>
+  <p class="sans line" style="font-size:30px;color:#C4DEC0;letter-spacing:10px;text-transform:uppercase">Найти · Позаботиться · Сохранить</p>
+</div>
+
+<!-- 6. Главы приложения -->
+<div id="halo"></div>
+<div id="phone"><div id="screen"><img id="shotA"><img id="shotB"></div></div>
+<div class="ch" id="c0"><p class="num">01 — Найти</p><h2>Найти<br>близкого</h2><p>Фамилия — и вы на странице памяти: даты, история, место. Зажгите свечу, где бы вы ни были.</p></div>
+<div class="ch" id="c1"><p class="num">02 — Прийти</p><h2>Каждое место<br>на плане</h2><p>Номер места — и маршрут до нужной могилы. Это реальная съёмка: кладбище в деревне Даймище.</p></div>
+<div class="ch" id="c2"><p class="num">03 — Позаботиться</p><h2>Уход<br>в два касания</h2><p>Уборка, цветы, свечи. Платить сейчас не нужно — оплата после результата.</p></div>
+<div class="ch" id="c3"><p class="num">04 — Сделать</p><h2>Работу ведёт<br>кладбище</h2><p>Заказ выполняет администрация кладбища. Без фото «до» и «после» заказ не закрыть.</p></div>
+<div class="ch" id="c4"><p class="num">05 — Увидеть</p><h2>Как было<br>и как стало</h2><p>Семья получает фотоотчёт и спокойствие — даже за тысячу километров.</p></div>
+<div class="ch" id="c5"><p class="num">06 — Помнить</p><h2>Ни одной<br>забытой даты</h2><p>День рождения, годовщина, родительские субботы — приложение напомнит заранее.</p></div>
+<div id="progress"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+<p id="demo">Приложение «Память» · демонстрационные данные · план Даймища — реальная съёмка</p>
+
+<!-- 7. Даймище -->
+<div class="layer" id="s7">
+  <div style="position:absolute;left:1010px;top:0;width:910px;height:1080px;overflow:hidden">
+    <img id="plan" src="../deck-img/plan.png" style="position:absolute;left:0;top:0;width:910px;height:auto;transform-origin:50% 40%">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,#FAF7F2 0,rgba(250,247,242,0) 22%)"></div>
+  </div>
+  <div style="position:absolute;left:150px;top:0;height:1080px;width:800px;display:flex;flex-direction:column;justify-content:center;gap:30px">
+    <p class="eyebrow line">Уже сделано</p>
+    <h2 class="serif line" style="font-size:88px;font-weight:400;color:#1C3318;line-height:1.05">Первое кладбище<br>оцифровано полностью</h2>
+    <div class="line" style="display:flex;gap:56px;margin-top:20px">
+      <div><p class="serif" style="font-size:80px;color:#B8935A;line-height:1">382</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">места на плане</p></div>
+      <div><p class="serif" style="font-size:80px;color:#B8935A;line-height:1">375</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">имён с памятников</p></div>
+      <div><p class="serif" style="font-size:80px;color:#B8935A;line-height:1">1–3 м</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">точность</p></div>
+    </div>
+    <p class="sans line" style="font-size:24px;color:#9A9A8E">Деревня Даймище, Ленинградская область · съёмка геодезиста</p>
+  </div>
+</div>
+
+<!-- 8. Страна -->
+<div class="layer" id="s8">
+  <div style="position:absolute;left:0;right:0;top:0;height:1080px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+    <div style="position:relative;width:1500px;height:420px">
+      <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;opacity:0">
+        <p class="eyebrow">Для страны</p>
+        <p class="serif" style="font-size:72px;color:#FAF7F2;line-height:1.2">Более 73 000 кладбищ.<br>Единый точный реестр — для каждого региона.</p></div>
+      <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;opacity:0">
+        <p class="eyebrow">Честно и прозрачно</p>
+        <p class="serif" style="font-size:72px;color:#FAF7F2;line-height:1.2">Каждый заказ — с договором, чеком<br>и фотоотчётом. Рынок выходит из тени.</p></div>
+      <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;opacity:0">
+        <p class="eyebrow">Вместе</p>
+        <p class="serif" style="font-size:72px;color:#FAF7F2;line-height:1.2">Кладбища получают заказчиков.<br>Семьи — уверенность и покой.</p></div>
+      <div class="st" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;text-align:center;opacity:0">
+        <p class="eyebrow">Связь поколений</p>
+        <p class="serif" style="font-size:72px;color:#FAF7F2;line-height:1.2">Память о предках — общее дело<br>народа и государства.</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- 9. Финал -->
+<div class="layer center" id="s9" style="gap:30px">
+  <svg width="64" height="96" viewBox="0 0 64 96" class="line"><path d="M32 4 C42 26 52 40 52 58 C52 76 43 88 32 88 C21 88 12 76 12 58 C12 40 22 26 32 4Z" fill="none" stroke="#B8935A" stroke-width="3"/><path d="M32 40 C37 52 40 58 40 66 C40 73 36 78 32 78 C28 78 24 73 24 66 C24 58 27 52 32 40Z" fill="#B8935A"/></svg>
+  <h1 class="serif line" style="font-size:150px;font-weight:400;color:#FAF7F2;letter-spacing:5px;line-height:1">Память</h1>
+  <p class="serif line" style="font-size:46px;color:#C4DEC0;font-style:italic">Сохраним память вместе</p>
+  <div class="rule line" style="margin:20px 0"></div>
+  <p class="sans line" style="font-size:24px;color:#9AA98F;letter-spacing:2px">Д. С. Пчеленков · В. В. Уваров · П. А. Краснощеков</p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)]
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x))
+const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 }
+const eout = x => 1 - Math.pow(1 - clamp(x), 3)
+// видимость отрезка [a,b] с плавным входом и выходом
+const vis = (t, a, b, i = .9, o = .9) => Math.min(ease((t - a) / i), ease((b - t) / o))
+const mix = (c1, c2, k) => { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = p(c1), B = p(c2); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})` }
+
+const T = window.TIMELINE   // задаётся снаружи
+const DARK = '#1C3318', CREAM = '#FAF7F2'
+
+function lines(el, t, a, step, b, dy = 18) {
+  el.querySelectorAll('.line').forEach((n, i) => {
+    const s = a + i * step, k = vis(t, s, b, 1.1, .8)
+    n.style.opacity = k
+    n.style.transform = `translateY(${(1 - eout((t - s) / 1.3)) * dy}px)`
+    n.style.filter = `blur(${(1 - eout((t - s) / 1)) * 4}px)`
+  })
+}
+
+// --- частицы: золотая пыль
+const fx = $('#fx'), g = fx.getContext('2d')
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+const dust = Array.from({ length: 140 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, r: .6 + rnd() * 2.2, v: 6 + rnd() * 16, ph: rnd() * 6.28, a: .15 + rnd() * .45 }))
+// точки для «страны»: облако, похожее на очертания суши, без претензии на карту
+const dots = []
+for (let i = 0; i < 2600; i++) {
+  const x = rnd(), y = rnd()
+  const edge = .35 + .25 * Math.sin(x * 5.2 + 1) * Math.cos(x * 2.1) + .1 * Math.sin(x * 13)
+  const top = .18 + .12 * Math.sin(x * 4 + .5) + .05 * Math.cos(x * 11)
+  if (y > top && y < top + edge + .25) dots.push({ x: 160 + x * 1600, y: 140 + y * 800, d: rnd(), r: .9 + rnd() * 1.6 })
+}
+
+function drawFx(t) {
+  g.clearRect(0, 0, 1920, 1080)
+  const dark = T.darkness(t)
+  if (dark > 0.01) {
+    for (const p of dust) {
+      const y = ((p.y - t * p.v) % 1080 + 1080) % 1080, x = p.x + Math.sin(t * .3 + p.ph) * 24
+      const tw = .55 + .45 * Math.sin(t * 1.3 + p.ph * 3)
+      g.fillStyle = `rgba(214,178,112,${p.a * tw * dark * T.dustK(t)})`
+      g.beginPath(); g.arc(x, y, p.r, 0, 6.283); g.fill()
+    }
+  }
+  const dk = T.dotsK(t)
+  if (dk > 0) {
+    const lit = T.dotsLit(t)
+    for (const p of dots) {
+      // под текстом точки приглушены, чтобы читалось
+      const ex = (p.x - 960) / 820, ey = (p.y - 540) / 250, q = .18 + .82 * clamp((Math.sqrt(ex * ex + ey * ey) - .55) / .6)
+      const on = clamp((lit - p.d) * 8) * q
+      g.fillStyle = on > 0 ? `rgba(226,190,120,${(.2 + .6 * on) * dk})` : `rgba(196,222,192,${.08 * q * dk})`
+      g.beginPath(); g.arc(p.x, p.y, p.r + on * .8, 0, 6.283); g.fill()
+      if (on > .5 && p.d < lit - .02 && p.r > 2.2) { g.fillStyle = `rgba(246,213,138,${.08 * dk})`; g.beginPath(); g.arc(p.x, p.y, 9, 0, 6.283); g.fill() }
+    }
+  }
+}
+
+// --- кадры приложения
+const shots = window.SHOTS  // [{dir, frames:[[file,ts]], a, b, speed}]
+function frameAt(ci, local) {
+  const s = shots[ci], ts = s.a + local * s.speed
+  const f = s.frames; let lo = 0, hi = f.length - 1
+  if (ts <= f[0][1]) return `${s.dir}/${f[0][0]}`
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (f[m][1] <= ts) lo = m; else hi = m - 1 }
+  return `${s.dir}/${f[lo][0]}`
+}
+async function setImg(img, src) {
+  if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; try { await img.decode() } catch (e) {} }
+}
+
+window.render = async function (t) {
+  const dark = T.darkness(t)
+  $('#bg').style.background = `radial-gradient(ellipse at 50% 45%, ${mix(CREAM, '#24401f', dark)}, ${mix('#F0EBE0', '#142611', dark)})`
+  drawFx(t)
+  const S = T.scenes
+  // 1
+  let k = vis(t, S.s1[0], S.s1[1], .01, 1.2); $('#s1').style.opacity = k
+  const fl = 1 + .04 * Math.sin(t * 9) + .03 * Math.sin(t * 13.7)
+  $('#flamep').setAttribute('transform', `translate(60 86) scale(${1 + .02 * Math.sin(t * 7)} ${fl}) translate(-60 -86)`)
+  $('#glowc').setAttribute('r', 58 + 5 * Math.sin(t * 5.3))
+  $('#candle').style.opacity = ease((t - .3) / 2.2)
+  lines($('#s1'), t, S.s1[0] + 2.4, 0, S.s1[1] + 5)
+  // 2–5
+  for (const [id, step] of [['s2', .9], ['s3', 1.1], ['s4', 1.6], ['s5', .7]]) {
+    const [a, b] = S[id]; $('#' + id).style.opacity = vis(t, a, b, .6, 1); lines($('#' + id), t, a + .3, step, b + 5)
+  }
+  // 6 — главы
+  const [ca, cb] = S.app
+  const pk = vis(t, ca, cb, 1.2, 1)
+  $('#phone').style.opacity = pk; $('#halo').style.opacity = pk
+  $('#phone').style.transform = `translateY(${(1 - eout((t - ca) / 1.6)) * 60 + (1 - eout((cb - t) / 1)) * 30}px)`
+  $('#progress').style.opacity = pk; $('#demo').style.opacity = pk
+  const bars = $$('#progress i')
+  let cur = -1
+  T.chapters.forEach(([a, b], i) => {
+    const el = $('#c' + i), kk = vis(t, a, b, .8, .6)
+    el.style.opacity = Math.min(kk, pk)
+    el.style.transform = `translateY(${(1 - eout((t - a) / 1.2)) * 26}px)`
+    el.querySelectorAll('h2,p').forEach((n, j) => { const s = a + .15 * j; n.style.opacity = ease((t - s) / .9); n.style.transform = `translateY(${(1 - eout((t - s) / 1.1)) * 14}px)` })
+    bars[i].style.transform = `scaleX(${clamp((t - a) / (b - a))})`
+    if (t >= a - .5 && t < b) cur = i
+  })
+  if (pk > 0) {
+    // перекрёстный переход между дублями
+    const i = Math.max(0, T.chapters.findIndex(([a, b]) => t < b))
+    const [a] = T.chapters[i], A = $('#shotA'), B = $('#shotB')
+    await setImg(A, frameAt(i, Math.max(0, t - a)))
+    const x = (t - a) / .5
+    if (i > 0 && x < 1) { const [pa] = T.chapters[i - 1]; await setImg(B, frameAt(i - 1, t - pa)); B.style.opacity = 1 - ease(x) }
+    else B.style.opacity = 0
+  }
+  // 7
+  k = vis(t, S.s7[0], S.s7[1], 1, 1); $('#s7').style.opacity = k
+  $('#plan').style.transform = `scale(${1.08 + .12 * clamp((t - S.s7[0]) / (S.s7[1] - S.s7[0]))}) translate(-10px,${-30 * clamp((t - S.s7[0]) / 10)}px)`
+  lines($('#s7'), t, S.s7[0] + .5, .5, S.s7[1] + 5)
+  // 8
+  k = vis(t, S.s8[0], S.s8[1], 1, 1); $('#s8').style.opacity = k
+  $$('#s8 .st').forEach((el, i) => {
+    const a = S.s8[0] + 1 + i * T.stLen, b = a + T.stLen - .2
+    el.style.opacity = vis(t, a, b, .9, .7)
+    el.style.transform = `translateY(${(1 - eout((t - a) / 1.3)) * 18}px)`
+    el.style.filter = `blur(${(1 - eout((t - a) / 1)) * 4}px)`
+  })
+  // 9
+  k = vis(t, S.s9[0], S.s9[1], 1, 2); $('#s9').style.opacity = k
+  lines($('#s9'), t, S.s9[0] + .5, .6, S.s9[1] + 9)
+}
+</script></body></html>
