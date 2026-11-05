@@ -1,46 +1,35 @@
-"""Национальная программа «Памяти» — финансовая модель.
-
-ФАКТЫ (источник):
-  в России более 73 тыс. кладбищ («Коммерсантъ», 13.08.2026)
-  федеральная платформа «Управление захоронениями»: данные о 14 тыс. кладбищ в НСПД (паспорт Минцифры)
-  рыночная цена инвентаризации: 817 509 ₽ за 9,6 га (Приморский край) ≈ 85 тыс ₽/га; подрядчики от 95 тыс ₽/га
-  Даймище: 382 места, ≈2,7 га, оцифровано не дороже 100 тыс ₽
-  исполнителю 80 %, платформе 20 %
-
-ОЦЕНКА КОМАНДЫ: 65–80 ₽ за захоронение при масштабе (берём 80).
-ДОПУЩЕНИЯ — проверяются пилотом.
-"""
-PLACES = 400            # мест на кладбище — консервативно, как сельское Даймище
-PILOT_COST = 100_000    # оцифровка кладбища в пилотный год (факт Даймища)
-SCALE_COST = 80 * PLACES
-CHECK, ORDERS, TAKE, REGISTRY = 2_000, 2, 0.20, 3_000
-MARKET_LO, MARKET_HI = 229_924, 256_500   # рынок за кладбище размером с Даймище
-
-YEARS = [  # (кладбищ накопительно, доля мест с заказами, команда/серверы/офис ₽ в год)
-    (100, 0.02, 15_000_000),
-    (3_000, 0.04, 60_000_000),
-    (14_000, 0.06, 180_000_000),
+"""Национальная программа: вариант А (реестр платный, 3 000 ₽/мес) и Б (реестр бесплатный)."""
+PLACES, PILOT_COST, SCALE_COST = 400, 100_000, 80 * 400
+CHECK, ORDERS, TAKE = 2_000, 2, 0.20
+YEARS = [  # (кладбищ накопительно, доля мест с заказами, команда ₽/год)
+    (100, 0.02, 15e6), (3_000, 0.04, 60e6), (14_000, 0.06, 180e6),
+    (14_000, 0.06, 180e6), (14_000, 0.06, 180e6),   # годы 4–5: без новых кладбищ
 ]
 
-prev, tot = 0, dict(cost=0, rev=0, adm=0, digit=0, gap=0)
-for i, (cem, share, team) in enumerate(YEARS, 1):
-    new = cem - prev
-    digit = new * (PILOT_COST if i == 1 else SCALE_COST)
-    # консервативно: новые кладбища подключаются в течение года — в среднем полгода в сервисе
-    live = prev + new / 2
-    gmv = live * PLACES * share * ORDERS * CHECK
-    rev = gmv * TAKE + live * REGISTRY * 12
-    adm = gmv * (1 - TAKE)
-    cost = digit + team
-    gap = max(cost - rev, 0)
-    print(f'Год {i}: кладбищ {cem:,} (+{new:,}); мест {cem*PLACES/1e6:.2f} млн; заказов {live*PLACES*share*ORDERS:,.0f}')
-    print(f'  кладбищам {adm/1e6:,.1f} млн; выручка {rev/1e6:,.1f} (реестр {live*REGISTRY*12/1e6:,.1f}); '
-          f'затраты {cost/1e6:,.1f} (оцифровка {digit/1e6:,.1f}); финансирование {gap/1e6:,.1f}; итог {(rev-cost)/1e6:+,.1f}')
-    for k, v in dict(cost=cost, rev=rev, adm=adm, digit=digit, gap=gap).items():
-        tot[k] += v
-    prev = cem
-print(f"\nИтого: финансирование {tot['gap']/1e6:.1f} млн; оцифровка {tot['digit']/1e6:.0f} млн")
-mature = PLACES * 0.06 * ORDERS * CHECK * TAKE + REGISTRY * 12
-print(f'Безубыточность при команде 180 млн: {180e6/mature:,.0f} кладбищ')
-for n in (14_000, 73_000):
-    print(f'{n:,} кладбищ: рынок {n*MARKET_LO/1e9:.1f}–{n*MARKET_HI/1e9:.1f} млрд; «Память» {n*SCALE_COST/1e9:.2f} млрд')
+def run(registry, label):
+    print(f'\n=== {label} ===')
+    prev, cum, fin3, fin = 0, 0.0, 0.0, 0.0
+    rows = []
+    for i, (cem, share, team) in enumerate(YEARS, 1):
+        new = cem - prev
+        digit = new * (PILOT_COST if i == 1 else SCALE_COST)
+        live = prev + new / 2
+        gmv = live * PLACES * share * ORDERS * CHECK
+        rev = gmv * TAKE + live * registry * 12
+        cost = digit + team
+        res = rev - cost
+        cum += res
+        fin += max(-res, 0)
+        if i <= 3:
+            fin3 += max(-res, 0)
+        rows.append((i, cem, gmv * (1 - TAKE), rev, cost, res, cum))
+        print(f'Год {i}: кладбищ {cem:>6,}; кладбищам {gmv*(1-TAKE)/1e6:7.1f}; выручка {rev/1e6:7.1f}; '
+              f'затраты {cost/1e6:6.1f}; итог {res/1e6:+7.1f}; накопленно {cum/1e6:+7.1f} млн')
+        prev = cem
+    mature = PLACES * 0.06 * ORDERS * CHECK * TAKE + registry * 12
+    print(f'финансирование за 3 года {fin3/1e6:.1f}; за 5 лет {fin/1e6:.1f} млн; '
+          f'безубыточность {180e6/mature:,.0f} кладбищ; бюджет на реестр при 14 000: {14_000*registry*12/1e6:.0f} млн/год')
+    return rows
+
+a = run(3_000, 'А: реестр 3 000 ₽/мес')
+b = run(0, 'Б: реестр бесплатный')
