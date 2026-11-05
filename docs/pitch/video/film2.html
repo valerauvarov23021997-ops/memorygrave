@@ -1,0 +1,304 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..700;1,400..700&family=Manrope:wght@300..800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1920px;height:1080px;overflow:hidden;background:#1C3318}
+#bg{position:absolute;inset:0}
+canvas{position:absolute;inset:0}
+.layer{position:absolute;inset:0;opacity:0}
+.center{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.serif{font-family:'Playfair Display',Georgia,serif;font-weight:400}
+.sans{font-family:'Manrope',Arial,sans-serif}
+.eyebrow{font-family:'Manrope';font-weight:700;font-size:22px;letter-spacing:8px;text-transform:uppercase;color:#B8935A}
+.w{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .02em .14em;margin-bottom:-.14em}
+.wi{display:inline-block;will-change:transform}
+.fade{opacity:0}
+.rule{height:2px;background:#B8935A;width:140px;transform-origin:center}
+/* приложение */
+#stage{position:absolute;inset:0;opacity:0}
+#phone{position:absolute;left:1190px;top:90px;width:436px;height:900px;border-radius:66px;background:#141d12;
+  box-shadow:0 50px 100px rgba(28,51,24,.30),0 10px 28px rgba(28,51,24,.18),inset 0 0 0 2px #2a3527;transform-origin:50% 55%}
+#screen{position:absolute;left:19px;top:19px;width:398px;height:862px;border-radius:50px;overflow:hidden;background:#FAF7F2}
+#screen img{position:absolute;inset:0;width:398px;height:862px}
+#glare{position:absolute;inset:0;border-radius:50px;background:linear-gradient(115deg,rgba(255,255,255,0) 40%,rgba(255,255,255,.16) 50%,rgba(255,255,255,0) 60%);background-size:300% 100%;pointer-events:none}
+#halo{position:absolute;left:1408px;top:540px;width:1000px;height:1000px;margin:-500px 0 0 -500px;border-radius:50%;
+  background:radial-gradient(circle,rgba(184,147,90,.22),rgba(184,147,90,0) 62%)}
+.ch{position:absolute;left:150px;top:0;width:900px;height:1080px;display:flex;flex-direction:column;justify-content:center;gap:26px;opacity:0}
+.ch .big{position:absolute;left:-20px;top:170px;font-family:'Playfair Display';font-size:360px;line-height:1;color:rgba(184,147,90,.10)}
+.ch .num{font-family:'Manrope';font-weight:700;font-size:22px;letter-spacing:7px;text-transform:uppercase;color:#B8935A}
+.ch h2{font-family:'Playfair Display';font-weight:400;font-size:100px;line-height:1.02;color:#1C3318}
+.ch p.d{font-family:'Manrope';font-size:33px;line-height:1.5;color:#4A4A40;max-width:700px}
+#progress{position:absolute;left:150px;bottom:92px;display:flex;gap:14px}
+#progress div{width:64px;height:3px;background:#DDD5C4;position:relative;overflow:hidden}
+#progress div i{position:absolute;inset:0;background:#B8935A;transform-origin:left;transform:scaleX(0)}
+#demo{position:absolute;left:150px;bottom:44px;font-family:'Manrope';font-size:19px;color:#A8A294}
+.chip{position:absolute;right:735px;display:flex;align-items:center;gap:14px;background:#FFFFFF;border-radius:999px;padding:16px 28px 16px 16px;
+  box-shadow:0 18px 40px rgba(28,51,24,.16),0 2px 6px rgba(28,51,24,.08);font-family:'Manrope';font-weight:700;font-size:25px;color:#1C3318;white-space:nowrap;opacity:0;transform-origin:right center}
+.chip b{width:40px;height:40px;border-radius:50%;background:#2E5028;display:flex;align-items:center;justify-content:center;flex:none}
+.chip b svg{width:22px;height:22px}
+</style></head><body>
+<div id="bg"></div>
+<canvas id="fx" width="1920" height="1080"></canvas>
+
+<div class="layer center" id="s1">
+  <svg id="candle" width="140" height="290" viewBox="0 0 120 260" style="margin-bottom:50px">
+    <defs>
+      <radialGradient id="glow" cx="50%" cy="40%" r="50%"><stop offset="0" stop-color="#F6D58A" stop-opacity=".6"/><stop offset="1" stop-color="#F6D58A" stop-opacity="0"/></radialGradient>
+      <linearGradient id="flame" x1="0" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#E8A23A"/><stop offset=".55" stop-color="#F6CF6E"/><stop offset="1" stop-color="#FFF4D6"/></linearGradient>
+      <linearGradient id="wax" x1="0" x2="1"><stop offset="0" stop-color="#E9E1CF"/><stop offset=".5" stop-color="#FAF7F2"/><stop offset="1" stop-color="#D9CFB9"/></linearGradient>
+    </defs>
+    <circle id="glowc" cx="60" cy="62" r="60" fill="url(#glow)"/>
+    <path id="flamep" d="M60 18 C70 40 76 52 76 66 C76 78 69 86 60 86 C51 86 44 78 44 66 C44 52 50 40 60 18Z" fill="url(#flame)"/>
+    <line x1="60" y1="84" x2="60" y2="98" stroke="#3a2f22" stroke-width="2.5"/>
+    <rect x="38" y="96" width="44" height="164" rx="4" fill="url(#wax)"/>
+  </svg>
+  <p class="serif words" style="font-size:72px;color:#FAF7F2;line-height:1.2">Человек жив, пока о нём помнят</p>
+</div>
+
+<div class="layer center" id="s2" style="gap:14px">
+  <p class="eyebrow fade" style="margin-bottom:30px">Культурный код</p>
+  <p class="serif words" style="font-size:62px;color:#1C3318;font-style:italic;line-height:1.3">Два чувства дивно близки нам,<br>В них обретает сердце пищу:<br>Любовь к родному пепелищу,<br>Любовь к отеческим гробам.</p>
+  <p class="sans fade" style="font-size:26px;color:#6B6B5E;margin-top:34px;letter-spacing:3px">А. С. Пушкин</p>
+</div>
+
+<div class="layer center" id="s3" style="gap:30px">
+  <p class="eyebrow fade">Веками</p>
+  <p class="serif words" style="font-size:84px;color:#FAF7F2;line-height:1.2">Радоница. Родительские субботы.<br>Мы приходим к своим.</p>
+</div>
+
+<div class="layer center" id="s4" style="gap:36px">
+  <p class="serif words" style="font-size:72px;color:#1C3318;line-height:1.22">Но миллионы семей живут далеко<br>от могил своих близких</p>
+  <div class="rule"></div>
+  <p class="sans words" style="font-size:38px;color:#4A4A40">Могилы зарастают. Имена стираются.</p>
+</div>
+
+<div class="layer center" id="s5" style="gap:28px">
+  <svg class="fade" width="64" height="96" viewBox="0 0 64 96"><path d="M32 4 C42 26 52 40 52 58 C52 76 43 88 32 88 C21 88 12 76 12 58 C12 40 22 26 32 4Z" fill="none" stroke="#B8935A" stroke-width="3"/><path d="M32 40 C37 52 40 58 40 66 C40 73 36 78 32 78 C28 78 24 73 24 66 C24 58 27 52 32 40Z" fill="#B8935A"/></svg>
+  <h1 id="title" class="serif" style="font-size:200px;font-weight:400;letter-spacing:8px;line-height:1.05;color:transparent;-webkit-background-clip:text;background-clip:text;
+    background-image:linear-gradient(100deg,#FAF7F2 0%,#FAF7F2 42%,#F6D9A0 50%,#FAF7F2 58%,#FAF7F2 100%);background-size:320% 100%">Память</h1>
+  <div class="rule" id="trule"></div>
+  <p class="sans fade" style="font-size:30px;color:#C4DEC0;letter-spacing:12px;text-transform:uppercase">Найти · Позаботиться · Сохранить</p>
+</div>
+
+<div id="stage">
+  <div id="halo"></div>
+  <div id="phone"><div id="screen"><img id="shotB"><img id="shotA"><div id="glare"></div></div></div>
+  <div class="ch" id="c0"><span class="big">01</span><p class="num">Найти</p><h2>Найти<br>близкого</h2><p class="d">Фамилия — и вы на странице памяти. Зажгите свечу, где бы вы ни были.</p></div>
+  <div class="ch" id="c1"><span class="big">02</span><p class="num">Прийти</p><h2>Каждое место<br>на плане</h2><p class="d">Номер места — и маршрут до нужной могилы. Реальная съёмка кладбища в деревне Даймище.</p></div>
+  <div class="ch" id="c2"><span class="big">03</span><p class="num">Позаботиться</p><h2>Уход<br>в два касания</h2><p class="d">Уборка, цветы, свечи. Платить сейчас не нужно — оплата после результата.</p></div>
+  <div class="ch" id="c3"><span class="big">04</span><p class="num">Сделать</p><h2>Работу ведёт<br>кладбище</h2><p class="d">Заказ выполняет администрация кладбища. Без фото «до» и «после» заказ не закрыть.</p></div>
+  <div class="ch" id="c4"><span class="big">05</span><p class="num">Увидеть</p><h2>Как было<br>и как стало</h2><p class="d">Семья получает фотоотчёт и спокойствие — даже за тысячу километров.</p></div>
+  <div class="ch" id="c5"><span class="big">06</span><p class="num">Помнить</p><h2>Ни одной<br>забытой даты</h2><p class="d">День рождения, годовщина, родительские субботы — приложение напомнит заранее.</p></div>
+  <div id="chips"></div>
+  <div id="progress"><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div><div><i></i></div></div>
+  <p id="demo">Приложение «Память» · демонстрационные данные · план Даймища — реальная съёмка</p>
+</div>
+
+<div class="layer" id="s7">
+  <div style="position:absolute;left:1010px;top:0;width:910px;height:1080px;overflow:hidden">
+    <img id="plan" src="../deck-img/plan.png" style="position:absolute;left:0;top:0;width:910px;height:auto;transform-origin:45% 45%">
+    <div style="position:absolute;inset:0;background:linear-gradient(90deg,#FAF7F2 0,rgba(250,247,242,0) 22%)"></div>
+  </div>
+  <div style="position:absolute;left:150px;top:0;height:1080px;width:820px;display:flex;flex-direction:column;justify-content:center;gap:30px">
+    <p class="eyebrow fade">Уже сделано</p>
+    <h2 class="serif words" style="font-size:90px;font-weight:400;color:#1C3318;line-height:1.05">Первое кладбище<br>оцифровано полностью</h2>
+    <div class="fade" style="display:flex;gap:60px;margin-top:20px">
+      <div><p class="serif" id="n382" style="font-size:84px;color:#B8935A;line-height:1">382</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">места на плане</p></div>
+      <div><p class="serif" id="n375" style="font-size:84px;color:#B8935A;line-height:1">375</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">имён с памятников</p></div>
+      <div><p class="serif" style="font-size:84px;color:#B8935A;line-height:1">1–3 м</p><p class="sans" style="font-size:24px;color:#6B6B5E;margin-top:8px">точность</p></div>
+    </div>
+    <p class="sans fade" style="font-size:24px;color:#9A9A8E">Деревня Даймище, Ленинградская область · съёмка геодезиста</p>
+  </div>
+</div>
+
+<div class="layer" id="s8">
+  <div class="st center" style="position:absolute;inset:0;gap:26px"><p class="eyebrow fade">Для страны</p>
+    <p class="serif" id="n73" style="font-size:150px;color:#E2BE78;line-height:1">73 000</p>
+    <p class="serif words" style="font-size:58px;color:#FAF7F2;line-height:1.25">кладбищ в России — и единый точный реестр<br>для каждого региона</p></div>
+  <div class="st center" style="position:absolute;inset:0;gap:26px"><p class="eyebrow fade">Честно и прозрачно</p>
+    <p class="serif words" style="font-size:74px;color:#FAF7F2;line-height:1.2">Каждый заказ — с договором, чеком<br>и фотоотчётом. Рынок выходит из тени.</p></div>
+  <div class="st center" style="position:absolute;inset:0;gap:26px"><p class="eyebrow fade">Вместе</p>
+    <p class="serif words" style="font-size:74px;color:#FAF7F2;line-height:1.2">Кладбища получают заказчиков.<br>Семьи — уверенность и покой.</p></div>
+  <div class="st center" style="position:absolute;inset:0;gap:26px"><p class="eyebrow fade">Связь поколений</p>
+    <p class="serif words" style="font-size:74px;color:#FAF7F2;line-height:1.2">Память о предках — общее дело<br>народа и государства.</p></div>
+</div>
+
+<div class="layer center" id="s9" style="gap:28px">
+  <svg class="fade" width="64" height="96" viewBox="0 0 64 96"><path d="M32 4 C42 26 52 40 52 58 C52 76 43 88 32 88 C21 88 12 76 12 58 C12 40 22 26 32 4Z" fill="none" stroke="#B8935A" stroke-width="3"/><path d="M32 40 C37 52 40 58 40 66 C40 73 36 78 32 78 C28 78 24 73 24 66 C24 58 27 52 32 40Z" fill="#B8935A"/></svg>
+  <h1 class="serif words" style="font-size:160px;font-weight:400;color:#FAF7F2;letter-spacing:6px;line-height:1.05">Память</h1>
+  <p class="serif words" style="font-size:50px;color:#C4DEC0;font-style:italic">Сохраним память вместе</p>
+  <div class="rule" style="margin:16px 0"></div>
+  <p class="sans fade" style="font-size:24px;color:#9AA98F;letter-spacing:2px">Д. С. Пчеленков · В. В. Уваров · П. А. Краснощеков</p>
+</div>
+
+<script>
+const $ = s => document.querySelector(s), $$ = (s, r = document) => [...r.querySelectorAll(s)]
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x))
+const ease = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 }
+const eout = x => 1 - Math.pow(1 - clamp(x), 3)
+const eout5 = x => 1 - Math.pow(1 - clamp(x), 5)
+const back = x => { x = clamp(x); const c = 1.6; return 1 + (c + 1) * Math.pow(x - 1, 3) + c * Math.pow(x - 1, 2) }
+const vis = (t, a, b, i = .8, o = .7) => Math.min(ease((t - a) / i), ease((b - t) / o))
+const mix = (c1, c2, k) => { const p = c => [1, 3, 5].map(i => parseInt(c.slice(i, i + 2), 16)); const A = p(c1), B = p(c2); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * k)).join(',')})` }
+const T = window.TIMELINE
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ' ')
+
+// разбивка текста на слова для «живого» появления
+$$('.words').forEach(el => {
+  const out = []
+  el.childNodes.forEach(n => {
+    if (n.nodeType === 3) n.textContent.split(/(\s+)/).forEach(w => out.push(/^\s+$/.test(w) ? w : w ? `<span class="w"><span class="wi">${w}</span></span>` : ''))
+    else out.push(n.outerHTML)
+  })
+  el.innerHTML = out.join('')
+})
+
+// слова: маска снизу вверх; fade-элементы — мягко
+function reveal(root, t, start, stagger = .07, dur = .75) {
+  let i = 0
+  $$('.words, .fade, .rule', root).forEach(el => {
+    if (el.classList.contains('words')) {
+      $$('.wi', el).forEach(w => {
+        const k = eout5((t - start - i * stagger) / dur); i++
+        w.style.transform = `translateY(${(1 - k) * 105}%)`
+      })
+    } else if (el.classList.contains('rule')) {
+      const k = eout((t - start - i * stagger) / 1); el.style.transform = `scaleX(${k})`
+    } else {
+      const k = eout((t - start - i * stagger) / .9); i += 2
+      el.style.opacity = k; el.style.transform = `translateY(${(1 - k) * 16}px)`
+    }
+  })
+}
+// сцена: вход, медленный «наезд», уход вверх
+function scene(el, t, a, b) {
+  const k = vis(t, a, b, .5, .6)
+  el.style.opacity = k
+  const zoom = 1 + .035 * clamp((t - a) / (b - a))
+  el.style.transform = `translateY(${-(1 - ease((b - t) / .6)) * 24}px) scale(${zoom})`
+  return k
+}
+
+// частицы
+const fx = $('#fx'), g = fx.getContext('2d')
+let seed = 11; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647
+const dust = Array.from({ length: 150 }, () => ({ x: rnd() * 1920, y: rnd() * 1080, r: .6 + rnd() * 2.2, v: 10 + rnd() * 24, ph: rnd() * 6.28, a: .15 + rnd() * .45 }))
+const dots = []
+for (let i = 0; i < 2600; i++) {
+  const x = rnd(), y = rnd()
+  const edge = .35 + .25 * Math.sin(x * 5.2 + 1) * Math.cos(x * 2.1) + .1 * Math.sin(x * 13)
+  const top = .18 + .12 * Math.sin(x * 4 + .5) + .05 * Math.cos(x * 11)
+  if (y > top && y < top + edge + .25) dots.push({ x: 160 + x * 1600, y: 140 + y * 800, d: rnd(), r: .9 + rnd() * 1.6 })
+}
+function drawFx(t, dark) {
+  g.clearRect(0, 0, 1920, 1080)
+  for (const p of dust) {
+    const y = ((p.y - t * p.v) % 1080 + 1080) % 1080, x = p.x + Math.sin(t * .4 + p.ph) * 30
+    const tw = .55 + .45 * Math.sin(t * 1.5 + p.ph * 3)
+    g.fillStyle = dark > .5 ? `rgba(214,178,112,${p.a * tw * dark * T.dustK(t)})` : `rgba(184,147,90,${p.a * tw * .35 * (1 - dark)})`
+    g.beginPath(); g.arc(x, y, p.r, 0, 6.283); g.fill()
+  }
+  const dk = T.dotsK(t)
+  if (dk > 0) {
+    const lit = T.dotsLit(t)
+    for (const p of dots) {
+      const ex = (p.x - 960) / 820, ey = (p.y - 540) / 250, q = .18 + .82 * clamp((Math.sqrt(ex * ex + ey * ey) - .55) / .6)
+      const on = clamp((lit - p.d) * 8) * q
+      g.fillStyle = on > 0 ? `rgba(226,190,120,${(.2 + .6 * on) * dk})` : `rgba(196,222,192,${.08 * q * dk})`
+      g.beginPath(); g.arc(p.x, p.y + Math.sin(t * .5 + p.d * 9) * 3, p.r + on * .8, 0, 6.283); g.fill()
+    }
+  }
+}
+
+// подсказки у телефона
+const CHECK = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
+T.chips.forEach(([, , text], i) => { const d = document.createElement('div'); d.className = 'chip'; d.innerHTML = `<b>${CHECK}</b>${text}`; $('#chips').appendChild(d) })
+
+const shots = window.SHOTS
+function frameAt(ci, local) {
+  const s = shots[ci], ts = s.a + Math.max(0, local) * s.speed, f = s.frames
+  let lo = 0, hi = f.length - 1
+  if (ts <= f[0][1]) return `${s.dir}/${f[0][0]}`
+  while (lo < hi) { const m = (lo + hi + 1) >> 1; if (f[m][1] <= ts) lo = m; else hi = m - 1 }
+  return `${s.dir}/${f[lo][0]}`
+}
+async function setImg(img, src) { if (img.dataset.src !== src) { img.dataset.src = src; img.src = src; try { await img.decode() } catch (e) {} } }
+
+window.render = async function (t) {
+  const dark = T.darkness(t), S = T.scenes
+  $('#bg').style.background = `radial-gradient(ellipse at 50% 45%, ${mix('#FAF7F2', '#25421f', dark)}, ${mix('#ECE5D6', '#122310', dark)})`
+  drawFx(t, dark)
+  // 1
+  scene($('#s1'), t, ...S.s1)
+  $('#flamep').setAttribute('transform', `translate(60 86) scale(${1 + .02 * Math.sin(t * 7)} ${1 + .045 * Math.sin(t * 9) + .03 * Math.sin(t * 13.7)}) translate(-60 -86)`)
+  $('#glowc').setAttribute('r', 58 + 6 * Math.sin(t * 5.3))
+  const ck = eout((t - .2) / 1.6); $('#candle').style.opacity = ck; $('#candle').style.transform = `translateY(${(1 - ck) * 30}px)`
+  reveal($('#s1'), t, S.s1[0] + 1.3, .12)
+  // 2–4
+  for (const [id, st] of [['s2', .055], ['s3', .09], ['s4', .085]]) { scene($('#' + id), t, ...S[id]); reveal($('#' + id), t, S[id][0] + .25, st) }
+  // 5 — название с бликом
+  scene($('#s5'), t, ...S.s5); reveal($('#s5'), t, S.s5[0] + .2, .1)
+  const tk = eout5((t - S.s5[0] - .3) / 1.1)
+  $('#title').style.transform = `translateY(${(1 - tk) * 60}px)`; $('#title').style.opacity = tk
+  $('#title').style.backgroundPosition = `${100 - 100 * clamp((t - S.s5[0] - 1.2) / 2.2)}% 0`
+  // 6 — приложение
+  const [ca, cb] = S.app
+  const pk = vis(t, ca, cb, .7, .7); $('#stage').style.opacity = pk
+  if (pk > 0) {
+    const ph = $('#phone'), enter = eout5((t - ca) / 1.4), leave = ease((t - (cb - .7)) / .7)
+    const i = Math.max(0, T.chapters.findIndex(([a, b]) => t < b)), [a] = T.chapters[i], local = t - a
+    const bump = i > 0 ? Math.sin(clamp(local / .6) * Math.PI) * .025 : 0
+    const ry = -14 * (1 - enter) - 4 + 2.2 * Math.sin(t * .55), rx = 1.6 * Math.sin(t * .42)
+    ph.style.transform = `perspective(2200px) translate(${(1 - enter) * 260}px,${Math.sin(t * .8) * 8 + leave * 40}px) rotateY(${ry}deg) rotateX(${rx}deg) scale(${1 - bump})`
+    $('#halo').style.transform = `scale(${1 + .05 * Math.sin(t * .6)})`
+    $('#glare').style.backgroundPosition = `${110 - 140 * clamp(local / 1.2)}% 0`
+    const A = $('#shotA'), B = $('#shotB')
+    await setImg(A, frameAt(i, local))
+    const x = local / .55
+    if (i > 0 && x < 1) {
+      await setImg(B, frameAt(i - 1, t - T.chapters[i - 1][0]))
+      A.style.transform = `translateX(${(1 - eout(x)) * 100}%)`; B.style.transform = `translateX(${-eout(x) * 30}%)`; B.style.opacity = 1 - .6 * x
+    } else { A.style.transform = 'none'; B.style.opacity = 0 }
+    T.chapters.forEach(([ca2, cb2], j) => {
+      const el = $('#c' + j), kk = vis(t, ca2, cb2, .5, .4)
+      el.style.opacity = kk
+      const big = el.querySelector('.big'), bk = eout5((t - ca2) / 1.2)
+      big.style.transform = `translateX(${(1 - bk) * -80 + (t - ca2) * 4}px)`; big.style.opacity = bk
+      ;[...el.querySelectorAll('.num,h2,p.d')].forEach((n, q) => {
+        const k = eout5((t - ca2 - .1 - .12 * q) / .8)
+        n.style.opacity = k; n.style.transform = `translateY(${(1 - k) * 40}px)`
+      })
+      $$('#progress i')[j].style.transform = `scaleX(${clamp((t - ca2) / (cb2 - ca2))})`
+    })
+    // подсказки
+    $$('.chip').forEach((c, n) => {
+      const [ch, at, , top] = T.chips[n], [c0, c1] = T.chapters[ch], s = c0 + at
+      const next = T.chips.find((x, m) => m > n + 1 - 1 && m > n && x[0] === ch && m >= n + 2)
+      const end = Math.min(c1 - .1, next ? c0 + next[1] - .3 : c1 - .1, s + 4.2)
+      const kin = back((t - s) / .55), kout = ease((end - t) / .4)
+      const k = t < s ? 0 : Math.min(clamp(kin, 0, 1.2), kout)
+      c.style.top = top + 'px'; c.style.opacity = clamp(Math.min(eout((t - s) / .3), kout))
+      c.style.transform = `translateX(${(1 - clamp(kin)) * 40}px) scale(${.8 + .2 * k}) translateY(${Math.sin(t * 1.1 + n) * 4}px)`
+    })
+  }
+  // 7 — Даймище
+  scene($('#s7'), t, ...S.s7); reveal($('#s7'), t, S.s7[0] + .2, .08)
+  const pz = clamp((t - S.s7[0]) / (S.s7[1] - S.s7[0]))
+  $('#plan').style.transform = `scale(${1.05 + .2 * ease(pz)}) translate(${-20 * pz}px,${-50 * pz}px)`
+  const nk = eout((t - S.s7[0] - 1.2) / 1.6)
+  $('#n382').textContent = fmt(382 * nk); $('#n375').textContent = fmt(375 * nk)
+  // 8 — страна
+  const s8k = vis(t, S.s8[0], S.s8[1], .8, .8); $('#s8').style.opacity = s8k
+  $$('#s8 .st').forEach((el, i) => {
+    const a = S.s8[0] + .5 + i * T.stLen, b = a + T.stLen - .15
+    el.style.opacity = vis(t, a, b, .35, .45)
+    el.style.transform = `translateY(${-(1 - ease((b - t) / .45)) * 30}px) scale(${1 + .03 * clamp((t - a) / T.stLen)})`
+    reveal(el, t, a, .06)
+  })
+  $('#n73').textContent = fmt(73000 * eout((t - S.s8[0] - .6) / 1.8))
+  // 9 — финал
+  scene($('#s9'), t, ...S.s9); reveal($('#s9'), t, S.s9[0] + .3, .14, .9)
+  $('#s9').style.opacity = vis(t, S.s9[0], S.s9[1], .6, 1.6)
+}
+</script></body></html>

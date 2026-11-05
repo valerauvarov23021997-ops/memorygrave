@@ -1,6 +1,10 @@
 # Видео «Память» — исходники
 
-Ролик 2:42, 1920×1080, 30 к/с. Без закадрового голоса: текст на экране и музыка.
+Ролик 2:12, 1920×1080, 30 к/с. Без закадрового голоса: текст на экране и музыка.
+
+**Текущая версия — v2** (`film2.html`, `film2.js`, `music2.py`): живее — текст по словам, телефон в объёме,
+смена экранов свайпом, подсказки у телефона, счётчики; музыка мягче — приглушённое фортепиано, лёгкий пульс,
+меньше эха. Первая версия (`film.html`, `film.js`, `music.py`) оставлена для сравнения.
 
 | Файл | Что делает |
 |---|---|
@@ -10,8 +14,8 @@
 | `film.js` | Покадровый рендер `film.html` в MP4 (`node film.js render out.mp4`, превью — `node film.js preview 5,50`) |
 | `music.py` | Синтез фоновой музыки с нуля (пэд, фортепиано, бас, зал) — прав третьих лиц нет |
 
-Сборка: `node takes.js` → `node film.js render film-video.mp4` → `python3 music.py` →
-`ffmpeg -i film-video.mp4 -i music.wav -af "highpass=f=40,lowpass=f=7500,loudnorm=I=-16:TP=-1.5" -c:v copy -c:a aac -b:a 192k -shortest Память-видео.mp4`.
+Сборка: `node takes.js` → `node film2.js render film2-video.mp4` → `python3 music2.py` →
+`ffmpeg -i film2-video.mp4 -i music2.wav -af "highpass=f=40,lowpass=f=7500,loudnorm=I=-16:TP=-1.5" -c:v copy -c:a aac -b:a 192k -shortest Память-видео.mp4`.
 
 Пути в скриптах указывают на рабочую папку сессии — при пересборке их надо поправить.
 Нужны: веб-сборки клиента (порт 8111) и исполнителя (8110) в мок-режиме, `ffmpeg`, Chromium.
