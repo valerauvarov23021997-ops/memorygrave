@@ -68,7 +68,34 @@ module.exports.handler = async function (event) {
       : event.body
     : undefined
 
-  const resp = await fetch(url, { method, headers, body })
+  // Сбой связи с Supabase раньше ронял функцию: шлюз отдавал безликий 502,
+  // а приложение висело на загрузке. Теперь — таймаут, один повтор для
+  // чтения и ответ с причиной, по которой видно, что сломалось
+  let resp
+  let lastError
+  const attempts = method === 'GET' || method === 'HEAD' ? 2 : 1
+  for (let i = 0; i < attempts && !resp; i++) {
+    try {
+      resp = await fetch(url, { method, headers, body, signal: AbortSignal.timeout(12000) })
+    } catch (e) {
+      lastError = e
+    }
+  }
+  if (!resp) {
+    const cause = lastError && lastError.cause
+    const detail = {
+      error: 'upstream_unreachable',
+      message: lastError ? String(lastError.message || lastError) : 'unknown',
+      cause: cause ? String(cause.code || cause.message || cause) : null,
+      upstream: UPSTREAM,
+    }
+    console.error('proxy upstream failed', JSON.stringify(detail))
+    return {
+      statusCode: 502,
+      headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+      body: JSON.stringify(detail),
+    }
+  }
   const buf = Buffer.from(await resp.arrayBuffer())
 
   const resHeaders = {}
