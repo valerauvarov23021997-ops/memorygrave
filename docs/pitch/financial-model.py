@@ -1,4 +1,4 @@
-"""Финансовая модель «Памяти», версия 2 (05.11.2026).
+"""Финансовая модель «Памяти», версия 2.1 (06.11.2026).
 
 ДАННЫЕ ВЛАДЕЛЬЦА (решения команды):
   оцифровка: ≈300 ₽ за захоронение сейчас (пилот Даймище: до 100 тыс ₽ за 382 места),
@@ -13,7 +13,7 @@
   эквайринг 2,5 % оборота платит платформа; привлечение клиента 500 ₽; отток 15 % в год;
   команда: 300 млн ₽/год постоянных + 60 ₽ на клиента (поддержка, серверы, модерация фото);
   актуализация реестра: 1 млн новых захоронений в год по 90 ₽;
-  ставка по кредиту 15 % годовых; 14 000 кладбищ под реестр (вариант А, 3 000 ₽/мес)
+  ставка по кредиту 15 % годовых (на средний долг за год); входящий НДС с эквайринга и рекламы — к вычету; 14 000 кладбищ под реестр (вариант А, 3 000 ₽/мес)
 """
 CHECK_YEAR = 6_000
 TAKE, VAT, PROFIT_TAX = 0.20, 0.22, 0.25
@@ -37,13 +37,16 @@ def year_pnl(clients, registry, team_fix=TEAM_FIX, new_clients=None, cemeteries=
     revenue = net(commission + subs + reg)
     if new_clients is None:
         new_clients = clients * CHURN
+    acq_gross, mkt_gross = (gmv + subs) * ACQ, new_clients * CAC
+    # эквайринг (с 2026 облагается НДС) и реклама приходят с НДС: его компания принимает к вычету
+    vat_in = (acq_gross + mkt_gross) - net(acq_gross + mkt_gross)
     costs = dict(
-        acquiring=(gmv + subs) * ACQ,
+        acquiring=net(acq_gross),
         team=team_fix + clients * TEAM_VAR,
-        marketing=new_clients * CAC,
+        marketing=net(mkt_gross),
     )
     return dict(gmv=gmv, cemeteries_get=gmv * (1 - TAKE), commission=commission, subs=subs, reg=reg,
-                revenue=revenue, vat=(commission + subs + reg) - revenue, costs=costs,
+                revenue=revenue, vat=(commission + subs + reg) - revenue - vat_in, costs=costs,
                 opex=sum(costs.values()))
 
 
@@ -74,11 +77,15 @@ def path(registry, label, show=True):
         new = end_clients - prev_clients + prev_clients * CHURN
         p = year_pnl(avg, registry, team_fix, new, cem)
         digit = burials * price + (UPKEEP if i >= 4 else 0)
-        interest = debt * RATE
-        ebit = p['revenue'] - p['opex'] - digit - interest
-        tax = max(ebit, 0) * PROFIT_TAX
-        res = ebit - tax
-        debt = max(debt - res, 0) if res > 0 else debt - res
+        pre = p['revenue'] - p['opex'] - digit
+        end_debt = debt
+        for _ in range(50):   # проценты — на средний долг за год
+            interest = (debt + end_debt) / 2 * RATE
+            ebit = pre - interest
+            tax = max(ebit, 0) * PROFIT_TAX
+            res = ebit - tax
+            end_debt = max(debt - res, 0)
+        debt = end_debt
         peak = max(peak, debt)
         out.append(dict(i=i, burials=cum_burials, clients=end_clients, gmv=p['gmv'], rev=p['revenue'],
                         digit=digit, opex=p['opex'], interest=interest, tax=tax, res=res, debt=debt,
@@ -115,7 +122,7 @@ if __name__ == '__main__':
 
 def extras():
     rev_c = net(CHECK_YEAR * TAKE + SUB_SHARE * SUB_PRICE * 12)
-    var_c = (CHECK_YEAR + SUB_SHARE * SUB_PRICE * 12) * ACQ + TEAM_VAR + CHURN * CAC
+    var_c = net((CHECK_YEAR + SUB_SHARE * SUB_PRICE * 12) * ACQ) + TEAM_VAR + net(CHURN * CAC)
     margin = rev_c - var_c
     print(f'\nНа одного клиента в год: выручка б/НДС {rev_c:.0f} ₽; переменные расходы {var_c:.0f} ₽ '
           f'(эквайринг {(CHECK_YEAR + SUB_SHARE*SUB_PRICE*12)*ACQ:.0f}, сервис {TEAM_VAR}, замена оттока {CHURN*CAC:.0f}); '
@@ -137,5 +144,60 @@ def extras():
     print(f'Рынок оцифровки 30 млн мест по 602–671 ₽: {30e6*602/1e9:.1f}–{30e6*671/1e9:.1f} млрд')
 
 
+
+def scenario(**kw):
+    """Пересчёт с другими допущениями: возвращает пик долга, долг в конце 5-го года,
+    безубыточность (клиентов) и чистую прибыль при 10 млн клиентов."""
+    g = globals(); saved = {k: g[k] for k in kw}
+    g.update(kw)
+    try:
+        _, peak = path(0, '', show=False)
+        out, _ = path(0, '', show=False)
+        rc = net(CHECK_YEAR * TAKE + SUB_SHARE * SUB_PRICE * 12)
+        vc = net((CHECK_YEAR + SUB_SHARE * SUB_PRICE * 12) * ACQ) + TEAM_VAR + net(CHURN * CAC)
+        be = (TEAM_FIX + UPKEEP) / (rc - vc)
+        return dict(peak=peak, end=out[-1]['debt'], be=be, p10=steady(10e6, 0)[3])
+    finally:
+        g.update(saved)
+
+
+SLOW = [(400_000, 300, 50_000, 60e6), (4_000_000, 180, 400_000, 150e6), (12_000_000, 90, 1_500_000, 300e6),
+        (13_600_000, 90, 3_000_000, 300e6), (0, 90, 5_000_000, 300e6)]
+STRESS = [
+    ('База (как в презентации)', {}),
+    ('Отток 30 % вместо 15 %', dict(CHURN=.30)),
+    ('Команда вдвое дороже', dict(TEAM_FIX=600e6, TEAM_VAR=120)),
+    ('Рост вдвое медленнее', dict(PATH=SLOW)),
+    ('Привлечение клиента 1 500 ₽', dict(CAC=1500)),
+    ('Осторожный: всё вместе', dict(CAC=1500, CHURN=.25, TEAM_FIX=600e6, TEAM_VAR=120, PATH=SLOW)),
+]
+
+
+def payoff_year(out):
+    """Первый год, к концу которого долг погашен (None — не за 5 лет)."""
+    for o in out:
+        if o['i'] > 1 and o['debt'] == 0:
+            return o['i']
+    return None
+
+
+def profit_year(out):
+    for o in out:
+        if o['res'] > 0:
+            return o['i']
+    return None
+
+
+def unit_margin():
+    rc = net(CHECK_YEAR * TAKE + SUB_SHARE * SUB_PRICE * 12)
+    vc = net((CHECK_YEAR + SUB_SHARE * SUB_PRICE * 12) * ACQ) + TEAM_VAR + net(CHURN * CAC)
+    return rc - vc
+
+
 if __name__ == '__main__':
     extras()
+    print()
+    for name, kw in STRESS:
+        r = scenario(**kw)
+        print(f"{name:30s} пик {r['peak']/1e9:5.2f} млрд; долг в конце 5-го {r['end']/1e9:5.2f}; "
+              f"безуб. {r['be']/1e6:.2f} млн; прибыль при 10 млн {r['p10']/1e9:.2f}")
