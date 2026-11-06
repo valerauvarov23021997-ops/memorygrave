@@ -1,0 +1,19 @@
+{
+  "v": 4,
+  "createdOnFiles": { "v": 1, "at": "2026-11-06T08:00:00Z" },
+  "lists": "css",
+  "title": "Память — кратко",
+  "cover": "cover",
+  "order": ["cover", "problem", "solution", "proof", "app", "cost", "unit", "scale", "plan", "offer", "next"],
+  "sections": {
+    "s1": { "description": "Проблема и решение", "start": "cover" },
+    "s2": { "description": "Доказательство: Даймище и работающее приложение", "start": "proof" },
+    "s3": { "description": "Экономика: себестоимость, клиент, масштаб, 5 лет", "start": "cost" },
+    "s4": { "description": "Предложение государству и следующие шаги", "start": "offer" }
+  },
+  "faces": {
+    "playfair-display": { "family": "Playfair Display", "href": "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400..800;1,400..800&display=swap" },
+    "manrope": { "family": "Manrope", "href": "https://fonts.googleapis.com/css2?family=Manrope:wght@400..800&display=swap" }
+  },
+  "designSystems": []
+}
